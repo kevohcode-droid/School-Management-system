@@ -1,0 +1,151 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <div>
+        <h1>Staff Management</h1>
+        <p class="page-subtitle">Onboard teachers, administrators, and support staff</p>
+      </div>
+    </div>
+    <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
+      + Add Staff Member
+    </button>
+  </header>
+
+  <main class="page-content">
+    <!-- Success message -->
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="staffList.length === 0 && !isLoading">
+      <div class="empty-icon">👩‍🏫</div>
+      <h3>No Staff Records Yet</h3>
+      <p>Start by adding your first staff member using the button above.</p>
+    </div>
+
+    <!-- Staff Cards Grid -->
+    <div class="staff-grid" *ngIf="staffList.length > 0">
+      <div class="staff-card" *ngFor="let staff of staffList">
+        <div class="staff-avatar">{{ staff.firstName[0] }}{{ staff.lastName[0] }}</div>
+        <div class="staff-info">
+          <h4>{{ staff.firstName }} {{ staff.lastName }}</h4>
+          <span class="staff-role">{{ staff.designation }}</span>
+          <span class="staff-dept">{{ staff.department }}</span>
+        </div>
+        <div class="staff-meta">
+          <span class="meta-item">📱 {{ staff.phone || '—' }}</span>
+          <span class="meta-item">✉️ {{ staff.email || '—' }}</span>
+          <span class="meta-item">🪪 {{ staff.employeeId }}</span>
+          <span class="badge-status">{{ staff.employmentStatus }}</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD STAFF MODAL -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <h2>Onboard Staff Member</h2>
+        <p class="modal-subtitle">Fill in employment and personal details for the new staff member.</p>
+      </div>
+      <button (click)="closeAddModal()" class="close-modal-btn">&times;</button>
+    </div>
+
+    <form (ngSubmit)="submitAddStaff()">
+      <!-- Employment Details -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">💼</span>
+          <h3>Employment Details</h3>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="staff-emp-id">Employee ID / TSC Number <span class="required">*</span></label>
+            <input type="text" id="staff-emp-id" [(ngModel)]="newStaff.employeeId" name="employeeId" required placeholder="EMP-1001">
+          </div>
+          <div class="form-group">
+            <label for="staff-designation">Designation / Role <span class="required">*</span></label>
+            <select id="staff-designation" [(ngModel)]="newStaff.designation" name="designation" required>
+              <option value="">— Select Designation —</option>
+              <option *ngFor="let d of designations" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="staff-department">Department <span class="required">*</span></label>
+            <select id="staff-department" [(ngModel)]="newStaff.department" name="department" required>
+              <option value="">— Select Department —</option>
+              <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="staff-joining">Date of Joining</label>
+            <input type="date" id="staff-joining" [(ngModel)]="newStaff.dateOfJoining" name="dateOfJoining">
+          </div>
+          <div class="form-group">
+            <label for="staff-status">Employment Status</label>
+            <select id="staff-status" [(ngModel)]="newStaff.employmentStatus" name="employmentStatus">
+              <option *ngFor="let s of employmentStatuses" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="staff-qualifications">Qualifications / Degree</label>
+            <input type="text" id="staff-qualifications" [(ngModel)]="newStaff.qualifications" name="qualifications" placeholder="e.g. B.Ed Mathematics, PGDE">
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal & Contact Info -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👤</span>
+          <h3>Personal &amp; Contact Information</h3>
+        </div>
+        <div class="modal-grid modal-grid-3">
+          <div class="form-group">
+            <label for="staff-first">First Name <span class="required">*</span></label>
+            <input type="text" id="staff-first" [(ngModel)]="newStaff.firstName" name="firstName" required placeholder="Jane">
+          </div>
+          <div class="form-group">
+            <label for="staff-last">Last Name <span class="required">*</span></label>
+            <input type="text" id="staff-last" [(ngModel)]="newStaff.lastName" name="lastName" required placeholder="Doe">
+          </div>
+          <div class="form-group">
+            <label for="staff-gender">Gender</label>
+            <select id="staff-gender" [(ngModel)]="newStaff.gender" name="gender">
+              <option [value]="1">Male</option>
+              <option [value]="2">Female</option>
+              <option [value]="3">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="staff-national-id">National ID / Passport Number</label>
+            <input type="text" id="staff-national-id" [(ngModel)]="newStaff.nationalId" name="nationalId" placeholder="12345678">
+          </div>
+          <div class="form-group">
+            <label for="staff-phone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="staff-phone" [(ngModel)]="newStaff.phone" name="phone" required placeholder="+254 700 000 000">
+          </div>
+          <div class="form-group">
+            <label for="staff-email">Professional Email</label>
+            <input type="email" id="staff-email" [(ngModel)]="newStaff.email" name="email" placeholder="jane.doe@school.edu">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closeAddModal()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="isLoading">Onboarding…</span>
+          <span *ngIf="!isLoading">Add Staff Member</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

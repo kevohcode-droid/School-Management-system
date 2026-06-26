@@ -33,6 +33,14 @@ public class AuthController : ControllerBase
         return result.Succeeded ? Ok(result.Response) : Unauthorized(new { errors = result.Errors });
     }
 
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model, CancellationToken ct)
+    {
+        await _identityService.ForgotPasswordAsync(model.Email, ct);
+        return Ok(new { Message = "If the email matches an account, a reset link has been sent." });
+    }
+
     [HttpGet("me")]
     [Authorize]
     public IActionResult Me([FromServices] ICurrentUser currentUser) => Ok(new

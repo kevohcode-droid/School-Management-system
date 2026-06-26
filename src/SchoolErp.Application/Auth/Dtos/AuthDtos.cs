@@ -2,6 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SchoolErp.Application.Auth.Dtos;
 
+public record ForgotPasswordRequest
+{
+    [Required, EmailAddress]
+    public string Email { get; init; } = string.Empty;
+}
+
 public record RegisterRequest
 {
     /// <summary>Code of the tenant (school) the new user belongs to.</summary>

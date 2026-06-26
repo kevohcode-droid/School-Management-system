@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SchoolErp.Application.Common.Interfaces;
+using SchoolErp.Application.Fees;
 using SchoolErp.Infrastructure.Configuration;
 using SchoolErp.Infrastructure.Identity;
 using SchoolErp.Infrastructure.Persistence;
@@ -36,6 +37,7 @@ public static class DependencyInjection
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IFeeService, FeeService>();
 
         return services;
     }

@@ -1,0 +1,240 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+        </svg>
+      </div>
+      <h2 *ngIf="!isRegisterMode">Welcome Back</h2>
+      <h2 *ngIf="isRegisterMode">Create Account</h2>
+      <p class="subtitle" *ngIf="!isRegisterMode">Sign in to your School ERP account</p>
+      <p class="subtitle" *ngIf="isRegisterMode">Join your school's management system</p>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form *ngIf="!isRegisterMode" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="tenantCode">School / Tenant Code</label>
+        <input 
+          type="text" 
+          id="tenantCode" 
+          formControlName="tenantCode" 
+          placeholder="Enter your school code"
+        >
+        <div class="error-text" *ngIf="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid">
+          <span *ngIf="loginControls['tenantCode'].errors?.['required']">Tenant code is required</span>
+          <span *ngIf="loginControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="admin@demo.school"
+        >
+        <div class="error-text" *ngIf="loginControls['email'].touched && loginControls['email'].invalid">
+          <span *ngIf="loginControls['email'].errors?.['required']">Email is required</span>
+          <span *ngIf="loginControls['email'].errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-input-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password" 
+            placeholder="••••••••"
+          >
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c9 0 9-7 9-7"></path>
+              <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <div class="error-text" *ngIf="loginControls['password'].touched && loginControls['password'].invalid">
+          <span *ngIf="loginControls['password'].errors?.['required']">Password is required</span>
+          <span *ngIf="loginControls['password'].errors?.['minlength']">Must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" formControlName="rememberMe">
+          <span class="checkmark"></span>
+          Remember me
+        </label>
+        <a class="forgot-password" (click)="onForgotPassword()">Forgot password?</a>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="isLoading || loginForm.invalid">
+        {{ isLoading ? 'Authenticating...' : 'Sign In' }}
+      </button>
+
+      <div class="divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="social-login">
+        <button type="button" class="social-btn google" (click)="onSocialLogin('google')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google
+        </button>
+        <button type="button" class="social-btn microsoft" (click)="onSocialLogin('microsoft')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z" fill="#00A4EF"/>
+          </svg>
+          Microsoft
+        </button>
+      </div>
+
+      <div class="mode-toggle">
+        Don't have an account? <a (click)="toggleMode()">Register here</a>
+      </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form *ngIf="isRegisterMode" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="reg-tenant">Tenant Code</label>
+          <input 
+            type="text" 
+            id="reg-tenant" 
+            formControlName="tenantCode" 
+            placeholder="Enter your school code"
+          >
+          <div class="error-text" *ngIf="registerControls['tenantCode'].touched && registerControls['tenantCode'].invalid">
+            <span *ngIf="registerControls['tenantCode'].errors?.['required']">Required</span>
+            <span *ngIf="registerControls['tenantCode'].errors?.['minlength']">Min 2 chars</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-role">Account Role</label>
+          <select id="reg-role" formControlName="role">
+            <option value="Admin">Admin</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Student">Student</option>
+            <option value="Parent">Parent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="reg-first">First Name</label>
+          <input 
+            type="text" 
+            id="reg-first" 
+            formControlName="firstName" 
+            placeholder="John"
+          >
+          <div class="error-text" *ngIf="registerControls['firstName'].touched && registerControls['firstName'].invalid">
+            <span *ngIf="registerControls['firstName'].errors?.['required']">Required</span>
+            <span *ngIf="registerControls['firstName'].errors?.['minlength']">Min 2 chars</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-last">Last Name</label>
+          <input 
+            type="text" 
+            id="reg-last" 
+            formControlName="lastName" 
+            placeholder="Doe"
+          >
+          <div class="error-text" *ngIf="registerControls['lastName'].touched && registerControls['lastName'].invalid">
+            <span *ngIf="registerControls['lastName'].errors?.['required']">Required</span>
+            <span *ngIf="registerControls['lastName'].errors?.['minlength']">Min 2 chars</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="reg-email">Email Address</label>
+        <input 
+          type="email" 
+          id="reg-email" 
+          formControlName="email" 
+          placeholder="john.doe@demo.school"
+        >
+        <div class="error-text" *ngIf="registerControls['email'].touched && registerControls['email'].invalid">
+          <span *ngIf="registerControls['email'].errors?.['required']">Email is required</span>
+          <span *ngIf="registerControls['email'].errors?.['email']">Invalid email</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="reg-pass">Password</label>
+        <div class="password-input-wrapper">
+          <input 
+            [type]="showRegisterPassword ? 'text' : 'password'" 
+            id="reg-pass" 
+            formControlName="password" 
+            placeholder="••••••••"
+          >
+          <button type="button" class="toggle-password" (click)="toggleRegisterPasswordVisibility()">
+            <svg *ngIf="!showRegisterPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c9 0 9-7 9-7"></path>
+              <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+            <svg *ngIf="showRegisterPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <div class="error-text" *ngIf="registerControls['password'].touched && registerControls['password'].invalid">
+          <span *ngIf="registerControls['password'].errors?.['required']">Password is required</span>
+          <span *ngIf="registerControls['password'].errors?.['minlength']">Min 8 characters</span>
+          <span *ngIf="registerControls['password'].errors?.['pattern']">Must contain uppercase, lowercase, number & special char</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reg-confirm">Confirm Password</label>
+        <input 
+          type="password" 
+          id="reg-confirm" 
+          formControlName="confirmPassword" 
+          placeholder="••••••••"
+        >
+        <div class="error-text" *ngIf="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid">
+          <span *ngIf="registerControls['confirmPassword'].errors?.['required']">Please confirm password</span>
+          <span *ngIf="registerControls['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="isLoading || registerForm.invalid">
+        {{ isLoading ? 'Creating Account...' : 'Register' }}
+      </button>
+
+      <div class="mode-toggle">
+        Already have an account? <a (click)="toggleMode()">Sign In here</a>
+      </div>
+    </form>
+  </div>
+</div>

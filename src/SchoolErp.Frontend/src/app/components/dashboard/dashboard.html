@@ -1,0 +1,80 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>School ERP Dashboard</h1>
+    <div class="user-info" *ngIf="currentUser">
+      <span class="user-badge">{{ currentUser.userName }} ({{ currentUser.roles.join(', ') }})</span>
+      <button (click)="logout()" class="logout-btn">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+    <div class="welcome-section" *ngIf="currentUser">
+      <h2>Welcome Back, {{ currentUser.userName }}</h2>
+      <p>Multi-tenant School Management System dashboard. Select a module to begin managing academic and administrative tasks.</p>
+    </div>
+
+    <!-- Quick stats widgets -->
+    <div class="stats-row" *ngIf="currentUser">
+      <div class="stat-widget">
+        <span class="stat-label">Active Tenant</span>
+        <span class="stat-value">{{ currentUser.tenantId || 'Default' }}</span>
+      </div>
+      <div class="stat-widget">
+        <span class="stat-label">Assigned Roles</span>
+        <span class="stat-value">{{ currentUser.roles.includes('SuperAdmin') ? 'Super Administrator' : 'Administrator' }}</span>
+      </div>
+      <div class="stat-widget">
+        <span class="stat-label">Status</span>
+        <span class="stat-value" style="color: var(--success)">Online</span>
+      </div>
+    </div>
+
+    <div class="modules-grid">
+      <!-- Students -->
+      <div class="module-card" (click)="navigateToStudents()">
+        <div class="module-icon">👨‍🎓</div>
+        <h3>Students Management</h3>
+        <p>View, search, register, modify, and manage student enrollment and demographic records.</p>
+      </div>
+
+      <!-- Staff / Teachers -->
+      <div class="module-card" (click)="navigateToStaff()">
+        <div class="module-icon">👩‍🏫</div>
+        <h3>Staff &amp; Teachers</h3>
+        <p>Onboard staff members, assign roles, departments, and manage employment records.</p>
+      </div>
+
+      <!-- Classes & Subjects -->
+      <div class="module-card" (click)="navigateToClasses()">
+        <div class="module-icon">📚</div>
+        <h3>Classes &amp; Subjects</h3>
+        <p>Configure academic structure, define classes, assign teachers, and map subjects.</p>
+      </div>
+
+      <!-- Tenants card visible only to SuperAdmin -->
+      <div class="module-card" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
+        <div class="module-icon">🏫</div>
+        <h3>Tenants Management</h3>
+        <p>Register and coordinate distinct schools, configure multi-tenant routing, and review licenses.</p>
+      </div>
+
+      <div class="module-card disabled">
+        <div class="module-icon">💰</div>
+        <h3>Fees &amp; Invoices</h3>
+        <p>Tuition payments tracking, billing schedule, transaction history, and invoices. (Coming Soon)</p>
+      </div>
+
+      <div class="module-card disabled">
+        <div class="module-icon">📊</div>
+        <h3>Academic Grades</h3>
+        <p>Midterms, quizzes, grading metrics, performance analytics, and transcripts. (Coming Soon)</p>
+      </div>
+
+      <div class="module-card disabled">
+        <div class="module-icon">⚙️</div>
+        <h3>System Settings</h3>
+        <p>Profile configurations, security logs, access tokens, and layout themes. (Coming Soon)</p>
+      </div>
+    </div>
+  </main>
+</div>

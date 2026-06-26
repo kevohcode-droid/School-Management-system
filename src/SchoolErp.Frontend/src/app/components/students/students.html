@@ -1,0 +1,321 @@
+<div class="students-container">
+  <header class="students-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <h1>Students Directory</h1>
+    </div>
+    <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
+      + Register Student
+    </button>
+  </header>
+
+  <main class="students-content">
+    <div class="search-and-filter-card">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="filterStudents()"
+        placeholder="Search by name, email, or admission number..."
+        class="search-input"
+      >
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="loading" *ngIf="isLoading && students.length === 0">
+      <div class="spinner"></div>
+      <span>Loading student directory...</span>
+    </div>
+
+    <div class="table-card" *ngIf="!isLoading || students.length > 0">
+      <div class="students-table-container">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>Admission No.</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Gender</th>
+              <th>Date of Birth</th>
+              <th>Section</th>
+              <th *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of filteredStudents">
+              <td class="font-mono">{{ student.admissionNumber }}</td>
+              <td class="font-semibold">{{ student.firstName }} {{ student.lastName }}</td>
+              <td>{{ student.email || '—' }}</td>
+              <td>
+                <span class="badge badge-gender" [class]="getGenderLabel(student.gender).toLowerCase()">
+                  {{ getGenderLabel(student.gender) }}
+                </span>
+              </td>
+              <td>{{ student.dateOfBirth ? (student.dateOfBirth | date:'mediumDate') : '—' }}</td>
+              <td>
+                <span class="badge-section">{{ student.sectionName || 'N/A' }}</span>
+              </td>
+              <td *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" class="actions-cell">
+                <button (click)="openEditModal(student)" class="btn-icon btn-edit" title="Edit Student">✏️</button>
+                <button (click)="openDeleteModal(student)" class="btn-icon btn-delete" title="Delete Student">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="no-data" *ngIf="filteredStudents.length === 0">
+          No students found matching your query.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <h2>Register New Student</h2>
+        <p class="modal-subtitle">Fill in the student's academic, personal, and guardian information.</p>
+      </div>
+      <button (click)="closeAddModal()" class="close-modal-btn">&times;</button>
+    </div>
+    <form (ngSubmit)="submitAddStudent()">
+      <!-- SECTION 1: Academic & Enrollment -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">🎓</span>
+          <h3>Academic & Enrollment Details</h3>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="add-admission">Admission / Reg Number <span class="required">*</span></label>
+            <input type="text" id="add-admission" [(ngModel)]="newStudent.admissionNumber" name="admissionNumber" required placeholder="ADM-1001">
+          </div>
+          <div class="form-group">
+            <label for="add-admission-date">Admission Date</label>
+            <input type="date" id="add-admission-date" [(ngModel)]="newStudent.admissionDate" name="admissionDate">
+          </div>
+          <div class="form-group">
+            <label for="add-section">Stream / Section</label>
+            <select id="add-section" [(ngModel)]="newStudent.sectionId" name="sectionId">
+              <option [value]="null">— Select Section —</option>
+              <option *ngFor="let s of sections" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-academic-year">Academic Year / Term</label>
+            <select id="add-academic-year" [(ngModel)]="newStudent.academicYear" name="academicYear">
+              <option *ngFor="let year of academicYears" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Personal Information -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👤</span>
+          <h3>Personal Information</h3>
+        </div>
+        <div class="modal-grid modal-grid-3">
+          <div class="form-group">
+            <label for="add-first">First Name <span class="required">*</span></label>
+            <input type="text" id="add-first" [(ngModel)]="newStudent.firstName" name="firstName" required placeholder="Alice">
+          </div>
+          <div class="form-group">
+            <label for="add-middle">Middle Name</label>
+            <input type="text" id="add-middle" [(ngModel)]="newStudent.middleName" name="middleName" placeholder="Grace">
+          </div>
+          <div class="form-group">
+            <label for="add-last">Last Name <span class="required">*</span></label>
+            <input type="text" id="add-last" [(ngModel)]="newStudent.lastName" name="lastName" required placeholder="Johnson">
+          </div>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="add-dob">Date of Birth</label>
+            <input type="date" id="add-dob" [(ngModel)]="newStudent.dateOfBirth" name="dateOfBirth">
+          </div>
+          <div class="form-group">
+            <label for="add-gender">Gender</label>
+            <select id="add-gender" [(ngModel)]="newStudent.gender" name="gender">
+              <option [value]="0">Unspecified</option>
+              <option [value]="1">Male</option>
+              <option [value]="2">Female</option>
+              <option [value]="3">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-nationality">Nationality / County of Origin</label>
+            <select id="add-nationality" [(ngModel)]="newStudent.nationality" name="nationality">
+              <option value="">— Select Nationality —</option>
+              <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-email">Email Address</label>
+            <input type="email" id="add-email" [(ngModel)]="newStudent.email" name="email" placeholder="alice@school.edu">
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Guardian / Parent Details -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👨‍👩‍👧</span>
+          <h3>Parent / Guardian Details</h3>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="add-guardian-name">Guardian Full Name</label>
+            <input type="text" id="add-guardian-name" [(ngModel)]="newStudent.guardianName" name="guardianName" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label for="add-guardian-rel">Relationship to Student</label>
+            <select id="add-guardian-rel" [(ngModel)]="newStudent.guardianRelationship" name="guardianRelationship">
+              <option value="">— Select Relationship —</option>
+              <option *ngFor="let r of guardianRelationships" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-guardian-phone">Primary Phone Number <span class="required">*</span></label>
+            <input type="tel" id="add-guardian-phone" [(ngModel)]="newStudent.guardianPhone" name="guardianPhone" placeholder="+254 700 000 000">
+          </div>
+          <div class="form-group">
+            <label for="add-guardian-email">Guardian Email Address</label>
+            <input type="email" id="add-guardian-email" [(ngModel)]="newStudent.guardianEmail" name="guardianEmail" placeholder="parent@example.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closeAddModal()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="isLoading">Registering…</span>
+          <span *ngIf="!isLoading">Register Student</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT STUDENT MODAL -->
+<div class="modal-overlay" *ngIf="showEditModal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <h2>Modify Student Profile</h2>
+        <p class="modal-subtitle">Update the student's details below.</p>
+      </div>
+      <button (click)="closeEditModal()" class="close-modal-btn">&times;</button>
+    </div>
+    <form (ngSubmit)="submitEditStudent()">
+      <!-- Personal -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👤</span>
+          <h3>Personal Information</h3>
+        </div>
+        <div class="modal-grid modal-grid-3">
+          <div class="form-group">
+            <label for="edit-first">First Name <span class="required">*</span></label>
+            <input type="text" id="edit-first" [(ngModel)]="editStudent.firstName" name="firstName" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-middle">Middle Name</label>
+            <input type="text" id="edit-middle" [(ngModel)]="editStudent.middleName" name="middleName">
+          </div>
+          <div class="form-group">
+            <label for="edit-last">Last Name <span class="required">*</span></label>
+            <input type="text" id="edit-last" [(ngModel)]="editStudent.lastName" name="lastName" required>
+          </div>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="edit-email">Email Address</label>
+            <input type="email" id="edit-email" [(ngModel)]="editStudent.email" name="email">
+          </div>
+          <div class="form-group">
+            <label for="edit-gender">Gender</label>
+            <select id="edit-gender" [(ngModel)]="editStudent.gender" name="gender">
+              <option [value]="0">Unspecified</option>
+              <option [value]="1">Male</option>
+              <option [value]="2">Female</option>
+              <option [value]="3">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-dob">Date of Birth</label>
+            <input type="date" id="edit-dob" [(ngModel)]="editStudent.dateOfBirth" name="dateOfBirth">
+          </div>
+          <div class="form-group">
+            <label for="edit-nationality">Nationality</label>
+            <select id="edit-nationality" [(ngModel)]="editStudent.nationality" name="nationality">
+              <option value="">— Select Nationality —</option>
+              <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guardian -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👨‍👩‍👧</span>
+          <h3>Parent / Guardian Details</h3>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="edit-guardian-name">Guardian Full Name</label>
+            <input type="text" id="edit-guardian-name" [(ngModel)]="editStudent.guardianName" name="guardianName">
+          </div>
+          <div class="form-group">
+            <label for="edit-guardian-rel">Relationship to Student</label>
+            <select id="edit-guardian-rel" [(ngModel)]="editStudent.guardianRelationship" name="guardianRelationship">
+              <option value="">— Select Relationship —</option>
+              <option *ngFor="let r of guardianRelationships" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-guardian-phone">Primary Phone Number</label>
+            <input type="tel" id="edit-guardian-phone" [(ngModel)]="editStudent.guardianPhone" name="guardianPhone">
+          </div>
+          <div class="form-group">
+            <label for="edit-guardian-email">Guardian Email</label>
+            <input type="email" id="edit-guardian-email" [(ngModel)]="editStudent.guardianEmail" name="guardianEmail">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closeEditModal()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="isLoading">Saving…</span>
+          <span *ngIf="!isLoading">Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal-content" style="max-width: 450px;">
+    <div class="modal-header">
+      <h2 style="color: var(--danger)">Confirm Student Deletion</h2>
+      <button (click)="closeDeleteModal()" class="close-modal-btn">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 1rem 0;">
+      <p>Are you sure you want to remove <strong>{{ studentToDelete?.firstName }} {{ studentToDelete?.lastName }}</strong> from the database?</p>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">This action is permanent and cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" (click)="closeDeleteModal()" class="btn-secondary">Cancel</button>
+      <button type="button" (click)="confirmDeleteStudent()" class="btn-danger" [disabled]="isLoading">Delete Records</button>
+    </div>
+  </div>
+</div>

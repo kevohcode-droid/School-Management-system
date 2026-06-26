@@ -15,6 +15,10 @@ public interface IApplicationDbContext
     DbSet<Course> Courses { get; }
     DbSet<Grade> Grades { get; }
     DbSet<FeeInvoice> FeeInvoices { get; }
+    DbSet<FeeCategory> FeeCategories { get; }
+    DbSet<FeeTemplate> FeeTemplates { get; }
+    DbSet<PaymentTransaction> PaymentTransactions { get; }
+    DbSet<Discount> Discounts { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

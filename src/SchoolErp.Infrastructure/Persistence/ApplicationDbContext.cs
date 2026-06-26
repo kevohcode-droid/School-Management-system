@@ -26,6 +26,12 @@ public class ApplicationDbContext
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<FeeInvoice> FeeInvoices => Set<FeeInvoice>();
+    public DbSet<FeeCategory> FeeCategories => Set<FeeCategory>();
+    public DbSet<FeeTemplate> FeeTemplates => Set<FeeTemplate>();
+    public DbSet<FeeTemplateItem> FeeTemplateItems => Set<FeeTemplateItem>();
+    public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+    public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+    public DbSet<Discount> Discounts => Set<Discount>();
 
     /// <summary>
     /// Tenant referenced by the global query filters. Read per-query by EF Core,

@@ -87,6 +87,9 @@ public class FeeInvoiceConfiguration : IEntityTypeConfiguration<FeeInvoice>
         b.Property(f => f.Description).HasMaxLength(500);
         b.Property(f => f.Amount).HasPrecision(12, 2);
         b.Property(f => f.AmountPaid).HasPrecision(12, 2);
+        b.Property(f => f.DiscountAmount).HasPrecision(12, 2);
+        b.Property(f => f.AcademicYear).HasMaxLength(20);
+        b.Property(f => f.Term).HasMaxLength(20);
         b.Ignore(f => f.Balance);
         b.HasIndex(f => new { f.TenantId, f.InvoiceNumber }).IsUnique();
 
@@ -94,5 +97,94 @@ public class FeeInvoiceConfiguration : IEntityTypeConfiguration<FeeInvoice>
             .WithMany(s => s.FeeInvoices)
             .HasForeignKey(f => f.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(f => f.Discount)
+            .WithMany()
+            .HasForeignKey(f => f.DiscountId)
+            .OnDelete(DeleteBehavior.SetNull);
+    }
+}
+
+public class FeeCategoryConfiguration : IEntityTypeConfiguration<FeeCategory>
+{
+    public void Configure(EntityTypeBuilder<FeeCategory> b)
+    {
+        b.Property(f => f.Name).HasMaxLength(150).IsRequired();
+        b.Property(f => f.Code).HasMaxLength(50).IsRequired();
+        b.Property(f => f.Description).HasMaxLength(500);
+        b.HasIndex(f => new { f.TenantId, f.Code }).IsUnique();
+    }
+}
+
+public class FeeTemplateConfiguration : IEntityTypeConfiguration<FeeTemplate>
+{
+    public void Configure(EntityTypeBuilder<FeeTemplate> b)
+    {
+        b.Property(f => f.Name).HasMaxLength(200).IsRequired();
+        b.Property(f => f.Description).HasMaxLength(500);
+    }
+}
+
+public class FeeTemplateItemConfiguration : IEntityTypeConfiguration<FeeTemplateItem>
+{
+    public void Configure(EntityTypeBuilder<FeeTemplateItem> b)
+    {
+        b.Property(f => f.Amount).HasPrecision(12, 2);
+
+        b.HasOne(f => f.FeeTemplate)
+            .WithMany(t => t.Items)
+            .HasForeignKey(f => f.FeeTemplateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(f => f.FeeCategory)
+            .WithMany(c => c.TemplateItems)
+            .HasForeignKey(f => f.FeeCategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class PaymentTransactionConfiguration : IEntityTypeConfiguration<PaymentTransaction>
+{
+    public void Configure(EntityTypeBuilder<PaymentTransaction> b)
+    {
+        b.Property(p => p.TransactionReference).HasMaxLength(100).IsRequired();
+        b.Property(p => p.Amount).HasPrecision(12, 2);
+        b.Property(p => p.Notes).HasMaxLength(500);
+
+        b.HasOne(p => p.FeeInvoice)
+            .WithMany(i => i.PaymentTransactions)
+            .HasForeignKey(p => p.FeeInvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class InvoiceItemConfiguration : IEntityTypeConfiguration<InvoiceItem>
+{
+    public void Configure(EntityTypeBuilder<InvoiceItem> b)
+    {
+        b.Property(i => i.Description).HasMaxLength(200).IsRequired();
+        b.Property(i => i.Amount).HasPrecision(12, 2);
+
+        b.HasOne(i => i.FeeInvoice)
+            .WithMany(f => f.Items)
+            .HasForeignKey(i => i.FeeInvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(i => i.FeeCategory)
+            .WithMany(c => c.InvoiceItems)
+            .HasForeignKey(i => i.FeeCategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
+{
+    public void Configure(EntityTypeBuilder<Discount> b)
+    {
+        b.Property(d => d.Code).HasMaxLength(50).IsRequired();
+        b.Property(d => d.Name).HasMaxLength(150).IsRequired();
+        b.Property(d => d.Description).HasMaxLength(500);
+        b.Property(d => d.Value).HasPrecision(10, 2);
+        b.HasIndex(d => new { d.TenantId, d.Code }).IsUnique();
     }
 }

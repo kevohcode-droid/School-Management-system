@@ -1,0 +1,83 @@
+<div class="tenants-container">
+  <header class="tenants-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <h1>Tenants Directory</h1>
+    </div>
+    <button (click)="openAddModal()" class="add-btn">
+      + Register School
+    </button>
+  </header>
+
+  <main class="tenants-content">
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="loading" *ngIf="isLoading && tenants.length === 0">
+      <div class="spinner"></div>
+      <span>Loading active tenants...</span>
+    </div>
+
+    <div class="table-card" *ngIf="!isLoading || tenants.length > 0">
+      <div class="tenants-table-container">
+        <table class="tenants-table">
+          <thead>
+            <tr>
+              <th>School Name</th>
+              <th>Tenant Code</th>
+              <th>Contact Email</th>
+              <th>Status</th>
+              <th>Created Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tenant of tenants">
+              <td class="font-semibold">{{ tenant.name }}</td>
+              <td class="font-mono">{{ tenant.code }}</td>
+              <td>{{ tenant.contactEmail || '—' }}</td>
+              <td>
+                <span class="status-badge" [class.active]="tenant.isActive">
+                  {{ tenant.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>{{ tenant.createdAtUtc | date:'mediumDate' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="no-data" *ngIf="tenants.length === 0">
+          No registered school tenants found.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD TENANT MODAL -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Register New Tenant School</h2>
+      <button (click)="closeAddModal()" class="close-modal-btn">&times;</button>
+    </div>
+    <form (ngSubmit)="submitAddTenant()">
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label for="tenant-name">School Name</label>
+        <input type="text" id="tenant-name" [(ngModel)]="newTenant.name" name="name" required placeholder="e.g. Oakridge High School">
+      </div>
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label for="tenant-code">Unique Domain Code</label>
+        <input type="text" id="tenant-code" [(ngModel)]="newTenant.code" name="code" required placeholder="e.g. oakridge" style="text-transform: lowercase;">
+      </div>
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label for="tenant-email">Primary Contact Email</label>
+        <input type="email" id="tenant-email" [(ngModel)]="newTenant.contactEmail" name="contactEmail" placeholder="admin@oakridge.school">
+      </div>
+      <div class="modal-footer">
+        <button type="button" (click)="closeAddModal()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">Register School</button>
+      </div>
+    </form>
+  </div>
+</div>

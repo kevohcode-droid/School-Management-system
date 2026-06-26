@@ -1,0 +1,139 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <div>
+        <h1>Classes &amp; Subjects</h1>
+        <p class="page-subtitle">Set up academic structure, classes, and subject assignments</p>
+      </div>
+    </div>
+    <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
+      + Create Class
+    </button>
+  </header>
+
+  <main class="page-content">
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="classes.length === 0 && !isLoading">
+      <div class="empty-icon">📚</div>
+      <h3>No Classes Configured Yet</h3>
+      <p>Define your school's academic structure by creating the first class.</p>
+    </div>
+
+    <!-- Classes Grid -->
+    <div class="classes-grid" *ngIf="classes.length > 0">
+      <div class="class-card" *ngFor="let cls of classes">
+        <div class="class-card-top">
+          <div class="class-code-badge">{{ cls.code || cls.name.substring(0,4).toUpperCase() }}</div>
+          <div class="class-card-meta">
+            <h4>{{ cls.name }}</h4>
+            <span *ngIf="cls.room" class="room-tag">📍 {{ cls.room }}</span>
+          </div>
+        </div>
+        <div class="class-details">
+          <div class="detail-row">
+            <span class="detail-label">Class Teacher</span>
+            <span class="detail-value">{{ cls.classTeacherName || 'Not assigned' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Capacity</span>
+            <span class="detail-value">{{ cls.capacity }} seats</span>
+          </div>
+          <div class="detail-row" *ngIf="cls.subjects.length > 0">
+            <span class="detail-label">Subjects ({{ cls.subjects.length }})</span>
+            <div class="subject-tags">
+              <span class="subject-tag" *ngFor="let s of cls.subjects.slice(0,4)">{{ s }}</span>
+              <span class="subject-tag more" *ngIf="cls.subjects.length > 4">+{{ cls.subjects.length - 4 }} more</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- CREATE CLASS MODAL -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <h2>Create New Class</h2>
+        <p class="modal-subtitle">Configure the class details, teacher, and associated subjects.</p>
+      </div>
+      <button (click)="closeAddModal()" class="close-modal-btn">&times;</button>
+    </div>
+
+    <form (ngSubmit)="submitAddClass()">
+      <!-- Class Details -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">🏫</span>
+          <h3>Class Details</h3>
+        </div>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label for="class-name">Class Name <span class="required">*</span></label>
+            <input type="text" id="class-name" [(ngModel)]="newClass.name" name="name" required placeholder="e.g. Form 1, Grade 5, BBIT-Y3">
+          </div>
+          <div class="form-group">
+            <label for="class-code">Class Code</label>
+            <input type="text" id="class-code" [(ngModel)]="newClass.code" name="code" placeholder="e.g. F1N, G5A">
+          </div>
+          <div class="form-group">
+            <label for="class-capacity">Capacity / Max Seats</label>
+            <input type="number" id="class-capacity" [(ngModel)]="newClass.capacity" name="capacity" min="1" max="200" placeholder="40">
+          </div>
+          <div class="form-group">
+            <label for="class-room">Room / Location</label>
+            <select id="class-room" [(ngModel)]="newClass.room" name="room">
+              <option [value]="null">— Select Room —</option>
+              <option *ngFor="let r of rooms" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="class-teacher">Class Teacher / Tutor</label>
+            <select id="class-teacher" [(ngModel)]="newClass.classTeacherId" name="classTeacherId">
+              <option [value]="null">— Select Teacher —</option>
+              <option *ngFor="let s of staffOptions" [value]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subject Selection -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">📖</span>
+          <h3>Associated Subjects</h3>
+        </div>
+        <p class="section-hint">Click to select subjects taught in this class (multi-select).</p>
+        <div class="subjects-picker">
+          <button
+            type="button"
+            *ngFor="let subject of allSubjects"
+            class="subject-pill"
+            [class.selected]="isSubjectSelected(subject)"
+            (click)="toggleSubject(subject)"
+          >
+            {{ subject }}
+          </button>
+        </div>
+        <div class="selected-count" *ngIf="newClass.subjects.length > 0">
+          {{ newClass.subjects.length }} subject{{ newClass.subjects.length > 1 ? 's' : '' }} selected
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closeAddModal()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="isLoading">Creating…</span>
+          <span *ngIf="!isLoading">Create Class</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

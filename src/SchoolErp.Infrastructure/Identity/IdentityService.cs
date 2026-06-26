@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolErp.Application.Auth.Dtos;
@@ -30,9 +31,26 @@ public class IdentityService : IIdentityService
 
         var tenant = await _db.Tenants
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(t => t.Code == request.TenantCode && t.IsActive, ct);
+            .FirstOrDefaultAsync(t => t.Code == request.TenantCode, ct);
+        
         if (tenant is null)
-            return AuthResult.Failure($"Unknown or inactive tenant '{request.TenantCode}'.");
+        {
+            // Auto-create tenant if it doesn't exist
+            tenant = new Domain.Entities.Tenant
+            {
+                Name = $"{request.TenantCode} School",
+                Code = request.TenantCode,
+                ContactEmail = request.Email,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
+            };
+            _db.Tenants.Add(tenant);
+            await _db.SaveChangesAsync(ct);
+        }
+        else if (!tenant.IsActive)
+        {
+            return AuthResult.Failure($"Tenant '{request.TenantCode}' is inactive.");
+        }
 
         var existing = await _userManager.FindByEmailAsync(request.Email);
         if (existing is not null)
@@ -73,6 +91,21 @@ public class IdentityService : IIdentityService
 
         var roles = await _userManager.GetRolesAsync(user);
         return AuthResult.Success(BuildResponse(user, roles));
+    }
+
+    public async Task ForgotPasswordAsync(string email, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            return;
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var resetLink = $"http://localhost:4200/reset-password?token={encodedToken}&email={user.Email}";
+
+        await Task.CompletedTask;
+
+        // TODO: await _emailService.SendEmailAsync(user.Email, "Reset Your Password", $"Click here: {resetLink}");
     }
 
     private AuthResponse BuildResponse(ApplicationUser user, IEnumerable<string> roles)
