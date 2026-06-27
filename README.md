@@ -1,21 +1,28 @@
 # School ERP System
 
-A multi-tenant School ERP built on **.NET 8** following **Clean Architecture**.
+A multi-tenant School ERP built on **.NET 10** following **Clean Architecture**.
 
 ## Tech Stack
-- .NET 8 Web API (C#)
+- .NET 10 Web API (C#)
 - Clean / Onion Architecture (Domain → Application → Infrastructure → WebAPI)
-- PostgreSQL + Entity Framework Core 8
+- PostgreSQL + Entity Framework Core 10
 - Multi-tenant: shared database with `TenantId` global query filters
 - ASP.NET Core Identity + JWT + Role-Based Access Control (RBAC)
 
 ## Project Structure
 ```
 src/
-  SchoolErp.Domain          Entities, enums, value objects, ITenantEntity
-  SchoolErp.Application      Interfaces, DTOs, business logic (services), Result types
-  SchoolErp.Infrastructure  EF Core DbContext + migrations, Identity, JWT, seeding
-  SchoolErp.WebAPI          Controllers, JWT auth, RBAC policies, Swagger
+  frontend/
+    SchoolErp.Frontend       Angular application
+  backend/
+    SchoolErp.Domain          Entities, enums, value objects, ITenantEntity
+    SchoolErp.Application      Interfaces, DTOs, business logic (services), Result types
+    SchoolErp.Infrastructure  EF Core DbContext + migrations, Identity, JWT, seeding
+    SchoolErp.WebAPI          Controllers, JWT auth, RBAC policies, Swagger
+  database/
+    Migrations/               EF Core database migrations
+    cleanup_sample_data.sql
+    delete_demo_user.sql
 ```
 
 ## Multi-tenancy
@@ -29,13 +36,13 @@ claim). On insert, `SaveChanges` stamps `TenantId` (and audit fields) automatica
 with `[Authorize(Roles = ...)]`. `SuperAdmin` manages tenants (schools).
 
 ## Running Locally
-Prerequisites: .NET 8 SDK and a PostgreSQL instance.
+Prerequisites: .NET 10 SDK and a PostgreSQL instance.
 
-1. Set the connection string in `src/SchoolErp.WebAPI/appsettings.json`
-   (`ConnectionStrings:Default`) and the `Jwt` settings.
+1. Set the connection string in `src/backend/SchoolErp.WebAPI/appsettings.json`
+   (`ConnectionStrings:DefaultConnection`) and the `Jwt` settings.
 2. Run the API (migrations are applied and demo data is seeded on startup):
    ```bash
-   dotnet run --project src/SchoolErp.WebAPI
+   dotnet run --project src/backend/SchoolErp.WebAPI
    ```
 3. Open Swagger at `http://localhost:<port>/swagger`.
 
@@ -57,7 +64,7 @@ Prerequisites: .NET 8 SDK and a PostgreSQL instance.
 ## Migrations
 ```bash
 dotnet ef migrations add <Name> \
-  --project src/SchoolErp.Infrastructure \
-  --startup-project src/SchoolErp.WebAPI \
+  --project src/backend/SchoolErp.Infrastructure \
+  --startup-project src/backend/SchoolErp.WebAPI \
   --output-dir Persistence/Migrations
 ```

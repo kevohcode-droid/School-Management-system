@@ -60,6 +60,21 @@ public class ApplicationDbContext
 
             builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
         }
+
+        builder.Entity<FeeTemplateItem>()
+            .HasQueryFilter(i =>
+                i.FeeTemplate.TenantId == CurrentTenantId
+                && i.FeeCategory.TenantId == CurrentTenantId);
+
+        builder.Entity<FeeTemplateClass>()
+            .HasQueryFilter(c =>
+                c.FeeTemplate.TenantId == CurrentTenantId
+                && c.Section.TenantId == CurrentTenantId);
+
+        builder.Entity<InvoiceItem>()
+            .HasQueryFilter(i =>
+                i.FeeInvoice.TenantId == CurrentTenantId
+                && i.FeeCategory.TenantId == CurrentTenantId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

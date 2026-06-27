@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using SchoolErp.Domain.Common;
 using SchoolErp.Domain.Enums;
 
@@ -31,6 +32,9 @@ public class FeeTemplateItem : AuditableEntity
 
 public class FeeTemplateClass
 {
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     public Guid FeeTemplateId { get; set; }
     public FeeTemplate FeeTemplate { get; set; } = null!;
 
