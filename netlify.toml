@@ -1,0 +1,9 @@
+[build]
+  base = "src/SchoolErp.Frontend"
+  command = "npm ci && npm run build"
+  publish = "dist/school-erp-frontend/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
