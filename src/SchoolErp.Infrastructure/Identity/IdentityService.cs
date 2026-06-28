@@ -1,3 +1,4 @@
+using Google.Apis.Auth;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -100,12 +101,75 @@ public class IdentityService : IIdentityService
             return;
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var encodedToken = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var encodedToken = Microsoft.AspNetCore.WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         var resetLink = $"http://localhost:4200/reset-password?token={encodedToken}&email={user.Email}";
 
         await Task.CompletedTask;
 
         // TODO: await _emailService.SendEmailAsync(user.Email, "Reset Your Password", $"Click here: {resetLink}");
+    }
+
+    public async Task<AuthResult> GoogleSignupAsync(GoogleSignupRequest request, CancellationToken ct = default)
+    {
+        var tenant = await _db.Tenants
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.Code == request.TenantCode && t.IsActive, ct);
+
+        if (tenant is null)
+        {
+            return AuthResult.Failure($"Tenant '{request.TenantCode}' not found or inactive.");
+        }
+
+        var payload = await VerifyGoogleTokenAsync(request.Token);
+        if (payload is null)
+        {
+            return AuthResult.Failure("Invalid Google token.");
+        }
+
+        var email = payload.Email;
+        var existing = await _userManager.FindByEmailAsync(email);
+
+        if (existing is not null)
+        {
+            var roles = await _userManager.GetRolesAsync(existing);
+            return AuthResult.Success(BuildResponse(existing, roles));
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            FirstName = payload.GivenName ?? "Google",
+            LastName = payload.FamilyName ?? "User",
+            TenantId = tenant.Id,
+            EmailConfirmed = true
+        };
+
+        var created = await _userManager.CreateAsync(user);
+        if (!created.Succeeded)
+        {
+            return AuthResult.Failure(created.Errors.Select(e => e.Description).ToArray());
+        }
+
+        await _userManager.AddToRoleAsync(user, Roles.Student);
+
+        return AuthResult.Success(BuildResponse(user, new[] { Roles.Student }));
+    }
+
+    private static async Task<GoogleJsonWebSignature.Payload?> VerifyGoogleTokenAsync(string token)
+    {
+        try
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { "673268021018-jtkrs64bsbi5mnhjhce1gelph85kg34p.apps.googleusercontent.com" }
+            };
+            return await GoogleJsonWebSignature.ValidateAsync(token, settings);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private AuthResponse BuildResponse(ApplicationUser user, IEnumerable<string> roles)

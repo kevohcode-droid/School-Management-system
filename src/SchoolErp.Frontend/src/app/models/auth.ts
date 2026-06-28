@@ -13,6 +13,11 @@ export interface RegisterRequest {
   role: string;
 }
 
+export interface GoogleLoginRequest {
+  token: string;
+  tenantCode: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   expiresAtUtc: string;

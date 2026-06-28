@@ -4,6 +4,7 @@ import { FormsModule, FormGroup, FormBuilder, Validators, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser } from '../../models/auth';
+import { SocialAuthService, GoogleLoginProvider } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +26,7 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
+    private socialAuthService: SocialAuthService,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -96,8 +98,44 @@ export class LoginComponent {
   }
 
   onSocialLogin(provider: string): void {
-    // TODO: Implement social login
-    console.log(`Social login with ${provider}`);
+    const tenantCode = this.loginForm.get('tenantCode')?.value;
+    
+    if (!tenantCode) {
+      alert("Please enter a School / Tenant Code first!");
+      return;
+    }
+
+    if (provider === 'google') {
+      this.loginWithGoogle(tenantCode);
+    }
+  }
+
+  loginWithGoogle(tenantCode: string): void {
+    this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
+      this.authService.googleLogin({ 
+        token: user.idToken, 
+        tenantCode: tenantCode 
+      }).subscribe({
+        next: (response: AuthResponse) => {
+          console.log('Google login successful:', response);
+          this.authService.saveToken(response.accessToken);
+          this.authService.saveCurrentUser({
+            userId: response.userId,
+            userName: response.email,
+            tenantId: response.tenantId,
+            roles: response.roles
+          });
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err: any) => {
+          console.error('Google login error:', err);
+          this.errorMessage = err.error?.errors?.[0] || err.message || 'Google login failed.';
+        }
+      });
+    }).catch((err) => {
+      console.error('Google sign-in error:', err);
+      this.errorMessage = 'Google sign-in was cancelled or failed.';
+    });
   }
 
   onSubmit(): void {

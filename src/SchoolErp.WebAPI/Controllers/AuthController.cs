@@ -50,4 +50,15 @@ public class AuthController : ControllerBase
         currentUser.TenantId,
         currentUser.Roles
     });
+
+    [HttpPost("google-signup")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GoogleSignUp([FromBody] GoogleSignupRequest request, CancellationToken ct)
+    {
+        var result = await _identityService.GoogleSignupAsync(request, ct);
+        return result.Succeeded ? Ok(result.Response) : BadRequest(new { errors = result.Errors });
+    }
 }

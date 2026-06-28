@@ -43,6 +43,15 @@ public record LoginRequest
     public string Password { get; init; } = string.Empty;
 }
 
+public record GoogleSignupRequest
+{
+    [Required]
+    public string Token { get; init; } = string.Empty;
+
+    [Required]
+    public string TenantCode { get; init; } = string.Empty;
+}
+
 public record AuthResponse
 {
     public string AccessToken { get; init; } = string.Empty;

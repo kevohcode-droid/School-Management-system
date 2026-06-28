@@ -18,3 +18,4 @@ Thumbs.db
 ## Logs / local secrets
 *.log
 appsettings.*.local.json
+node_modules/ 

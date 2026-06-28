@@ -1,17 +1,16 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2051EAB4-2B75-496A-B326-37669995EF78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Domain", "src\backend\SchoolErp.Domain\SchoolErp.Domain.csproj", "{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Domain", "src\SchoolErp.Domain\SchoolErp.Domain.csproj", "{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Application", "src\backend\SchoolErp.Application\SchoolErp.Application.csproj", "{A84C9F19-6A9A-4F93-9793-63761C2205E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Application", "src\SchoolErp.Application\SchoolErp.Application.csproj", "{A84C9F19-6A9A-4F93-9793-63761C2205E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Infrastructure", "src\backend\SchoolErp.Infrastructure\SchoolErp.Infrastructure.csproj", "{F93293E4-55CD-4E25-A16C-F565262B68D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.Infrastructure", "src\SchoolErp.Infrastructure\SchoolErp.Infrastructure.csproj", "{F93293E4-55CD-4E25-A16C-F565262B68D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.WebAPI", "src\backend\SchoolErp.WebAPI\SchoolErp.WebAPI.csproj", "{7BBDC44B-185A-431E-9EE7-BA6848F96054}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolErp.WebAPI", "src\SchoolErp.WebAPI\SchoolErp.WebAPI.csproj", "{7BBDC44B-185A-431E-9EE7-BA6848F96054}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,7 +22,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}.Debug|Any CPU.Build.0.ActiveCfg = Debug|Any CPU
 		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A84C9F19-6A9A-4F93-9793-63761C2205E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -38,11 +37,5 @@ Global
 		{7BBDC44B-185A-431E-9EE7-BA6848F96054}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BBDC44B-185A-431E-9EE7-BA6848F96054}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BBDC44B-185A-431E-9EE7-BA6848F96054}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{FA96D3C0-DDB9-4CAD-89EB-E8A6EB5B642F} = {2051EAB4-2B75-496A-B326-37669995EF78}
-		{A84C9F19-6A9A-4F93-9793-63761C2205E8} = {2051EAB4-2B75-496A-B326-37669995EF78}
-		{F93293E4-55CD-4E25-A16C-F565262B68D7} = {2051EAB4-2B75-496A-B326-37669995EF78}
-		{7BBDC44B-185A-431E-9EE7-BA6848F96054} = {2051EAB4-2B75-496A-B326-37669995EF78}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\backend\SchoolErp.Domain\SchoolErp.Domain.csproj" />
+    <ProjectReference Include="..\SchoolErp.Domain\SchoolErp.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser } from '../models/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser, GoogleLoginRequest } from '../models/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -54,6 +54,10 @@ export class AuthService {
 
   forgotPassword(email: string): Observable<any> {
     return this.apiService.post<any>('/auth/forgot-password', { email });
+  }
+
+  googleLogin(request: GoogleLoginRequest): Observable<AuthResponse> {
+    return this.apiService.post<AuthResponse>('/auth/google-signup', request);
   }
 
   hasAnyRole(roles: string[]): boolean {
