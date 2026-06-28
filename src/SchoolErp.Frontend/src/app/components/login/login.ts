@@ -110,11 +110,15 @@ export class LoginComponent {
     }
   }
 
-  loginWithGoogle(tenantCode: string): void {
+loginWithGoogle(tenantCode: string): void {
     this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
-      this.authService.googleLogin({ 
-        token: user.idToken, 
-        tenantCode: tenantCode 
+      if (!user.idToken) {
+        this.errorMessage = 'Google authentication failed: no token received.';
+        return;
+      }
+      this.authService.googleLogin({
+        token: user.idToken,
+        tenantCode: tenantCode
       }).subscribe({
         next: (response: AuthResponse) => {
           console.log('Google login successful:', response);
