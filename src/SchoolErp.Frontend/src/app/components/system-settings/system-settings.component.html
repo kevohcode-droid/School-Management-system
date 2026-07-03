@@ -1,0 +1,27 @@
+<div class="system-settings-container">
+  <header class="settings-header">
+    <button (click)="goBack()" class="back-btn">&larr; Back to Dashboard</button>
+    <h1>System Settings</h1>
+  </header>
+
+  <div class="settings-tabs">
+    <button *ngFor="let tab of tabs"
+            (click)="activeTab = tab.id"
+            [class.active]="activeTab === tab.id"
+            class="tab-button">
+      {{ tab.name }}
+    </button>
+  </div>
+
+  <div class="settings-content">
+    <div class="tab-panel" [class.active]="activeTab === 'general'">
+      <app-general-settings-tab />
+    </div>
+    <div class="tab-panel" [class.active]="activeTab === 'security'">
+      <app-security-settings-tab />
+    </div>
+    <div class="tab-panel" [class.active]="activeTab === 'appearance'">
+      <app-appearance-settings-tab />
+    </div>
+  </div>
+</div>

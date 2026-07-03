@@ -51,3 +51,15 @@ public record UpdateStudentRequest
     public Gender Gender { get; init; }
     public Guid? SectionId { get; init; }
 }
+
+public record StudentImportRow
+{
+    public string AdmissionNumber { get; init; } = string.Empty;
+    public string FirstName { get; init; } = string.Empty;
+    public string LastName { get; init; } = string.Empty;
+    public string? Email { get; init; }
+    public Gender Gender { get; init; } = Gender.Unspecified;
+    public DateOnly? DateOfBirth { get; init; }
+    public Guid? SectionId { get; init; }
+    public string? SectionName { get; init; }
+}

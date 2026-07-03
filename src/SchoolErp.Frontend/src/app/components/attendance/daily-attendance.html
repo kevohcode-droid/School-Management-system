@@ -1,0 +1,129 @@
+<div class="attendance-container">
+  <div class="attendance-header">
+    <h2>Daily Attendance</h2>
+    <button class="back-button" (click)="navigateToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label for="date">Date:</label>
+      <input 
+        type="date" 
+        id="date" 
+        [(ngModel)]="selectedDate" 
+        (change)="loadStudents()"
+        class="filter-input"
+      >
+    </div>
+    
+    <div class="filter-group">
+      <label for="class">Class:</label>
+      <select 
+        id="class" 
+        [(ngModel)]="selectedClassId" 
+        (change)="loadStudents()"
+        class="filter-input"
+      >
+        <option value="">Select Class</option>
+        <option *ngFor="let cls of classOptions" [value]="cls.id">
+          {{ cls.name }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    Loading students...
+  </div>
+
+  <!-- Attendance Table -->
+  <div *ngIf="!isLoading && attendanceList.length > 0" class="attendance-table-container">
+    <table class="attendance-table">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th class="text-center">Present</th>
+          <th class="text-center">Absent</th>
+          <th class="text-center">Late</th>
+          <th class="text-center">Excused</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of attendanceList" class="attendance-row">
+          <td class="student-name">{{ record.studentName }}</td>
+          
+          <!-- Radio buttons for quick selection -->
+          <td class="text-center">
+            <input 
+              type="radio" 
+              [name]="'status_' + record.studentId" 
+              [checked]="record.status === 1" 
+              (change)="updateStatus(record.studentId, 1)"
+              class="status-radio status-present-radio"
+            >
+          </td>
+          <td class="text-center">
+            <input 
+              type="radio" 
+              [name]="'status_' + record.studentId" 
+              [checked]="record.status === 2" 
+              (change)="updateStatus(record.studentId, 2)"
+              class="status-radio status-absent-radio"
+            >
+          </td>
+          <td class="text-center">
+            <input 
+              type="radio" 
+              [name]="'status_' + record.studentId" 
+              [checked]="record.status === 3" 
+              (change)="updateStatus(record.studentId, 3)"
+              class="status-radio status-late-radio"
+            >
+          </td>
+          <td class="text-center">
+            <input 
+              type="radio" 
+              [name]="'status_' + record.studentId" 
+              [checked]="record.status === 4" 
+              (change)="updateStatus(record.studentId, 4)"
+              class="status-radio status-excused-radio"
+            >
+          </td>
+          <td>
+            <input 
+              type="text" 
+              [(ngModel)]="record.remarks"
+              (ngModelChange)="updateRemarks(record.studentId, $event)"
+              placeholder="Add remarks..."
+              class="remarks-input"
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && attendanceList.length === 0 && selectedClassId" class="empty-state">
+    <p>No students found for this class.</p>
+  </div>
+
+  <!-- Save Button -->
+  <div *ngIf="attendanceList.length > 0" class="actions-section">
+    <button 
+      (click)="saveAll()" 
+      [disabled]="isSaving"
+      class="save-button"
+    >
+      {{ isSaving ? 'Saving...' : 'Save Attendance' }}
+    </button>
+  </div>
+</div>

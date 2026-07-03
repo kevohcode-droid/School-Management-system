@@ -23,6 +23,7 @@ export interface AuthResponse {
   expiresAtUtc: string;
   userId: string;
   email: string;
+  fullName: string;
   tenantId: string;
   roles: string[];
 }
@@ -30,6 +31,9 @@ export interface AuthResponse {
 export interface CurrentUser {
   userId: string;
   userName: string;
+  fullName?: string;
   tenantId: string;
+  tenantName?: string;
+  tenantCode?: string;
   roles: string[];
 }

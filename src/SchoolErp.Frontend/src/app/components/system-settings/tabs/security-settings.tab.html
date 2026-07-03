@@ -1,0 +1,24 @@
+<h2>Security Settings</h2>
+<p class="tab-description">Manage authentication and session policies.</p>
+
+<form (ngSubmit)="save()" class="settings-form">
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="requireTwoFactor" name="requireTwoFactor">
+      <span>Require Two-Factor Authentication for all users</span>
+    </label>
+    <p class="field-hint">When enabled, users will need to verify their identity via email or authenticator app on login.</p>
+  </div>
+
+  <div class="form-group">
+    <label for="sessionTimeoutMinutes">Session Timeout (minutes)</label>
+    <input [(ngModel)]="sessionTimeoutMinutes" name="sessionTimeoutMinutes" id="sessionTimeoutMinutes" type="number" min="5" max="1440">
+    <p class="field-hint">Users will be logged out after this period of inactivity.</p>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="isSaving" class="save-btn">
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </div>
+</form>

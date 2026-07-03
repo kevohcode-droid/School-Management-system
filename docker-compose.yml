@@ -17,6 +17,48 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - schoolerp-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: schoolerp-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=schoolerp;Username=postgres;Password=postgres
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - schoolerp-network
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: schoolerp-frontend
+    ports:
+      - "4200:4200"
+    environment:
+      API_URL: http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - schoolerp-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   postgres_data:
+
+networks:
+  schoolerp-network:
+    driver: bridge

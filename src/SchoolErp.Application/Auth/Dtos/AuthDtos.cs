@@ -8,6 +8,18 @@ public record ForgotPasswordRequest
     public string Email { get; init; } = string.Empty;
 }
 
+public record ResetPasswordRequest
+{
+    [Required, EmailAddress]
+    public string Email { get; init; } = string.Empty;
+
+    [Required]
+    public string Token { get; init; } = string.Empty;
+
+    [Required, MinLength(6)]
+    public string NewPassword { get; init; } = string.Empty;
+}
+
 public record RegisterRequest
 {
     /// <summary>Code of the tenant (school) the new user belongs to.</summary>
@@ -58,6 +70,7 @@ public record AuthResponse
     public DateTime ExpiresAtUtc { get; init; }
     public string UserId { get; init; } = string.Empty;
     public string Email { get; init; } = string.Empty;
+    public string FullName { get; init; } = string.Empty;
     public Guid TenantId { get; init; }
     public IReadOnlyList<string> Roles { get; init; } = Array.Empty<string>();
 }

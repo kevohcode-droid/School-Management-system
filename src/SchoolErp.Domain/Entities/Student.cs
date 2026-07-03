@@ -23,6 +23,7 @@ public class Student : AuditableEntity, ITenantEntity
 
     public ICollection<Grade> Grades { get; set; } = new List<Grade>();
     public ICollection<FeeInvoice> FeeInvoices { get; set; } = new List<FeeInvoice>();
+    public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
 
     public string FullName => $"{FirstName} {LastName}".Trim();
 }

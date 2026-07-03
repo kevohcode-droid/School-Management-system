@@ -94,7 +94,7 @@ public static class DbSeeder
             }
         }
 
-        foreach (var role in new[] { Roles.SuperAdmin, Roles.Admin })
+        foreach (var role in new[] { Roles.Admin })
         {
             if (!await userManager.IsInRoleAsync(admin, role))
                 await userManager.AddToRoleAsync(admin, role);

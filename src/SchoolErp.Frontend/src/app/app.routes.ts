@@ -5,6 +5,8 @@ import { StudentsComponent } from './components/students/students';
 import { TenantsComponent } from './components/tenants/tenants';
 import { StaffComponent } from './components/staff/staff';
 import { ClassesComponent } from './components/classes/classes';
+import { DailyAttendanceComponent } from './components/attendance/daily-attendance';
+import { SystemSettingsComponent } from './components/system-settings/system-settings.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -13,6 +15,8 @@ export const routes: Routes = [
   { path: 'tenants', component: TenantsComponent },
   { path: 'staff', component: StaffComponent },
   { path: 'classes', component: ClassesComponent },
+  { path: 'attendance', component: DailyAttendanceComponent },
+  { path: 'settings', component: SystemSettingsComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
 ];

@@ -22,6 +22,8 @@ public class CurrentUser : ICurrentUser
     public string? UserName => _principal?.FindFirstValue(ClaimTypes.Name)
         ?? _principal?.FindFirstValue("unique_name");
 
+    public string? FullName => _principal?.FindFirstValue("full_name");
+
     public Guid? TenantId =>
         Guid.TryParse(_principal?.FindFirstValue(JwtTokenGenerator.TenantClaimType), out var id)
             ? id

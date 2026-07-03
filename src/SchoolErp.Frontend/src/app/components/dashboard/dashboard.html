@@ -9,23 +9,26 @@
 
   <main class="dashboard-content">
     <div class="welcome-section" *ngIf="currentUser">
-      <h2>Welcome Back, {{ currentUser.userName }}</h2>
+      <h2>Welcome Back, {{ currentUser.fullName || currentUser.userName }}</h2>
       <p>Multi-tenant School Management System dashboard. Select a module to begin managing academic and administrative tasks.</p>
     </div>
 
     <!-- Quick stats widgets -->
     <div class="stats-row" *ngIf="currentUser">
       <div class="stat-widget">
-        <span class="stat-label">Active Tenant</span>
-        <span class="stat-value">{{ currentUser.tenantId || 'Default' }}</span>
+        <span class="stat-label">School</span>
+        <span class="stat-value">
+          {{ currentUser.tenantName || 'School Tenant' }}
+        </span>
+        <small class="stat-subtitle">{{ currentUser.tenantCode ? 'Code: ' + currentUser.tenantCode : currentUser.tenantId }}</small>
       </div>
       <div class="stat-widget">
-        <span class="stat-label">Assigned Roles</span>
-        <span class="stat-value">{{ currentUser.roles.includes('SuperAdmin') ? 'Super Administrator' : 'Administrator' }}</span>
+        <span class="stat-label">Assigned Role</span>
+        <span class="stat-value">{{ currentUser.roles.includes('SuperAdmin') ? 'Super Administrator' : currentUser.roles.join(', ') }}</span>
       </div>
       <div class="stat-widget">
         <span class="stat-label">Status</span>
-        <span class="stat-value" style="color: var(--success)">Online</span>
+        <span class="stat-value status-online">Online</span>
       </div>
     </div>
 
@@ -51,6 +54,13 @@
         <p>Configure academic structure, define classes, assign teachers, and map subjects.</p>
       </div>
 
+      <!-- Attendance -->
+      <div class="module-card" (click)="navigateToAttendance()">
+        <div class="module-icon">📋</div>
+        <h3>Attendance</h3>
+        <p>Mark daily attendance, track student presence, and generate attendance reports.</p>
+      </div>
+
       <!-- Tenants card visible only to SuperAdmin -->
       <div class="module-card" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
         <div class="module-icon">🏫</div>
@@ -70,10 +80,10 @@
         <p>Midterms, quizzes, grading metrics, performance analytics, and transcripts. (Coming Soon)</p>
       </div>
 
-      <div class="module-card disabled">
+      <div class="module-card" (click)="navigateToSettings()">
         <div class="module-icon">⚙️</div>
         <h3>System Settings</h3>
-        <p>Profile configurations, security logs, access tokens, and layout themes. (Coming Soon)</p>
+        <p>Profile configurations, security logs, access tokens, and layout themes.</p>
       </div>
     </div>
   </main>

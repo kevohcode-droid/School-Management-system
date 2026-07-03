@@ -7,6 +7,7 @@ using SchoolErp.Application.Fees;
 using SchoolErp.Infrastructure.Configuration;
 using SchoolErp.Infrastructure.Identity;
 using SchoolErp.Infrastructure.Persistence;
+using SchoolErp.Infrastructure.Services;
 
 namespace SchoolErp.Infrastructure;
 
@@ -36,8 +37,11 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IFeeService, FeeService>();
+        services.AddScoped<IAttendanceService, AttendanceService>();
 
         return services;
     }

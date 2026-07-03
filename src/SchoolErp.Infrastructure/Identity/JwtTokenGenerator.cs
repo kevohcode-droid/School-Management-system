@@ -20,7 +20,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         string userId,
         string userName,
         Guid tenantId,
-        IEnumerable<string> roles)
+        IEnumerable<string> roles,
+        string fullName)
     {
         var expires = DateTime.UtcNow.AddMinutes(_settings.ExpiryMinutes);
 
@@ -29,7 +30,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Sub, userId),
             new(JwtRegisteredClaimNames.UniqueName, userName),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(TenantClaimType, tenantId.ToString())
+            new(TenantClaimType, tenantId.ToString()),
+            new("full_name", fullName)
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

@@ -9,8 +9,13 @@ namespace SchoolErp.Application.Students;
 public class StudentService : IStudentService
 {
     private readonly IApplicationDbContext _db;
+    private readonly IAuditService _auditService;
 
-    public StudentService(IApplicationDbContext db) => _db = db;
+    public StudentService(IApplicationDbContext db, IAuditService auditService)
+    {
+        _db = db;
+        _auditService = auditService;
+    }
 
     public async Task<IReadOnlyList<StudentDto>> GetAllAsync(CancellationToken ct = default)
     {
@@ -67,6 +72,7 @@ public class StudentService : IStudentService
 
         _db.Students.Add(student);
         await _db.SaveChangesAsync(ct);
+        await _auditService.LogAsync("system", request.Email, "CREATE_STUDENT", $"Created student {student.FirstName} {student.LastName}", ct: ct);
 
         return Result<StudentDto>.Success(Map(student));
     }
@@ -88,6 +94,7 @@ public class StudentService : IStudentService
         student.SectionId = request.SectionId;
 
         await _db.SaveChangesAsync(ct);
+        await _auditService.LogAsync("system", request.Email, "UPDATE_STUDENT", $"Updated student {student.FirstName} {student.LastName}", ct: ct);
         return Result<StudentDto>.Success(Map(student));
     }
 
@@ -99,7 +106,56 @@ public class StudentService : IStudentService
 
         _db.Students.Remove(student);
         await _db.SaveChangesAsync(ct);
+        await _auditService.LogAsync("system", student.Email ?? "unknown", "DELETE_STUDENT", $"Deleted student {student.FirstName} {student.LastName}", ct: ct);
         return Result.Success();
+    }
+
+    public async Task<IReadOnlyList<Student>> GetForExportAsync(CancellationToken ct = default)
+    {
+        return await _db.Students
+            .AsNoTracking()
+            .Include(s => s.Section)
+            .ToListAsync(ct);
+    }
+
+    public async Task<Result<int>> ImportFromRowsAsync(IReadOnlyList<StudentImportRow> rows, CancellationToken ct = default)
+    {
+        int importedCount = 0;
+        foreach (var row in rows)
+        {
+            if (string.IsNullOrWhiteSpace(row.AdmissionNumber))
+                continue;
+
+            var existing = await _db.Students.FirstOrDefaultAsync(s => s.AdmissionNumber == row.AdmissionNumber, ct);
+            if (existing != null)
+                continue;
+
+            Guid? sectionId = row.SectionId;
+            if (sectionId == Guid.Empty && !string.IsNullOrWhiteSpace(row.SectionName))
+            {
+                var section = await _db.Sections.FirstOrDefaultAsync(s => s.Name == row.SectionName, ct);
+                sectionId = section?.Id;
+            }
+
+            var student = new Student
+            {
+                AdmissionNumber = row.AdmissionNumber,
+                FirstName = row.FirstName,
+                LastName = row.LastName,
+                Email = row.Email,
+                Gender = row.Gender,
+                DateOfBirth = row.DateOfBirth,
+                SectionId = sectionId == Guid.Empty ? null : sectionId,
+                EnrollmentDate = DateTime.UtcNow,
+                TenantId = Guid.Empty
+            };
+
+            _db.Students.Add(student);
+            importedCount++;
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return Result<int>.Success(importedCount, "Students imported successfully");
     }
 
     private static StudentDto Map(Student s) => new()

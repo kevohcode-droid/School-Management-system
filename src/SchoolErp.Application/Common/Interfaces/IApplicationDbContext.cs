@@ -19,6 +19,7 @@ public interface IApplicationDbContext
     DbSet<FeeTemplate> FeeTemplates { get; }
     DbSet<PaymentTransaction> PaymentTransactions { get; }
     DbSet<Discount> Discounts { get; }
+    DbSet<TenantSetting> TenantSettings { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

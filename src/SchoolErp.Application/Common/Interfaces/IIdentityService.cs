@@ -8,4 +8,5 @@ public interface IIdentityService
     Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken ct = default);
     Task<AuthResult> GoogleSignupAsync(GoogleSignupRequest request, CancellationToken ct = default);
     Task ForgotPasswordAsync(string email, CancellationToken ct = default);
+    Task<AuthResult> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default);
 }

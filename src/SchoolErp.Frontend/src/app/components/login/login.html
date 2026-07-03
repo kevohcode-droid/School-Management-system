@@ -1,240 +1,211 @@
 <div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <div class="logo-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-        </svg>
+  <div class="login-layout">
+    <aside class="welcome-panel">
+      <div class="brand-hero">
+        <div class="brand-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4L6 7v5a6 6 0 0 0 12 0V7l-6-3z"></path>
+            <path d="M6 7l6 3 6-3M12 10v6"></path>
+            <path d="M9 16h6"></path>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <span class="eyebrow">Welcome to</span>
+          <h1>{{ schoolName }}</h1>
+          <p class="motto">“{{ schoolMotto }}”</p>
+        </div>
       </div>
-      <h2 *ngIf="!isRegisterMode">Welcome Back</h2>
-      <h2 *ngIf="isRegisterMode">Create Account</h2>
-      <p class="subtitle" *ngIf="!isRegisterMode">Sign in to your School ERP account</p>
-      <p class="subtitle" *ngIf="isRegisterMode">Join your school's management system</p>
-    </div>
 
-    <!-- LOGIN FORM -->
-    <form *ngIf="!isRegisterMode" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="tenantCode">School / Tenant Code</label>
-        <input 
-          type="text" 
-          id="tenantCode" 
-          formControlName="tenantCode" 
-          placeholder="Enter your school code"
-        >
-        <div class="error-text" *ngIf="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid">
-          <span *ngIf="loginControls['tenantCode'].errors?.['required']">Tenant code is required</span>
-          <span *ngIf="loginControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
+      <p class="hero-description">A modern school ERP experience for administrators, teachers, students, and parents.</p>
+
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-value">1,245</span>
+          <span class="stat-label">Students</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">56</span>
+          <span class="stat-label">Teachers</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">1,102</span>
+          <span class="stat-label">Parents</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">42</span>
+          <span class="stat-label">Classes</span>
         </div>
       </div>
-      
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email" 
-          placeholder="admin@demo.school"
-        >
-        <div class="error-text" *ngIf="loginControls['email'].touched && loginControls['email'].invalid">
-          <span *ngIf="loginControls['email'].errors?.['required']">Email is required</span>
-          <span *ngIf="loginControls['email'].errors?.['email']">Please enter a valid email</span>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-title">Academic Year</span>
+          <strong>{{ currentAcademicYear }}</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-title">Current Term</span>
+          <strong>{{ currentTerm }}</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-title">Today's Date</span>
+          <strong>{{ todayDate }}</strong>
         </div>
       </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="password-input-wrapper">
-          <input 
-            [type]="showPassword ? 'text' : 'password'" 
-            id="password" 
-            formControlName="password" 
-            placeholder="••••••••"
-          >
-          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
-            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
-              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c9 0 9-7 9-7"></path>
-              <line x1="2" y1="2" x2="22" y2="22"></line>
-            </svg>
-            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
+
+      <div class="announcements-panel">
+        <div class="announcements-header">
+          <h3>Announcements</h3>
+        </div>
+        <ul>
+          <li>Midterm exams begin on 20th July, 2026</li>
+          <li>Fee payment deadline is 15th July, 2026</li>
+          <li>Parent meeting on 25th July, 2026</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div>
+            <p class="eyebrow">Sign in to your account</p>
+            <h2>Access your dashboard</h2>
+          </div>
+          <div class="auth-note">Secure login protected by School ERP Security</div>
+        </div>
+
+        <div class="role-tabs">
+          <button type="button" class="role-tab" *ngFor="let option of roleOptions" [class.active]="selectedRole === option.key" (click)="selectLoginRole(option.key)">
+            <span class="role-icon">{{ option.icon }}</span>
+            <span>{{ option.label }}</span>
           </button>
         </div>
-        <div class="error-text" *ngIf="loginControls['password'].touched && loginControls['password'].invalid">
-          <span *ngIf="loginControls['password'].errors?.['required']">Password is required</span>
-          <span *ngIf="loginControls['password'].errors?.['minlength']">Must be at least 6 characters</span>
-        </div>
-      </div>
 
-      <div class="form-options">
-        <label class="checkbox-wrapper">
-          <input type="checkbox" formControlName="rememberMe">
-          <span class="checkmark"></span>
-          Remember me
-        </label>
-        <a class="forgot-password" (click)="onForgotPassword()">Forgot password?</a>
-      </div>
-
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-
-      <button type="submit" [disabled]="isLoading || loginForm.invalid">
-        {{ isLoading ? 'Authenticating...' : 'Sign In' }}
-      </button>
-
-      <div class="divider">
-        <span>or continue with</span>
-      </div>
-
-      <div class="social-login">
-        <button type="button" class="social-btn google" (click)="onSocialLogin('google')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Google
-        </button>
-        <button type="button" class="social-btn microsoft" (click)="onSocialLogin('microsoft')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z" fill="#00A4EF"/>
-          </svg>
-          Microsoft
-        </button>
-      </div>
-
-      <div class="mode-toggle">
-        Don't have an account? <a (click)="toggleMode()">Register here</a>
-      </div>
-    </form>
-
-    <!-- REGISTER FORM -->
-    <form *ngIf="isRegisterMode" [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="reg-tenant">Tenant Code</label>
-          <input 
-            type="text" 
-            id="reg-tenant" 
-            formControlName="tenantCode" 
-            placeholder="Enter your school code"
-          >
-          <div class="error-text" *ngIf="registerControls['tenantCode'].touched && registerControls['tenantCode'].invalid">
-            <span *ngIf="registerControls['tenantCode'].errors?.['required']">Required</span>
-            <span *ngIf="registerControls['tenantCode'].errors?.['minlength']">Min 2 chars</span>
+        <form *ngIf="!isRegisterMode" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="tenantCode">School / Tenant Code</label>
+            <input type="text" id="tenantCode" formControlName="tenantCode" placeholder="Enter your school code">
+            <div class="error-text" *ngIf="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid">
+              <span *ngIf="loginControls['tenantCode'].errors?.['required']">Tenant code is required</span>
+              <span *ngIf="loginControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="reg-role">Account Role</label>
-          <select id="reg-role" formControlName="role">
-            <option value="Admin">Admin</option>
-            <option value="Teacher">Teacher</option>
-            <option value="Student">Student</option>
-            <option value="Parent">Parent</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="reg-first">First Name</label>
-          <input 
-            type="text" 
-            id="reg-first" 
-            formControlName="firstName" 
-            placeholder="John"
-          >
-          <div class="error-text" *ngIf="registerControls['firstName'].touched && registerControls['firstName'].invalid">
-            <span *ngIf="registerControls['firstName'].errors?.['required']">Required</span>
-            <span *ngIf="registerControls['firstName'].errors?.['minlength']">Min 2 chars</span>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" formControlName="email" placeholder="Enter your email">
+            <div class="error-text" *ngIf="loginControls['email'].touched && loginControls['email'].invalid">
+              <span *ngIf="loginControls['email'].errors?.['required']">Email is required</span>
+              <span *ngIf="loginControls['email'].errors?.['email']">Please enter a valid email</span>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="reg-last">Last Name</label>
-          <input 
-            type="text" 
-            id="reg-last" 
-            formControlName="lastName" 
-            placeholder="Doe"
-          >
-          <div class="error-text" *ngIf="registerControls['lastName'].touched && registerControls['lastName'].invalid">
-            <span *ngIf="registerControls['lastName'].errors?.['required']">Required</span>
-            <span *ngIf="registerControls['lastName'].errors?.['minlength']">Min 2 chars</span>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-input-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="Enter your password">
+              <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">{{ showPassword ? 'Hide' : 'Show' }}</button>
+            </div>
+            <div class="error-text" *ngIf="loginControls['password'].touched && loginControls['password'].invalid">
+              <span *ngIf="loginControls['password'].errors?.['required']">Password is required</span>
+              <span *ngIf="loginControls['password'].errors?.['minlength']">Must be at least 6 characters</span>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="reg-email">Email Address</label>
-        <input 
-          type="email" 
-          id="reg-email" 
-          formControlName="email" 
-          placeholder="john.doe@demo.school"
-        >
-        <div class="error-text" *ngIf="registerControls['email'].touched && registerControls['email'].invalid">
-          <span *ngIf="registerControls['email'].errors?.['required']">Email is required</span>
-          <span *ngIf="registerControls['email'].errors?.['email']">Invalid email</span>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="reg-pass">Password</label>
-        <div class="password-input-wrapper">
-          <input 
-            [type]="showRegisterPassword ? 'text' : 'password'" 
-            id="reg-pass" 
-            formControlName="password" 
-            placeholder="••••••••"
-          >
-          <button type="button" class="toggle-password" (click)="toggleRegisterPasswordVisibility()">
-            <svg *ngIf="!showRegisterPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
-              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c9 0 9-7 9-7"></path>
-              <line x1="2" y1="2" x2="22" y2="22"></line>
-            </svg>
-            <svg *ngIf="showRegisterPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
+
+          <div class="login-actions">
+            <label class="checkbox-wrapper">
+              <input type="checkbox" formControlName="rememberMe">
+              <span class="checkmark"></span>
+              Remember me
+            </label>
+            <button type="button" class="text-link" (click)="onForgotPassword()">Forgot Password?</button>
+          </div>
+
+          <button type="submit" class="submit-button" [disabled]="isLoading || loginForm.invalid">
+            {{ isLoading ? 'Authenticating...' : 'Sign In' }}
+          </button>
+        </form>
+
+        <form *ngIf="isRegisterMode" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="reg-first">First Name</label>
+              <input type="text" id="reg-first" formControlName="firstName" placeholder="First name">
+              <div class="error-text" *ngIf="registerControls['firstName'].touched && registerControls['firstName'].invalid">
+                <span *ngIf="registerControls['firstName'].errors?.['required']">Required</span>
+                <span *ngIf="registerControls['firstName'].errors?.['minlength']">Min 2 characters</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="reg-last">Last Name</label>
+              <input type="text" id="reg-last" formControlName="lastName" placeholder="Last name">
+              <div class="error-text" *ngIf="registerControls['lastName'].touched && registerControls['lastName'].invalid">
+                <span *ngIf="registerControls['lastName'].errors?.['required']">Required</span>
+                <span *ngIf="registerControls['lastName'].errors?.['minlength']">Min 2 characters</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" formControlName="email" placeholder="Enter your email">
+            <div class="error-text" *ngIf="registerControls['email'].touched && registerControls['email'].invalid">
+              <span *ngIf="registerControls['email'].errors?.['required']">Email is required</span>
+              <span *ngIf="registerControls['email'].errors?.['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-tenant">School / Tenant Code</label>
+            <input type="text" id="reg-tenant" formControlName="tenantCode" placeholder="Enter your school code">
+            <div class="error-text" *ngIf="registerControls['tenantCode'].touched && registerControls['tenantCode'].invalid">
+              <span *ngIf="registerControls['tenantCode'].errors?.['required']">Tenant code is required</span>
+              <span *ngIf="registerControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-role">Account Role</label>
+            <select id="reg-role" formControlName="role">
+              <option *ngFor="let option of roleOptions" [value]="option.key">{{ option.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <div class="password-input-wrapper">
+              <input [type]="showRegisterPassword ? 'text' : 'password'" id="reg-password" formControlName="password" placeholder="Create a password">
+              <button type="button" class="toggle-password" (click)="toggleRegisterPasswordVisibility()">{{ showRegisterPassword ? 'Hide' : 'Show' }}</button>
+            </div>
+            <div class="error-text" *ngIf="registerControls['password'].touched && registerControls['password'].invalid">
+              <span *ngIf="registerControls['password'].errors?.['required']">Password is required</span>
+              <span *ngIf="registerControls['password'].errors?.['minlength']">Minimum 8 characters</span>
+              <span *ngIf="registerControls['password'].errors?.['pattern']">Must contain uppercase, lowercase, number and special character</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-confirm">Confirm Password</label>
+            <input type="password" id="reg-confirm" formControlName="confirmPassword" placeholder="Confirm password">
+            <div class="error-text" *ngIf="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid">
+              <span *ngIf="registerControls['confirmPassword'].errors?.['required']">Confirmation is required</span>
+              <span *ngIf="registerControls['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match</span>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-button" [disabled]="isLoading || registerForm.invalid">
+            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+          </button>
+        </form>
+
+        <div class="switch-mode">
+          <span *ngIf="!isRegisterMode">Don't have an account?</span>
+          <span *ngIf="isRegisterMode">Already have an account?</span>
+          <button type="button" class="link-button" (click)="toggleMode()">
+            {{ isRegisterMode ? 'Sign In here' : 'Register here' }}
           </button>
         </div>
-        <div class="error-text" *ngIf="registerControls['password'].touched && registerControls['password'].invalid">
-          <span *ngIf="registerControls['password'].errors?.['required']">Password is required</span>
-          <span *ngIf="registerControls['password'].errors?.['minlength']">Min 8 characters</span>
-          <span *ngIf="registerControls['password'].errors?.['pattern']">Must contain uppercase, lowercase, number & special char</span>
-        </div>
       </div>
-
-      <div class="form-group">
-        <label for="reg-confirm">Confirm Password</label>
-        <input 
-          type="password" 
-          id="reg-confirm" 
-          formControlName="confirmPassword" 
-          placeholder="••••••••"
-        >
-        <div class="error-text" *ngIf="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid">
-          <span *ngIf="registerControls['confirmPassword'].errors?.['required']">Please confirm password</span>
-          <span *ngIf="registerControls['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match</span>
-        </div>
-      </div>
-
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-
-      <button type="submit" [disabled]="isLoading || registerForm.invalid">
-        {{ isLoading ? 'Creating Account...' : 'Register' }}
-      </button>
-
-      <div class="mode-toggle">
-        Already have an account? <a (click)="toggleMode()">Sign In here</a>
-      </div>
-    </form>
+    </main>
   </div>
 </div>

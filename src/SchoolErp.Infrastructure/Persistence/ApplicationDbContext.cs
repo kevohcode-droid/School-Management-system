@@ -32,6 +32,9 @@ public class ApplicationDbContext
     public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
     public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
     public DbSet<Discount> Discounts => Set<Discount>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<TenantSetting> TenantSettings => Set<TenantSetting>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     /// <summary>
     /// Tenant referenced by the global query filters. Read per-query by EF Core,

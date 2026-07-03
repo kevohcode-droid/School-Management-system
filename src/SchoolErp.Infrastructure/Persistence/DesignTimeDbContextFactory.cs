@@ -28,6 +28,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
         public bool IsAuthenticated => false;
         public string? UserId => null;
         public string? UserName => null;
+        public string? FullName => null;
         public Guid? TenantId => null;
         public IReadOnlyCollection<string> Roles => Array.Empty<string>();
     }

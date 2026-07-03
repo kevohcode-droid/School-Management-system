@@ -4,7 +4,6 @@ import { FormsModule, FormGroup, FormBuilder, Validators, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser } from '../../models/auth';
-import { SocialAuthService, GoogleLoginProvider } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-login',
@@ -21,12 +20,25 @@ export class LoginComponent {
   showRegisterPassword: boolean = false;
   rememberMe: boolean = false;
 
+  schoolName = 'Maina Group of Schools ERP';
+  schoolMotto = 'Empowering Education Through Technology';
+  currentAcademicYear = this.getAcademicYear();
+  currentTerm = 'Term 2';
+  todayDate = this.getFormattedDate();
+
+  roleOptions = [
+    { key: 'Admin', label: 'Admin', icon: '🛡️' },
+    { key: 'Teacher', label: 'Teacher', icon: '👩‍🏫' },
+    { key: 'Student', label: 'Student', icon: '🎓' },
+    { key: 'Parent', label: 'Parent', icon: '👥' }
+  ];
+  selectedRole = 'Student';
+
   loginForm!: FormGroup;
   registerForm!: FormGroup;
 
   constructor(
     private authService: AuthService,
-    private socialAuthService: SocialAuthService,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -79,6 +91,27 @@ export class LoginComponent {
     this.showRegisterPassword = !this.showRegisterPassword;
   }
 
+  selectLoginRole(role: string): void {
+    this.selectedRole = role;
+  }
+
+  private getAcademicYear(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    return month >= 8 ? `${year} / ${year + 1}` : `${year - 1} / ${year}`;
+  }
+
+  private getFormattedDate(): string {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
   onForgotPassword(): void {
     const email = this.loginForm.get('email')?.value;
     if (!email) {
@@ -98,48 +131,8 @@ export class LoginComponent {
   }
 
   onSocialLogin(provider: string): void {
-    const tenantCode = this.loginForm.get('tenantCode')?.value;
-    
-    if (!tenantCode) {
-      alert("Please enter a School / Tenant Code first!");
-      return;
-    }
-
-    if (provider === 'google') {
-      this.loginWithGoogle(tenantCode);
-    }
-  }
-
-loginWithGoogle(tenantCode: string): void {
-    this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
-      if (!user.idToken) {
-        this.errorMessage = 'Google authentication failed: no token received.';
-        return;
-      }
-      this.authService.googleLogin({
-        token: user.idToken,
-        tenantCode: tenantCode
-      }).subscribe({
-        next: (response: AuthResponse) => {
-          console.log('Google login successful:', response);
-          this.authService.saveToken(response.accessToken);
-          this.authService.saveCurrentUser({
-            userId: response.userId,
-            userName: response.email,
-            tenantId: response.tenantId,
-            roles: response.roles
-          });
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err: any) => {
-          console.error('Google login error:', err);
-          this.errorMessage = err.error?.errors?.[0] || err.message || 'Google login failed.';
-        }
-      });
-    }).catch((err) => {
-      console.error('Google sign-in error:', err);
-      this.errorMessage = 'Google sign-in was cancelled or failed.';
-    });
+    // Social login temporarily disabled
+    alert("Social login is currently disabled. Please use email/password login.");
   }
 
   onSubmit(): void {
@@ -166,6 +159,7 @@ loginWithGoogle(tenantCode: string): void {
         this.authService.saveCurrentUser({
           userId: response.userId,
           userName: response.email,
+          fullName: response.fullName,
           tenantId: response.tenantId,
           roles: response.roles
         });
@@ -229,6 +223,7 @@ loginWithGoogle(tenantCode: string): void {
         this.authService.saveCurrentUser({
           userId: response.userId,
           userName: response.email,
+          fullName: response.fullName,
           tenantId: response.tenantId,
           roles: response.roles
         });

@@ -1,0 +1,29 @@
+<h2>Layout & Themes</h2>
+<p class="tab-description">Customize the look and feel of the application.</p>
+
+<form (ngSubmit)="save()" class="settings-form">
+  <div class="form-group">
+    <label>Primary Color</label>
+    <div class="color-grid">
+      <label *ngFor="let color of colorOptions" class="color-option">
+        <input type="radio" [(ngModel)]="primaryColor" [value]="color.value" name="primaryColor">
+        <span class="color-swatch" [style.background]="color.value"></span>
+        <span class="color-label">{{ color.label }}</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="isDarkModeEnabled" name="isDarkModeEnabled">
+      <span>Enable Dark Mode</span>
+    </label>
+    <p class="field-hint">Apply a dark color scheme across the entire interface.</p>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="isSaving" class="save-btn">
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </div>
+</form>

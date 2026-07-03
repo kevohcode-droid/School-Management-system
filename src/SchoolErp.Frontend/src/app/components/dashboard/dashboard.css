@@ -129,6 +129,17 @@
   font-weight: 700;
 }
 
+.stat-subtitle {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.825rem;
+  color: var(--text-muted);
+}
+
+.status-online {
+  color: var(--success);
+}
+
 /* Modules Grid */
 .modules-grid {
   display: grid;

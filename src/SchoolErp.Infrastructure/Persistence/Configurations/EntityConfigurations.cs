@@ -188,3 +188,19 @@ public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
         b.HasIndex(d => new { d.TenantId, d.Code }).IsUnique();
     }
 }
+
+public class AttendanceRecordConfiguration : IEntityTypeConfiguration<AttendanceRecord>
+{
+    public void Configure(EntityTypeBuilder<AttendanceRecord> b)
+    {
+        b.Property(a => a.Remarks).HasMaxLength(500);
+        
+        // Composite index for performance on daily queries
+        b.HasIndex(a => new { a.TenantId, a.ClassId, a.Date });
+        
+        b.HasOne(a => a.Student)
+            .WithMany(s => s.AttendanceRecords)
+            .HasForeignKey(a => a.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}

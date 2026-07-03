@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using SchoolErp.Application.Settings;
 using SchoolErp.Application.Students;
 using SchoolErp.Application.Tenants;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IStudentService, StudentService>();
         services.AddScoped<ITenantService, TenantService>();
+        services.AddScoped<ISettingsService, SettingsService>();
         return services;
     }
 }

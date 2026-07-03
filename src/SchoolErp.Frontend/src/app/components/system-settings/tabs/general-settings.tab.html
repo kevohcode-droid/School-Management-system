@@ -1,0 +1,35 @@
+<h2>General Profile Settings</h2>
+<p class="tab-description">Basic school information displayed throughout the system.</p>
+
+<form (ngSubmit)="save()" class="settings-form">
+  <div class="form-group">
+    <label for="schoolName">School Name</label>
+    <input [(ngModel)]="schoolName" name="schoolName" id="schoolName" type="text" placeholder="Springfield High School">
+  </div>
+
+  <div class="form-group">
+    <label for="contactEmail">Contact Email</label>
+    <input [(ngModel)]="contactEmail" name="contactEmail" id="contactEmail" type="email" placeholder="admin@school.edu">
+  </div>
+
+  <div class="form-group">
+    <label for="phoneNumber">Phone Number</label>
+    <input [(ngModel)]="phoneNumber" name="phoneNumber" id="phoneNumber" type="tel" placeholder="+1 234 567 890">
+  </div>
+
+  <div class="form-group">
+    <label for="address">Address</label>
+    <textarea [(ngModel)]="address" name="address" id="address" rows="3" placeholder="123 Education St, City, Country"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="academicYearStart">Academic Year Start</label>
+    <input [(ngModel)]="academicYearStart" name="academicYearStart" id="academicYearStart" type="date">
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="isSaving" class="save-btn">
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </div>
+</form>
