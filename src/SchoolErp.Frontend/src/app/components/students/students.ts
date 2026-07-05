@@ -81,7 +81,7 @@ export class StudentsComponent implements OnInit {
   studentToDelete: Student | null = null;
 
   constructor(
-    private studentService: StudentService,
+    public studentService: StudentService,
     public authService: AuthService,
     private router: Router
   ) {}
@@ -136,12 +136,14 @@ export class StudentsComponent implements OnInit {
 
   submitAddStudent(): void {
     this.isLoading = true;
-    const request: CreateStudentRequest = {
+    const payload: CreateStudentRequest = {
       ...this.newStudent,
       gender: Number(this.newStudent.gender)
     };
 
-    this.studentService.createStudent(request).subscribe({
+    console.log(JSON.stringify(payload, null, 2));
+
+    this.studentService.createStudent(payload).subscribe({
       next: () => {
         this.closeAddModal();
         this.loadStudents();
@@ -241,5 +243,24 @@ export class StudentsComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  importStudents(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xlsx,.xls,.csv';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.studentService.importStudents(file).subscribe({
+          next: (result: any) => {
+            alert(`Imported ${result.imported || 0} students successfully`);
+            this.loadStudents();
+          },
+          error: (err: any) => alert('Import failed: ' + (err.message || err.error?.errors?.[0] || 'Unknown error'))
+        });
+      }
+    };
+    input.click();
   }
 }

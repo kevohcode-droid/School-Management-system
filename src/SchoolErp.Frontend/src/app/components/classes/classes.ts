@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { SectionsService } from '../../services/sections.service';
 import { SchoolClass, CreateClassRequest } from '../../models/class';
 
 @Component({
@@ -53,7 +54,8 @@ export class ClassesComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private router: Router
+    private router: Router,
+    public sectionsService: SectionsService
   ) {}
 
   ngOnInit(): void {
@@ -110,5 +112,27 @@ export class ClassesComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  importSections(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xlsx,.xls,.csv';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.sectionsService.importSections(file).subscribe({
+          next: (result: any) => {
+            alert(`Imported ${result.imported || 0} sections successfully`);
+          },
+          error: (err: any) => alert('Import failed: ' + (err.message || err.error?.errors?.[0] || 'Unknown error'))
+        });
+      }
+    };
+    input.click();
+  }
+
+  exportSections(): void {
+    this.sectionsService.exportSections();
   }
 }

@@ -3,15 +3,14 @@ using SchoolErp.Domain.Entities;
 
 namespace SchoolErp.Application.Common.Interfaces;
 
-/// <summary>
-/// Abstraction over the persistence context so the Application layer can run
-/// queries without depending on the concrete EF Core / Infrastructure types.
-/// </summary>
 public interface IApplicationDbContext
 {
     DbSet<Tenant> Tenants { get; }
     DbSet<Student> Students { get; }
     DbSet<Section> Sections { get; }
+    DbSet<StaffMember> StaffMembers { get; }
+    DbSet<Parent> Parents { get; }
+    DbSet<Announcement> Announcements { get; }
     DbSet<Course> Courses { get; }
     DbSet<Grade> Grades { get; }
     DbSet<FeeInvoice> FeeInvoices { get; }
@@ -20,6 +19,7 @@ public interface IApplicationDbContext
     DbSet<PaymentTransaction> PaymentTransactions { get; }
     DbSet<Discount> Discounts { get; }
     DbSet<TenantSetting> TenantSettings { get; }
+    DbSet<AttendanceRecord> AttendanceRecords { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -3,6 +3,8 @@ using SchoolErp.Domain.Enums;
 
 namespace SchoolErp.Application.Students.Dtos;
 
+// CreateStudentRequest moved to separate file: CreateStudentRequest.cs
+
 public record StudentDto
 {
     public Guid Id { get; init; }
@@ -15,25 +17,6 @@ public record StudentDto
     public DateTime EnrollmentDate { get; init; }
     public Guid? SectionId { get; init; }
     public string? SectionName { get; init; }
-}
-
-public record CreateStudentRequest
-{
-    [Required]
-    public string AdmissionNumber { get; init; } = string.Empty;
-
-    [Required]
-    public string FirstName { get; init; } = string.Empty;
-
-    [Required]
-    public string LastName { get; init; } = string.Empty;
-
-    [EmailAddress]
-    public string? Email { get; init; }
-
-    public DateOnly? DateOfBirth { get; init; }
-    public Gender Gender { get; init; } = Gender.Unspecified;
-    public Guid? SectionId { get; init; }
 }
 
 public record UpdateStudentRequest

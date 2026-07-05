@@ -1,90 +1,374 @@
-<div class="dashboard-container">
-  <header class="dashboard-header">
-    <h1>School ERP Dashboard</h1>
-    <div class="user-info" *ngIf="currentUser">
-      <span class="user-badge">{{ currentUser.userName }} ({{ currentUser.roles.join(', ') }})</span>
-      <button (click)="logout()" class="logout-btn">Sign Out</button>
-    </div>
-  </header>
+<div class="dashboard-layout">
 
-  <main class="dashboard-content">
-    <div class="welcome-section" *ngIf="currentUser">
-      <h2>Welcome Back, {{ currentUser.fullName || currentUser.userName }}</h2>
-      <p>Multi-tenant School Management System dashboard. Select a module to begin managing academic and administrative tasks.</p>
-    </div>
-
-    <!-- Quick stats widgets -->
-    <div class="stats-row" *ngIf="currentUser">
-      <div class="stat-widget">
-        <span class="stat-label">School</span>
-        <span class="stat-value">
-          {{ currentUser.tenantName || 'School Tenant' }}
-        </span>
-        <small class="stat-subtitle">{{ currentUser.tenantCode ? 'Code: ' + currentUser.tenantCode : currentUser.tenantId }}</small>
+  <!-- LEFT SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🏫</span>
+        <span class="brand-text">{{ currentUser?.tenantName || 'School ERP' }}</span>
       </div>
-      <div class="stat-widget">
-        <span class="stat-label">Assigned Role</span>
-        <span class="stat-value">{{ currentUser.roles.includes('SuperAdmin') ? 'Super Administrator' : currentUser.roles.join(', ') }}</span>
-      </div>
-      <div class="stat-widget">
-        <span class="stat-label">Status</span>
-        <span class="stat-value status-online">Online</span>
+      <div class="sidebar-academic-info" *ngIf="summary || currentUser">
+        <small *ngIf="summary?.academicYear">AY: {{ summary.academicYear }}</small>
+        <small *ngIf="summary?.currentTerm">Term: {{ summary.currentTerm }}</small>
+        <small *ngIf="summary?.currentSemester">Sem: {{ summary.currentSemester }}</small>
       </div>
     </div>
 
-    <div class="modules-grid">
-      <!-- Students -->
-      <div class="module-card" (click)="navigateToStudents()">
-        <div class="module-icon">👨‍🎓</div>
-        <h3>Students Management</h3>
-        <p>View, search, register, modify, and manage student enrollment and demographic records.</p>
-      </div>
-
-      <!-- Staff / Teachers -->
-      <div class="module-card" (click)="navigateToStaff()">
-        <div class="module-icon">👩‍🏫</div>
-        <h3>Staff &amp; Teachers</h3>
-        <p>Onboard staff members, assign roles, departments, and manage employment records.</p>
-      </div>
-
-      <!-- Classes & Subjects -->
-      <div class="module-card" (click)="navigateToClasses()">
-        <div class="module-icon">📚</div>
-        <h3>Classes &amp; Subjects</h3>
-        <p>Configure academic structure, define classes, assign teachers, and map subjects.</p>
-      </div>
-
-      <!-- Attendance -->
-      <div class="module-card" (click)="navigateToAttendance()">
-        <div class="module-icon">📋</div>
-        <h3>Attendance</h3>
-        <p>Mark daily attendance, track student presence, and generate attendance reports.</p>
-      </div>
-
-      <!-- Tenants card visible only to SuperAdmin -->
-      <div class="module-card" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
-        <div class="module-icon">🏫</div>
-        <h3>Tenants Management</h3>
-        <p>Register and coordinate distinct schools, configure multi-tenant routing, and review licenses.</p>
-      </div>
-
-      <div class="module-card disabled">
-        <div class="module-icon">💰</div>
-        <h3>Fees &amp; Invoices</h3>
-        <p>Tuition payments tracking, billing schedule, transaction history, and invoices. (Coming Soon)</p>
-      </div>
-
-      <div class="module-card disabled">
-        <div class="module-icon">📊</div>
-        <h3>Academic Grades</h3>
-        <p>Midterms, quizzes, grading metrics, performance analytics, and transcripts. (Coming Soon)</p>
-      </div>
-
-      <div class="module-card" (click)="navigateToSettings()">
-        <div class="module-icon">⚙️</div>
-        <h3>System Settings</h3>
-        <p>Profile configurations, security logs, access tokens, and layout themes.</p>
-      </div>
+    <div class="sidebar-section">
+      <button class="sidebar-btn active">
+        <span class="sidebar-icon">📊</span>
+        Dashboard
+      </button>
     </div>
-  </main>
+
+    <div class="sidebar-section">
+      <h4>ACADEMICS</h4>
+      <button class="sidebar-btn" (click)="navigateToStudents()">
+        <span class="sidebar-icon">👨‍🎓</span>
+        Students
+      </button>
+      <button class="sidebar-btn" (click)="navigateToStaff()">
+        <span class="sidebar-icon">👩‍🏫</span>
+        Staff
+      </button>
+      <button class="sidebar-btn" (click)="navigateToClasses()">
+        <span class="sidebar-icon">📚</span>
+        Classes
+      </button>
+      <button class="sidebar-btn" (click)="navigateToAttendance()">
+        <span class="sidebar-icon">📋</span>
+        Attendance
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>ADMINISTRATION</h4>
+      <button class="sidebar-btn" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
+        <span class="sidebar-icon">🏫</span>
+        Tenants
+      </button>
+      <button class="sidebar-btn" (click)="navigateToSettings()">
+        <span class="sidebar-icon">⚙️</span>
+        Settings
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn">
+        <span class="sidebar-icon">❓</span>
+        Help & Support
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="header-left">
+        <h1>School ERP Dashboard</h1>
+        <div class="date-info" *ngIf="currentUser">{{ currentDate | date:'EEEE, MMMM d, y' }}</div>
+      </div>
+
+      <div class="header-right" *ngIf="currentUser">
+        <div class="search-container">
+          <input type="text" placeholder="Search students, staff, classes..." class="search-input">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="notifications-wrapper" (click)="toggleNotifications()">
+          <span class="notification-bell">🔔</span>
+          <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+
+          <div class="notifications-dropdown" *ngIf="showNotifications">
+            <div class="notification-item" *ngFor="let note of notifications">
+              <span class="notification-dot"></span>
+              <span class="notification-text">{{ note }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="user-profile-wrapper" (click)="toggleProfile()">
+          <div class="user-avatar">{{ currentUser.fullName?.charAt(0) || currentUser.userName?.charAt(0) }}</div>
+          <span class="user-name">{{ currentUser.fullName || currentUser.userName }}</span>
+          <span class="dropdown-arrow">▼</span>
+
+          <div class="profile-dropdown" *ngIf="showProfile">
+            <button class="dropdown-item" (click)="viewProfile()">Profile</button>
+            <button class="dropdown-item" (click)="changePassword()">Change Password</button>
+            <button class="dropdown-item" (click)="openPreferences()">Preferences</button>
+            <button class="dropdown-item" (click)="openAuditLogs()">Audit Logs</button>
+            <hr class="dropdown-divider">
+            <button class="dropdown-item logout-item" (click)="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <!-- Welcome Section -->
+      <div class="welcome-section" *ngIf="currentUser">
+        <div class="welcome-text">
+          <h2>Welcome Back, {{ currentUser.fullName || currentUser.userName }}</h2>
+          <div class="welcome-details">
+            <span *ngIf="currentUser?.tenantName">
+              {{ currentUser.roles[0] || 'User' }} • {{ currentUser.tenantName }}
+              <span *ngIf="currentUser.tenantCode">(Code: {{ currentUser.tenantCode }})</span>
+            </span>
+          </div>
+          <div class="welcome-meta">
+            <span>Today: {{ currentDate | date:'EEEE, MMMM d, y' }}</span>
+            <span *ngIf="summary?.academicYear">Academic Year: {{ summary.academicYear }}</span>
+            <span *ngIf="summary?.currentTerm">Current Term: {{ summary.currentTerm }}</span>
+            <span *ngIf="summary?.currentSemester">Semester: {{ summary.currentSemester }}</span>
+          </div>
+        </div>
+        <div class="last-login" *ngIf="lastLogin">Last Login: {{ lastLogin }}</div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-row" *ngIf="currentUser">
+        <div class="stat-widget students">
+          <div class="stat-header">
+            <span class="stat-icon">👨‍🎓</span>
+            <span class="stat-label">Total Students</span>
+          </div>
+          <span class="stat-value">{{ summary ? summary.totalStudents : '0' }}</span>
+        </div>
+        <div class="stat-widget staff">
+          <div class="stat-header">
+            <span class="stat-icon">👩‍🏫</span>
+            <span class="stat-label">Total Staff</span>
+          </div>
+          <span class="stat-value">{{ summary ? summary.totalStaff : '0' }}</span>
+        </div>
+        <div class="stat-widget classes">
+          <div class="stat-header">
+            <span class="stat-icon">📚</span>
+            <span class="stat-label">Total Classes</span>
+          </div>
+          <span class="stat-value">{{ summary ? summary.totalClasses : '0' }}</span>
+        </div>
+        <div class="stat-widget attendance">
+          <div class="stat-header">
+            <span class="stat-icon">📅</span>
+            <span class="stat-label">Today's Attendance</span>
+          </div>
+          <span class="stat-value">{{ summary && summary.attendancePercentage !== null ? (summary.attendancePercentage | number:'1.1-1f') + '%' : 'N/A' }}</span>
+        </div>
+        <div class="stat-widget fees">
+          <div class="stat-header">
+            <span class="stat-icon">💰</span>
+            <span class="stat-label">Pending Fees Balance</span>
+          </div>
+          <span class="stat-value">{{ summary ? ('KSh ' + summary.pendingFees.toLocaleString()) : 'KSh 0' }}</span>
+        </div>
+        <div class="stat-widget subjects">
+          <div class="stat-header">
+            <span class="stat-icon">💵</span>
+            <span class="stat-label">Today's Collections</span>
+          </div>
+          <span class="stat-value">{{ summary ? ('KSh ' + summary.todayCollections.toLocaleString()) : 'KSh 0' }}</span>
+        </div>
+      </div>
+
+      <!-- Monthly Stats -->
+      <div class="stats-row" *ngIf="currentUser">
+        <div class="stat-widget students">
+          <div class="stat-header">
+            <span class="stat-icon">📈</span>
+            <span class="stat-label">New Admissions This Month</span>
+          </div>
+          <span class="stat-value">{{ summary ? summary.newAdmissions : '0' }}</span>
+        </div>
+        <div class="stat-widget staff">
+          <div class="stat-header">
+            <span class="stat-icon">👩‍🏫</span>
+            <span class="stat-label">New Staff Added</span>
+          </div>
+          <span class="stat-value">{{ summary ? summary.newStaff : '0' }}</span>
+        </div>
+        <div class="stat-widget classes">
+          <div class="stat-header">
+            <span class="stat-icon">💰</span>
+            <span class="stat-label">Monthly Collections</span>
+          </div>
+          <span class="stat-value">{{ summary ? ('KSh ' + summary.monthlyCollections.toLocaleString()) : 'KSh 0' }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-section">
+        <h3>Quick Actions</h3>
+        <div class="quick-actions-grid">
+          <button class="quick-action-btn" (click)="addStudent()">
+            <span class="action-icon">➕</span>
+            Add Student
+          </button>
+          <button class="quick-action-btn" (click)="addStaff()">
+            <span class="action-icon">➕</span>
+            Add Staff
+          </button>
+          <button class="quick-action-btn" (click)="createClass()">
+            <span class="action-icon">➕</span>
+            Create Class
+          </button>
+          <button class="quick-action-btn" (click)="markAttendance()">
+            <span class="action-icon">📋</span>
+            Mark Attendance
+          </button>
+          <button class="quick-action-btn" (click)="importExcel()">
+            <span class="action-icon">📥</span>
+            Import Excel
+          </button>
+          <button class="quick-action-btn" (click)="exportReport()">
+            <span class="action-icon">📤</span>
+            Export Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Grid: Charts + Activities -->
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <h4>Student Enrollment Trend</h4>
+          <div class="chart-placeholder">
+            <div class="bar-chart">
+              <div class="bar-item" *ngFor="let month of enrollmentData">
+                <div class="bar" [style.height.%]="month.percentage"></div>
+                <span class="bar-label">{{ month.month }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4>Attendance Overview</h4>
+          <div class="chart-placeholder">
+            <div class="pie-chart">
+              <div class="pie-segment present" style="width: 92%">Present</div>
+              <div class="pie-segment absent" style="width: 8%">Absent</div>
+            </div>
+            <div class="attendance-legend">
+              <span><span class="legend-dot present"></span> Present: 92%</span>
+              <span><span class="legend-dot absent"></span> Absent: 8%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card">
+          <h4>Recent Activities</h4>
+          <div class="activities-list">
+            <div class="activity-item" *ngFor="let activity of activities">
+              <span class="activity-status">✓</span>
+              <span class="activity-text">{{ activity }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <h4>System Status</h4>
+          <div class="status-list">
+            <div class="status-item" *ngFor="let status of systemStatus">
+              <span class="status-icon">✓</span>
+              <span class="status-text">{{ status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module Cards -->
+      <div class="modules-grid">
+        <div class="module-card" (click)="navigateToStudents()">
+          <div class="module-header">
+            <div class="module-icon">👨‍🎓</div>
+            <h3>Students Management</h3>
+          </div>
+          <p>View, search, register, modify, and manage student enrollment and demographic records.</p>
+          <div class="module-stats">
+            <span>Total: {{ summary ? summary.totalStudents : 0 }}</span>
+            <span>New this month: {{ summary ? summary.newAdmissions : 0 }}</span>
+          </div>
+          <div class="module-actions">
+            <button class="module-action-btn primary" (click)="$event.stopPropagation(); navigateToStudents()">View</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); addStudent()">Add</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); importExcel()">Import</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); exportReport()">Export</button>
+          </div>
+        </div>
+
+        <div class="module-card" (click)="navigateToStaff()">
+          <div class="module-header">
+            <div class="module-icon">👩‍🏫</div>
+            <h3>Staff &amp; Teachers</h3>
+          </div>
+          <p>Onboard staff members, assign roles, departments, and manage employment records.</p>
+          <div class="module-stats">
+            <span>Total: {{ summary ? summary.totalStaff : 0 }}</span>
+            <span>New this month: {{ summary ? summary.newStaff : 0 }}</span>
+          </div>
+          <div class="module-actions">
+            <button class="module-action-btn primary" (click)="$event.stopPropagation(); navigateToStaff()">View</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); addStaff()">Add</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); importStaffExcel()">Import</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); exportStaffReport()">Export</button>
+          </div>
+        </div>
+
+        <div class="module-card" (click)="navigateToClasses()">
+          <div class="module-header">
+            <div class="module-icon">📚</div>
+            <h3>Classes &amp; Subjects</h3>
+          </div>
+          <p>Configure academic structure, define classes, assign teachers, and map subjects.</p>
+          <div class="module-stats">
+            <span>Classes: {{ summary ? summary.totalClasses : 0 }}</span>
+          </div>
+          <div class="module-actions">
+            <button class="module-action-btn primary" (click)="$event.stopPropagation(); navigateToClasses()">View</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); createClass()">Add</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); importClassExcel()">Import</button>
+            <button class="module-action-btn" (click)="$event.stopPropagation(); exportClassReport()">Export</button>
+          </div>
+        </div>
+
+        <div class="module-card" (click)="navigateToAttendance()">
+          <div class="module-header">
+            <div class="module-icon">📋</div>
+            <h3>Attendance</h3>
+          </div>
+          <p>Mark daily attendance, track student presence, and generate attendance reports.</p>
+          <div class="module-stats">
+            <span>Today: {{ summary && summary.attendancePercentage !== null ? (summary.attendancePercentage | number:'1.0-0f') + '%' : 'N/A' }}</span>
+          </div>
+          <div class="module-actions">
+            <button class="module-action-btn primary">View</button>
+            <button class="module-action-btn">Mark</button>
+          </div>
+        </div>
+
+        <div class="module-card" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
+          <div class="module-header">
+            <div class="module-icon">🏫</div>
+            <h3>Tenants Management</h3>
+          </div>
+          <p>Register and coordinate distinct schools, configure multi-tenant routing, and review licenses.</p>
+          <div class="module-actions">
+            <button class="module-action-btn primary">View</button>
+            <button class="module-action-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="module-card" (click)="navigateToSettings()">
+          <div class="module-header">
+            <div class="module-icon">⚙️</div>
+            <h3>System Settings</h3>
+          </div>
+          <p>Profile configurations, security logs, access tokens, and layout themes.</p>
+          <div class="module-actions">
+            <button class="module-action-btn primary">View</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </div>

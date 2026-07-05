@@ -7,9 +7,14 @@
         <p class="page-subtitle">Onboard teachers, administrators, and support staff</p>
       </div>
     </div>
-    <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
-      + Add Staff Member
-    </button>
+    <div class="header-actions" *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])">
+      <button (click)="downloadTemplate()" class="template-btn">Template</button>
+      <button (click)="exportStaff()" class="export-btn">Export Excel</button>
+      <button (click)="importStaff()" class="import-btn">Import Excel</button>
+      <button (click)="openAddModal()" class="add-btn">
+        + Add Staff Member
+      </button>
+    </div>
   </header>
 
   <main class="page-content">

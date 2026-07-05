@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { DashboardService } from '../../services/dashboard.service';
 import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser } from '../../models/auth';
+import { DashboardPublic } from '../../models/dashboard';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +14,7 @@ import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser } from '../../
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   isRegisterMode: boolean = false;
   errorMessage: string = '';
   isLoading: boolean = false;
@@ -22,9 +24,10 @@ export class LoginComponent {
 
   schoolName = 'Maina Group of Schools ERP';
   schoolMotto = 'Empowering Education Through Technology';
-  currentAcademicYear = this.getAcademicYear();
-  currentTerm = 'Term 2';
   todayDate = this.getFormattedDate();
+
+  publicData: DashboardPublic | null = null;
+  isLoadingPublicData = true;
 
   roleOptions = [
     { key: 'Admin', label: 'Admin', icon: '🛡️' },
@@ -40,9 +43,14 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private dashboardService: DashboardService
   ) {
     this.initForms();
+  }
+
+  ngOnInit(): void {
+    this.loadPublicData();
   }
 
   private initForms(): void {
@@ -73,6 +81,21 @@ export class LoginComponent {
     }
   }
 
+  private loadPublicData(): void {
+    this.isLoadingPublicData = true;
+    this.dashboardService.getPublicSummary().subscribe({
+      next: (data) => {
+        this.publicData = data;
+        this.isLoadingPublicData = false;
+      },
+      error: (err) => {
+        console.error('Failed to load public data', err);
+        this.publicData = null;
+        this.isLoadingPublicData = false;
+      }
+    });
+  }
+
   toggleMode(): void {
     this.isRegisterMode = !this.isRegisterMode;
     this.errorMessage = '';
@@ -93,13 +116,6 @@ export class LoginComponent {
 
   selectLoginRole(role: string): void {
     this.selectedRole = role;
-  }
-
-  private getAcademicYear(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    return month >= 8 ? `${year} / ${year + 1}` : `${year - 1} / ${year}`;
   }
 
   private getFormattedDate(): string {
@@ -131,7 +147,6 @@ export class LoginComponent {
   }
 
   onSocialLogin(provider: string): void {
-    // Social login temporarily disabled
     alert("Social login is currently disabled. Please use email/password login.");
   }
 

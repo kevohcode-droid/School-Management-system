@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { StaffService } from '../../services/staff.service';
 import { CreateStaffRequest, Staff } from '../../models/staff';
 
 @Component({
@@ -45,7 +46,8 @@ export class StaffComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private router: Router
+    private router: Router,
+    public staffService: StaffService
   ) {}
 
   ngOnInit(): void {
@@ -92,5 +94,31 @@ export class StaffComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  importStaff(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xlsx,.xls,.csv';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.staffService.importStaff(file).subscribe({
+          next: (result: any) => {
+            alert(`Imported ${result.imported || 0} staff successfully`);
+          },
+          error: (err: any) => alert('Import failed: ' + (err.message || err.error?.errors?.[0] || 'Unknown error'))
+        });
+      }
+    };
+    input.click();
+  }
+
+  exportStaff(): void {
+    this.staffService.exportStaff();
+  }
+
+  downloadTemplate(): void {
+    this.staffService.downloadTemplate();
   }
 }

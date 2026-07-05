@@ -32,7 +32,7 @@ public class StudentsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
-    public async Task<IActionResult> Create(CreateStudentRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] CreateStudentRequest request, CancellationToken ct)
     {
         var result = await _students.CreateAsync(request, ct);
         return result.Succeeded
@@ -42,7 +42,7 @@ public class StudentsController : ControllerBase
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
-    public async Task<IActionResult> Update(Guid id, UpdateStudentRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStudentRequest request, CancellationToken ct)
     {
         var result = await _students.UpdateAsync(id, request, ct);
         return result.Succeeded ? Ok(result.Value) : BadRequest(new { errors = result.Errors });

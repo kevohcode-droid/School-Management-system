@@ -34,4 +34,31 @@ export class ApiService {
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders() });
   }
+
+  upload<T>(endpoint: string, formData: FormData): Observable<T> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, formData, { headers });
+  }
+
+  download(endpoint: string): void {
+    const token = localStorage.getItem('token');
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    this.http.get(`${this.baseUrl}${endpoint}`, { 
+      headers, 
+      responseType: 'blob' as const 
+    }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = endpoint.split('/').pop() || 'download';
+        link.click();
+        window.URL.revokeObjectURL(url);
+      }
+    });
+  }
 }

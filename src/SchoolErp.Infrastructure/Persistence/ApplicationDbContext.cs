@@ -23,6 +23,9 @@ public class ApplicationDbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Student> Students => Set<Student>();
     public DbSet<Section> Sections => Set<Section>();
+    public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
+    public DbSet<Parent> Parents => Set<Parent>();
+    public DbSet<Announcement> Announcements => Set<Announcement>();
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<FeeInvoice> FeeInvoices => Set<FeeInvoice>();

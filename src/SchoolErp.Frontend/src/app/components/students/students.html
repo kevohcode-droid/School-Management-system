@@ -2,11 +2,18 @@
   <header class="students-header">
     <div class="header-left">
       <button (click)="goBack()" class="back-btn">← Dashboard</button>
-      <h1>Students Directory</h1>
+      <div>
+        <h1>Students Directory</h1>
+      </div>
     </div>
-    <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
-      + Register Student
-    </button>
+    <div class="header-actions">
+      <button (click)="studentService.downloadTemplate()" class="template-btn">Template</button>
+      <button (click)="studentService.exportStudents()" class="export-btn">Export Excel</button>
+      <button (click)="importStudents()" class="import-btn">Import Excel</button>
+      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
+        + Register Student
+      </button>
+    </div>
   </header>
 
   <main class="students-content">

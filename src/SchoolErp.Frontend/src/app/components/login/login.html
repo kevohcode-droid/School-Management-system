@@ -20,19 +20,19 @@
 
       <div class="hero-stats">
         <div class="stat-card">
-          <span class="stat-value">1,245</span>
+          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalStudents ?? 0) | number }}</span>
           <span class="stat-label">Students</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">56</span>
+          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalStaff ?? 0) | number }}</span>
           <span class="stat-label">Teachers</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">1,102</span>
+          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalParents ?? 0) | number }}</span>
           <span class="stat-label">Parents</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">42</span>
+          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalClasses ?? 0) | number }}</span>
           <span class="stat-label">Classes</span>
         </div>
       </div>
@@ -40,11 +40,11 @@
       <div class="summary-grid">
         <div class="summary-card">
           <span class="summary-title">Academic Year</span>
-          <strong>{{ currentAcademicYear }}</strong>
+          <strong>{{ publicData?.academicYear || 'Not Configured' }}</strong>
         </div>
         <div class="summary-card">
           <span class="summary-title">Current Term</span>
-          <strong>{{ currentTerm }}</strong>
+          <strong>{{ publicData?.currentTerm || 'Not Configured' }}</strong>
         </div>
         <div class="summary-card">
           <span class="summary-title">Today's Date</span>
@@ -56,11 +56,14 @@
         <div class="announcements-header">
           <h3>Announcements</h3>
         </div>
-        <ul>
-          <li>Midterm exams begin on 20th July, 2026</li>
-          <li>Fee payment deadline is 15th July, 2026</li>
-          <li>Parent meeting on 25th July, 2026</li>
+        <ul *ngIf="publicData?.announcements && publicData.announcements.length > 0; else noAnnouncements">
+          <li *ngFor="let announcement of publicData.announcements">{{ announcement }}</li>
         </ul>
+        <ng-template #noAnnouncements>
+          <ul>
+            <li>No announcements available</li>
+          </ul>
+        </ng-template>
       </div>
     </aside>
 

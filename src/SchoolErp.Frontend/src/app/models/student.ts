@@ -25,17 +25,16 @@ export interface Section {
 
 export interface CreateStudentRequest {
   admissionNumber: string;
-  admissionDate: string | null;
   firstName: string;
-  middleName?: string | null;
   lastName: string;
   email: string | null;
-  gender: number;
   dateOfBirth: string | null;
+  gender: number;
+  sectionId?: string | null;
+  admissionDate?: string | null;
+  middleName?: string | null;
   nationality?: string | null;
   academicYear?: string | null;
-  sectionId?: string | null;
-  // Guardian / Parent details
   guardianName?: string | null;
   guardianRelationship?: string | null;
   guardianPhone?: string | null;
