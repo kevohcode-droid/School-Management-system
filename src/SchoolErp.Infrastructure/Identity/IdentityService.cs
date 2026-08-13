@@ -17,19 +17,66 @@ public class IdentityService : IIdentityService
     private readonly IJwtTokenGenerator _tokenGenerator;
     private readonly IEmailService _emailService;
     private readonly IAuditService _auditService;
+    private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<ApplicationUser> _passwordHasher;
+    private readonly string _frontendUrl;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext db,
         IJwtTokenGenerator tokenGenerator,
         IEmailService emailService,
-        IAuditService auditService)
+        IAuditService auditService,
+        Microsoft.AspNetCore.Identity.IPasswordHasher<ApplicationUser> passwordHasher,
+        Microsoft.Extensions.Configuration.IConfiguration configuration)
     {
         _userManager = userManager;
         _db = db;
         _tokenGenerator = tokenGenerator;
         _emailService = emailService;
         _auditService = auditService;
+        _passwordHasher = passwordHasher;
+        // Read frontend URL from configuration; fallback to localhost:4200
+        _frontendUrl = configuration["FrontendUrl"] ?? "http://localhost:4200";
+    }
+
+    // Read-only helper that projects user fields we need without selecting
+    // any potentially-missing columns that would cause SQL errors on older schemas.
+    private async Task<ApplicationUser?> FindUserByEmailAsync(string email, CancellationToken ct = default)
+    {
+        var u = await _db.Users.AsNoTracking()
+            .Where(x => x.Email == email)
+            .Select(x => new
+            {
+                x.Id,
+                x.UserName,
+                x.Email,
+                x.EmailConfirmed,
+                x.PasswordHash,
+                x.TenantId,
+                x.SecurityStamp,
+                x.ConcurrencyStamp,
+                x.FirstName,
+                x.LastName,
+                x.LastLoginAt
+            })
+            .SingleOrDefaultAsync(ct);
+
+        if (u is null) return null;
+
+        return new ApplicationUser
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            Email = u.Email,
+            EmailConfirmed = u.EmailConfirmed,
+            PasswordHash = u.PasswordHash,
+            TenantId = u.TenantId,
+            SecurityStamp = u.SecurityStamp,
+            ConcurrencyStamp = u.ConcurrencyStamp,
+            FirstName = u.FirstName,
+            LastName = u.LastName,
+            LastLoginAt = u.LastLoginAt
+        };
     }
 
     public async Task<AuthResult> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
@@ -60,8 +107,8 @@ public class IdentityService : IIdentityService
             return AuthResult.Failure($"Tenant '{request.TenantCode}' is inactive.");
         }
 
-        var existing = await _userManager.FindByEmailAsync(request.Email);
-        if (existing is not null)
+        var existing = await _db.Users.AsNoTracking().AnyAsync(u => u.Email == request.Email, ct);
+        if (existing)
             return AuthResult.Failure("A user with this email already exists.");
 
         var user = new ApplicationUser
@@ -98,6 +145,9 @@ public class IdentityService : IIdentityService
         if (!await _userManager.CheckPasswordAsync(user, request.Password))
             return AuthResult.Failure("Invalid credentials.");
 
+        user.LastLoginAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
         var roles = await _userManager.GetRolesAsync(user);
         await _auditService.LogAsync(user.Id, user.Email!, "LOGIN", $"{user.Email} logged in", ct: ct);
         return AuthResult.Success(BuildResponse(user, roles));
@@ -105,13 +155,13 @@ public class IdentityService : IIdentityService
 
     public async Task ForgotPasswordAsync(string email, CancellationToken ct = default)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await FindUserByEmailAsync(email, ct);
         if (user is null)
             return;
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var encodedToken = WebUtility.UrlEncode(token);
-        var resetLink = $"http://localhost:4200/reset-password?token={encodedToken}&email={user.Email}";
+        var resetLink = $"{_frontendUrl.TrimEnd('/')}/reset-password?token={encodedToken}&email={WebUtility.UrlEncode(user.Email)}";
 
         var body = $@"
             <h2>Reset your password</h2>
@@ -125,7 +175,7 @@ public class IdentityService : IIdentityService
 
     public async Task<AuthResult> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
+        var user = await FindUserByEmailAsync(request.Email, ct);
         if (user is null)
             return AuthResult.Failure("Invalid password reset request.");
 
@@ -134,6 +184,23 @@ public class IdentityService : IIdentityService
             return AuthResult.Failure(result.Errors.Select(e => e.Description).ToArray());
 
         await _auditService.LogAsync(user.Id, user.Email!, "RESET_PASSWORD", $"{user.Email} reset their password", ct: ct);
+        return AuthResult.Success(BuildResponse(user, await _userManager.GetRolesAsync(user)));
+    }
+
+    public async Task<AuthResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            return AuthResult.Failure("User not found.");
+
+        if (!await _userManager.CheckPasswordAsync(user, currentPassword))
+            return AuthResult.Failure("Current password is incorrect.");
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+            return AuthResult.Failure(result.Errors.Select(e => e.Description).ToArray());
+
+        await _auditService.LogAsync(user.Id, user.Email!, "CHANGE_PASSWORD", $"{user.Email} changed their password", ct: ct);
         return AuthResult.Success(BuildResponse(user, await _userManager.GetRolesAsync(user)));
     }
 
@@ -155,7 +222,7 @@ public class IdentityService : IIdentityService
         }
 
         var email = payload.Email;
-        var existing = await _userManager.FindByEmailAsync(email);
+        var existing = await FindUserByEmailAsync(email, ct);
 
         if (existing is not null)
         {

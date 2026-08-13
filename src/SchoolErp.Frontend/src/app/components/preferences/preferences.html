@@ -1,0 +1,144 @@
+<div class="profile-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🏫</span>
+        <span class="brand-text">School ERP</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="sidebar-btn" (click)="goBack()">
+        <span class="sidebar-icon">←</span>
+        Back to Dashboard
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" (click)="logout()">
+        <span class="sidebar-icon">🚪</span>
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <div class="profile-container">
+    <header class="profile-header">
+      <h1>Preferences</h1>
+      <p class="profile-subtitle">Customize your experience</p>
+    </header>
+
+    <main class="profile-content">
+      <div class="profile-card">
+        <div class="profile-avatar-section">
+          <div class="profile-avatar-large">⚙️</div>
+          <h2 class="profile-name">Settings</h2>
+        </div>
+
+        <div class="profile-details">
+          <form (ngSubmit)="savePreferences()" class="preferences-form">
+            <!-- Appearance Section -->
+            <div class="preferences-section">
+              <h3>Appearance</h3>
+              <div class="form-group">
+                <label>Theme</label>
+                <div class="radio-group">
+                  <label *ngFor="let option of appearanceOptions" class="radio-label">
+                    <input type="radio" name="appearance" [value]="option.value" [(ngModel)]="form.appearance">
+                    <span>{{ option.label }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Language Section -->
+            <div class="preferences-section">
+              <h3>Language</h3>
+              <div class="form-group">
+                <label for="language">Language</label>
+                <select id="language" [(ngModel)]="form.language" class="form-control">
+                  <option *ngFor="let option of languageOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Timezone Section -->
+            <div class="preferences-section">
+              <h3>Timezone</h3>
+              <div class="form-group">
+                <label for="timezone">Default Timezone</label>
+                <select id="timezone" [(ngModel)]="form.timezone" class="form-control">
+                  <option *ngFor="let option of timezoneOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="preferences-section">
+              <h3>Notifications</h3>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="form.emailNotifications">
+                  <span>Email Notifications</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="form.smsNotifications">
+                  <span>SMS Notifications</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="form.pushNotifications">
+                  <span>Push Notifications</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="preferences-section">
+              <h3>Dashboard</h3>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="form.compactMode">
+                  <span>Compact Mode</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="form.showWelcomeBanner">
+                  <span>Show Welcome Banner</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label for="defaultLandingPage">Default Landing Page</label>
+                <select id="defaultLandingPage" [(ngModel)]="form.defaultLandingPage" class="form-control">
+                  <option value="/dashboard">Dashboard</option>
+                  <option value="/students">Students</option>
+                  <option value="/staff">Staff</option>
+                  <option value="/analytics">Analytics</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="preferences-section">
+              <h3>Security</h3>
+              <div class="form-group">
+                <label for="autoLogoutMinutes">Auto Logout</label>
+                <select id="autoLogoutMinutes" [(ngModel)]="form.autoLogoutMinutes" class="form-control">
+                  <option *ngFor="let option of autoLogoutOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+            <div class="form-success" *ngIf="successMessage">{{ successMessage }}</div>
+
+            <div class="profile-actions">
+              <button type="submit" class="action-btn primary" [disabled]="isSaving">
+                <span *ngIf="isSaving">⏳</span>
+                <span *ngIf="!isSaving">Save Preferences</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

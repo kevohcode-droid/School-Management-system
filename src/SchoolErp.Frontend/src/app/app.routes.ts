@@ -1,22 +1,42 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login';
 import { DashboardComponent } from './components/dashboard/dashboard';
+import { AnalyticsComponent } from './components/analytics/analytics';
 import { StudentsComponent } from './components/students/students';
 import { TenantsComponent } from './components/tenants/tenants';
 import { StaffComponent } from './components/staff/staff';
 import { ClassesComponent } from './components/classes/classes';
 import { DailyAttendanceComponent } from './components/attendance/daily-attendance';
 import { SystemSettingsComponent } from './components/system-settings/system-settings.component';
+import { ProfileComponent } from './components/profile/profile';
+import { DatabaseCenterComponent } from './components/database-center/database-center';
+import { ImportCenterComponent } from './components/import-center/import-center';
+import { ExportCenterComponent } from './components/export-center/export-center';
+import { AuditLogsComponent } from './components/audit-logs/audit-logs';
+import { NotificationsComponent } from './components/notifications/notifications';
+import { ChangePasswordComponent } from './components/change-password/change-password';
+import { PreferencesComponent } from './components/preferences/preferences';
+import { ResetPasswordComponent } from './components/reset-password/reset-password';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'analytics', component: AnalyticsComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'change-password', component: ChangePasswordComponent },
+  { path: 'preferences', component: PreferencesComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'students', component: StudentsComponent },
   { path: 'tenants', component: TenantsComponent },
   { path: 'staff', component: StaffComponent },
   { path: 'classes', component: ClassesComponent },
   { path: 'attendance', component: DailyAttendanceComponent },
   { path: 'settings', component: SystemSettingsComponent },
+  { path: 'database-center', component: DatabaseCenterComponent },
+  { path: 'import-center', component: ImportCenterComponent },
+  { path: 'export-center', component: ExportCenterComponent },
+  { path: 'audit-logs', component: AuditLogsComponent },
+  { path: 'notifications', component: NotificationsComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
 ];

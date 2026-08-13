@@ -20,6 +20,8 @@ public interface IApplicationDbContext
     DbSet<Discount> Discounts { get; }
     DbSet<TenantSetting> TenantSettings { get; }
     DbSet<AttendanceRecord> AttendanceRecords { get; }
+    DbSet<AuditLog> AuditLogs { get; }
+    DbSet<UserPreferences> UserPreferences { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

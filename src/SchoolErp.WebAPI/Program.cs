@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:63505")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -94,6 +94,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await DbSeeder.SeedAsync(app.Services);
+try
+{
+    await DbSeeder.SeedAsync(app.Services);
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Database seeding failed; continuing without seeding.");
+}
 
 app.Run();

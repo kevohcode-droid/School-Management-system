@@ -1,0 +1,170 @@
+<div class="dashboard-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🏫</span>
+        <span class="brand-text">{{ currentUser?.tenantName || 'School ERP' }}</span>
+      </div>
+      <div class="sidebar-academic-info" *ngIf="summary || currentUser">
+        <small *ngIf="summary?.academicYear">AY: {{ summary.academicYear }}</small>
+        <small *ngIf="summary?.currentTerm">Term: {{ summary.currentTerm }}</small>
+        <small *ngIf="summary?.currentSemester">Sem: {{ summary.currentSemester }}</small>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <button class="sidebar-item active" (click)="navigateTo('/dashboard')">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">Dashboard</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/analytics')">
+        <span class="sidebar-icon">📈</span>
+        <span class="sidebar-label">Analytics</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/students')">
+        <span class="sidebar-icon">👨‍🎓</span>
+        <span class="sidebar-label">Students</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/staff')">
+        <span class="sidebar-icon">👩‍🏫</span>
+        <span class="sidebar-label">Staff</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/attendance')">
+        <span class="sidebar-icon">📋</span>
+        <span class="sidebar-label">Attendance</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/finance')">
+        <span class="sidebar-icon">💰</span>
+        <span class="sidebar-label">Finance</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/reports')">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">Reports</span>
+      </button>
+
+      <button class="sidebar-item" (click)="navigateTo('/database-center')">
+        <span class="sidebar-icon">🗄️</span>
+        <span class="sidebar-label">Database</span>
+      </button>
+
+<button class="sidebar-item" (click)="navigateTo('/settings')">
+        <span class="sidebar-icon">⚙️</span>
+        <span class="sidebar-label">Settings</span>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-item" (click)="logout()">
+        <span class="sidebar-icon">🚪</span>
+        <span class="sidebar-label">Logout</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="header-left">
+        <h1>School ERP Dashboard</h1>
+        <div class="date-info" *ngIf="currentUser">{{ currentDate | date:'EEEE, MMMM d, y' }}</div>
+      </div>
+
+      <div class="header-right" *ngIf="currentUser">
+        <div class="notifications-wrapper" (click)="toggleNotifications()">
+          <span class="notification-bell">🔔</span>
+          <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+        </div>
+
+        <div class="user-profile-wrapper" (click)="toggleNotifications()">
+          <div class="user-avatar">{{ currentUser.fullName?.charAt(0) || currentUser.userName?.charAt(0) }}</div>
+          <span class="user-name">{{ currentUser.fullName || currentUser.userName }}</span>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <div class="welcome-section" *ngIf="currentUser">
+        <div class="welcome-text">
+          <h2>Welcome Back, {{ currentUser.fullName || currentUser.userName }}</h2>
+          <div class="welcome-details">
+            <span *ngIf="currentUser?.tenantName">
+              {{ currentUser.roles[0] || 'User' }} • {{ currentUser.tenantName }}
+            </span>
+          </div>
+          <div class="welcome-meta">
+            <span>Today: {{ currentDate | date:'EEEE, MMMM d, y' }}</span>
+            <span *ngIf="summary?.academicYear">Academic Year: {{ summary.academicYear }}</span>
+            <span *ngIf="summary?.currentTerm">Current Term: {{ summary.currentTerm }}</span>
+          </div>
+        </div>
+        <div class="last-login">Last Login: {{ lastLogin }}</div>
+      </div>
+
+      <div class="quick-actions-bar">
+        <h3>Quick Actions</h3>
+        <div class="quick-actions-grid">
+          <button class="quick-action-btn" (click)="addStudent()">
+            <span class="action-icon">➕</span>
+            <span>Add Student</span>
+          </button>
+          <button class="quick-action-btn" (click)="addStaff()">
+            <span class="action-icon">➕</span>
+            <span>Add Staff</span>
+          </button>
+          <button class="quick-action-btn" (click)="createClass()">
+            <span class="action-icon">➕</span>
+            <span>Create Class</span>
+          </button>
+          <button class="quick-action-btn" (click)="markAttendance()">
+            <span class="action-icon">📋</span>
+            <span>Take Attendance</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" *ngFor="let card of metricCards; trackBy: trackByTitle">
+          <div class="metric-header">
+            <span class="metric-icon" [style.color]="card.color">{{ card.icon }}</span>
+            <h4 class="metric-title">{{ card.title }}</h4>
+            <span class="metric-trend" [class.positive]="card.trend && card.trend > 0" [class.negative]="card.trend && card.trend < 0">
+              {{ card.trend != null ? (card.trend >= 0 ? '+' : '') + card.trend + '%' : '-' }}
+            </span>
+          </div>
+          <div class="metric-value" [style.color]="card.color">{{ card.value }}</div>
+          <div class="metric-footer">
+            <span class="metric-prev">vs last month: {{ card.previousValue }}</span>
+            <button class="metric-action" (click)="navigateToMetric(card)" *ngIf="card.action">Go</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="activities-section">
+        <h3>Recent Activities</h3>
+        <div class="activities-list">
+          <div class="activity-item" *ngFor="let activity of activities">
+            <span class="activity-icon">📋</span>
+            <span class="activity-text">{{ activity }}</span>
+            <span class="activity-time">2h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="system-status">
+        <h3>System Health</h3>
+        <div class="status-grid">
+          <div class="status-item" *ngFor="let status of systemStatus">
+            <span class="status-icon">✓</span>
+            <span class="status-text">{{ status }}</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

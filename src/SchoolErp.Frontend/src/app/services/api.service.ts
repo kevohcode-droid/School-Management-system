@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -19,8 +19,19 @@ export class ApiService {
     return headers;
   }
 
-  get<T>(endpoint: string): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders() });
+  private buildParams(params: any = {}): HttpParams {
+    let httpParams = new HttpParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        httpParams = httpParams.set(key, params[key].toString());
+      }
+    });
+    return httpParams;
+  }
+
+  get<T>(endpoint: string, params: any = {}): Observable<T> {
+    const httpParams = this.buildParams(params);
+    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders(), params: httpParams });
   }
 
   post<T>(endpoint: string, body: any): Observable<T> {

@@ -1,0 +1,89 @@
+<div class="notifications-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <h2>Notifications</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="quick-stats">
+        <div class="stat-item">
+          <span class="stat-label">Unread</span>
+          <span class="stat-value">{{ notifications.filter(n => !n.isRead).length }}</span>
+        </div>
+        <button class="mark-all-btn" (click)="markAllAsRead()">
+          <span>✓</span> Mark All Read
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="content-header">
+      <h1>Notification Center</h1>
+      <p class="header-subtitle">Stay updated with system activities</p>
+    </div>
+
+    <div class="content-body">
+      <div class="filters">
+        <div class="search-box">
+          <input type="text" placeholder="Search notifications..." 
+                 [(ngModel)]="filterType" (ngModelChange)="filterNotifications()">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="filter-row">
+          <select (change)="onFilterTypeChange($event)">
+            <option value="">All Types</option>
+            <option value="success">Success</option>
+            <option value="info">Info</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+          </select>
+
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="showUnreadOnly" (change)="filterNotifications()">
+            <span>Unread Only</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="notifications-container">
+        <div class="notification-item" 
+             *ngFor="let notification of filteredNotifications"
+             [class.unread]="!notification.isRead"
+             (click)="navigateTo(notification)">
+          <div class="notification-header">
+            <span class="notification-icon" [class]="getTypeBadgeClass(notification.type)">
+              {{ getNotificationIcon(notification.type) }}
+            </span>
+            <div class="notification-content">
+              <h4 class="notification-title">{{ notification.title }}</h4>
+              <p class="notification-message">{{ notification.message }}</p>
+              <span class="notification-date">{{ notification.date | date:'short' }}</span>
+            </div>
+            <div class="notification-actions" (click)="$event.stopPropagation()">
+              <button class="action-btn" (click)="markAsRead(notification)" *ngIf="!notification.isRead">
+                ✓
+              </button>
+              <button class="action-btn delete-btn" (click)="deleteNotification(notification.id)">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-notifications" *ngIf="!isLoading && filteredNotifications.length === 0">
+          <div class="empty-icon">🔔</div>
+          <h3>No notifications found</h3>
+          <p>Try adjusting your filters or check back later.</p>
+        </div>
+
+        <div class="loading" *ngIf="isLoading">
+          <div class="spinner"></div>
+          <span>Loading notifications...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

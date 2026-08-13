@@ -131,22 +131,26 @@ export class DashboardComponent implements OnInit {
 
   viewProfile(): void {
     this.showProfile = false;
-    alert('Profile page coming soon.');
+    this.router.navigate(['/profile']);
   }
 
   changePassword(): void {
     this.showProfile = false;
-    this.router.navigate(['/settings']);
+    this.router.navigate(['/change-password']);
   }
 
   openPreferences(): void {
     this.showProfile = false;
-    this.router.navigate(['/settings']);
+    this.router.navigate(['/preferences']);
   }
 
   openAuditLogs(): void {
     this.showProfile = false;
-    alert('Audit Logs page coming soon.');
+    if (!this.authService.hasAnyRole(['Admin', 'SuperAdmin'])) {
+      alert('Access denied. Administrator privileges required.');
+      return;
+    }
+    this.router.navigate(['/audit-logs']);
   }
 
   navigateToStudents(): void {

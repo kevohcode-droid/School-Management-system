@@ -1,0 +1,110 @@
+<div class="export-center-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <h2>Export Center</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>Entities</h4>
+      <div class="entity-list">
+        <div class="entity-item" *ngFor="let entity of exportableEntities"
+             [class.active]="selectedEntity?.name === entity.name"
+             (click)="selectEntity(entity)">
+          <span class="entity-icon">{{ entity.icon }}</span>
+          <span class="entity-name">{{ entity.name }}</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="content-header" *ngIf="selectedEntity">
+      <div class="header-info">
+        <h1>Export {{ selectedEntity.name }}</h1>
+        <p class="entity-description">{{ selectedEntity.description }}</p>
+      </div>
+    </div>
+
+    <div class="content-body" *ngIf="selectedEntity">
+      <div class="export-form">
+        <div class="form-group">
+          <label class="form-label">Export Format</label>
+          <div class="format-options">
+            <button class="format-btn" 
+                    [class.active]="exportFormat === 'csv'"
+                    (click)="exportFormat = 'csv'">
+              CSV
+            </button>
+            <button class="format-btn" 
+                    [class.active]="exportFormat === 'excel'"
+                    (click)="exportFormat = 'excel'">
+              Excel
+            </button>
+            <button class="format-btn" 
+                    [class.active]="exportFormat === 'json'"
+                    (click)="exportFormat = 'json'">
+              JSON
+            </button>
+            <button class="format-btn" 
+                    [class.active]="exportFormat === 'pdf'"
+                    (click)="exportFormat = 'pdf'">
+              PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="filterEnabled">
+            <span>Filter Data</span>
+          </label>
+        </div>
+
+        <div class="form-group" *ngIf="filterEnabled">
+          <input type="text" placeholder="Enter search term..." 
+                 [(ngModel)]="filterValue" class="filter-input">
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="selectedRows">
+            <span>Export Selected Rows Only</span>
+          </label>
+        </div>
+
+        <div class="export-progress" *ngIf="isExporting">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="exportProgress"></div>
+          </div>
+          <span class="progress-text">Exporting... {{ exportProgress }}%</span>
+        </div>
+
+        <div class="export-actions">
+          <button class="btn-secondary" (click)="closeExport()">Cancel</button>
+          <button class="btn-primary" 
+                  (click)="executeExport()"
+                  [disabled]="isExporting">
+            Export Now
+          </button>
+        </div>
+      </div>
+
+      <div class="export-info">
+        <h3>Export Options</h3>
+        <ul class="info-list">
+          <li>CSV: Best for spreadsheets and data analysis</li>
+          <li>Excel: Includes formatting and multiple sheets</li>
+          <li>JSON: Ideal for APIs and data integration</li>
+          <li>PDF: Perfect for reports and documentation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!selectedEntity">
+      <div class="empty-icon">📤</div>
+      <h3>Select an Entity to Export</h3>
+      <p>Choose from the list to begin exporting data.</p>
+    </div>
+  </div>
+</div>

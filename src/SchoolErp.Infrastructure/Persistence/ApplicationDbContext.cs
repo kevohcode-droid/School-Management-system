@@ -38,6 +38,7 @@ public class ApplicationDbContext
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
     public DbSet<TenantSetting> TenantSettings => Set<TenantSetting>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
 
     /// <summary>
     /// Tenant referenced by the global query filters. Read per-query by EF Core,

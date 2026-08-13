@@ -1,0 +1,61 @@
+<div class="enterprise-sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🏫</span>
+      <span class="brand-text">{{ currentUser?.tenantName || 'School ERP' }}</span>
+    </div>
+    <div class="sidebar-academic-info" *ngIf="summary || currentUser">
+      <small *ngIf="summary?.academicYear">AY: {{ summary.academicYear }}</small>
+      <small *ngIf="summary?.currentTerm">Term: {{ summary.currentTerm }}</small>
+      <small *ngIf="summary?.currentSemester">Sem: {{ summary.currentSemester }}</small>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section" *ngFor="let item of sidebarItems">
+      <button
+        class="sidebar-item"
+        [class.active]="isActive(item)"
+        [class.has-children]="item.hasChildren"
+        (click)="item.hasChildren ? toggleExpand(item) : navigateTo(item.route!)"
+        *ngIf="!(item.adminOnly && !hasAnyRole(['Admin', 'SuperAdmin']))"
+      >
+        <span class="sidebar-icon">{{ item.icon }}</span>
+        <span class="sidebar-label">{{ item.label }}</span>
+        <span class="sidebar-arrow" *ngIf="item.hasChildren">
+          {{ expandedItems.has(item.label) ? '▼' : '▶' }}
+        </span>
+      </button>
+
+      <div class="sidebar-children" *ngIf="item.hasChildren && expandedItems.has(item.label)">
+        <button
+          class="sidebar-child-item"
+          [class.active]="isActive(child)"
+          (click)="navigateTo(child.route!)"
+          *ngFor="let child of item.children"
+        >
+          <span class="sidebar-icon">{{ child.icon }}</span>
+          <span class="sidebar-label">{{ child.label }}</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="sidebar-item" (click)="navigateTo('/profile')">
+      <span class="sidebar-icon">👤</span>
+      <span class="sidebar-label">Profile</span>
+    </button>
+    <button class="sidebar-item" (click)="logout()">
+      <span class="sidebar-icon">🚪</span>
+      <span class="sidebar-label">Logout</span>
+    </button>
+  </div>
+</div>
+
+<!-- Summary data for academic info -->
+<ng-container *ngIf="currentUser">
+  <div class="summary-data" *ngIf="summary">
+    {{ summary | json }}
+  </div>
+</ng-container>

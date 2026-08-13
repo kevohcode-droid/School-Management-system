@@ -20,6 +20,15 @@ public record ResetPasswordRequest
     public string NewPassword { get; init; } = string.Empty;
 }
 
+public record ChangePasswordRequest
+{
+    [Required]
+    public string CurrentPassword { get; init; } = string.Empty;
+
+    [Required, MinLength(8)]
+    public string NewPassword { get; init; } = string.Empty;
+}
+
 public record RegisterRequest
 {
     /// <summary>Code of the tenant (school) the new user belongs to.</summary>

@@ -1,0 +1,178 @@
+<div class="analytics-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <h2>Analytics</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="filters">
+        <select [(ngModel)]="activeDateRange" (ngModelChange)="onDateRangeChange()">
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+          <option>Last 90 Days</option>
+          <option>This Month</option>
+          <option>This Year</option>
+        </select>
+        <select [(ngModel)]="activeAcademicYear">
+          <option>2026/2027</option>
+          <option>2025/2026</option>
+          <option>2024/2025</option>
+        </select>
+        <select [(ngModel)]="activeTerm">
+          <option>Term 1</option>
+          <option>Term 2</option>
+          <option>Term 3</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" (click)="logout()">
+        <span class="btn-icon">🚪</span> Logout
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="content-header">
+      <h1>Analytics Dashboard</h1>
+      <p class="header-subtitle">Student enrollment, attendance, and finance analytics</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" (click)="setActiveTab('student')">Student Analytics</button>
+      <button class="tab-btn" (click)="setActiveTab('attendance')">Attendance Analytics</button>
+      <button class="tab-btn" (click)="setActiveTab('finance')">Finance Analytics</button>
+      <button class="tab-btn" (click)="setActiveTab('academic')">Academic Analytics</button>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <h3>Student Enrollment Trend</h3>
+        <div class="chart-container">
+          <div class="bar-chart">
+            <div class="bar-item" *ngFor="let item of studentEnrollmentData.labels; let i = index">
+              <div class="bar" [style.height.px]="studentEnrollmentData.values[i] * 3" 
+                   [style.background-color]="studentEnrollmentData.colors[i]"></div>
+              <span class="bar-label">{{ item }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Student Enrollment')">📥 Excel</button>
+          <button (click)="exportToPDF('Student Enrollment')">📄 PDF</button>
+          <button (click)="printReport('Student Enrollment')">🖨️ Print</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Gender Distribution</h3>
+        <div class="chart-container">
+          <div class="donut-chart">
+            <div class="donut-pie">
+              <div class="donut-slice slice1" *ngIf="genderDistributionData.values.length > 0"></div>
+              <div class="donut-slice slice2" *ngIf="genderDistributionData.values.length > 1"></div>
+            </div>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <span class="legend-color" [style.background-color]="genderDistributionData.colors[0]"></span>
+                Male ({{ genderDistributionData.values[0] }}%)
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" [style.background-color]="genderDistributionData.colors[1]"></span>
+                Female ({{ genderDistributionData.values[1] }}%)
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Gender Distribution')">📥 Excel</button>
+          <button (click)="exportToPDF('Gender Distribution')">📄 PDF</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Students Per Class</h3>
+        <div class="chart-container">
+          <div class="horizontal-bar-chart">
+            <div class="horizontal-bar-item" *ngFor="let item of studentsPerClassData.labels; let i = index">
+              <span class="bar-label">{{ item }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.width.px]="studentsPerClassData.values[i] * 6"></div>
+              </div>
+              <span class="bar-value">{{ studentsPerClassData.values[i] }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Students Per Class')">📥 Excel</button>
+          <button (click)="exportToPDF('Students Per Class')">📄 PDF</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Monthly Revenue</h3>
+        <div class="chart-container">
+          <div class="line-chart">
+            <div class="line-value" *ngFor="let val of monthlyRevenueData.values | slice:0:6">
+              <span class="line-value-num">KSh {{ (val / 100000) | number:'1.0-0' }}L</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item" *ngFor="let label of monthlyRevenueData.labels">
+              <span class="legend-color" [style.background-color]="monthlyRevenueData.colors[0]"></span>
+              {{ label }}
+            </span>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Monthly Revenue')">📥 Excel</button>
+          <button (click)="exportToPDF('Monthly Revenue')">📄 PDF</button>
+          <button (click)="printReport('Monthly Revenue')">🖨️ Print</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Attendance Trend</h3>
+        <div class="chart-container">
+          <div class="area-chart">
+            <div class="area-values" *ngFor="let val of attendanceTrendData.values">
+              <div class="area-bar" [style.height.px]="val * 2.5"></div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item" *ngFor="let label of attendanceTrendData.labels; let i = index">
+              <span class="legend-color" [style.background-color]="attendanceTrendData.colors[i]"></span>
+              {{ label }}
+            </span>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Attendance Trend')">📥 Excel</button>
+          <button (click)="exportToPDF('Attendance Trend')">📄 PDF</button>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Fee Collection Trend</h3>
+        <div class="chart-container">
+          <div class="stacked-bar-chart">
+            <div class="stacked-bar" *ngFor="let val of [45, 52, 48, 55, 62, 70]">
+              <div class="stacked-segment" [style.background-color]="'#10b981'"></div>
+              <div class="stacked-segment" [style.background-color]="'#f59e0b'"></div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-color" style="background-color: #10b981"></span>Paid</span>
+            <span class="legend-item"><span class="legend-color" style="background-color: #f59e0b"></span>Pending</span>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button (click)="exportToExcel('Fee Collection')">📥 Excel</button>
+          <button (click)="exportToPDF('Fee Collection')">📄 PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

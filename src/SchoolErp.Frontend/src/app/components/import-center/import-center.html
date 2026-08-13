@@ -1,0 +1,191 @@
+<div class="import-center-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <h2>Import Center</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>Entities</h4>
+      <div class="entity-list">
+        <div class="entity-item" *ngFor="let entity of importableEntities"
+             [class.active]="selectedEntity?.name === entity.name"
+             (click)="selectEntity(entity)">
+          <span class="entity-icon">{{ entity.icon }}</span>
+          <span class="entity-name">{{ entity.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" (click)="downloadTemplate()" *ngIf="selectedEntity">
+        <span>📥</span>
+        Download Template
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="content-header" *ngIf="selectedEntity">
+      <div class="header-info">
+        <h1>Import {{ selectedEntity.name }}</h1>
+        <p class="entity-description">{{ selectedEntity.description }}</p>
+        <div class="entity-fields">
+          <span class="field-tag" *ngFor="let field of selectedEntity.fields.slice(0, 5)">{{ field }}</span>
+          <span *ngIf="selectedEntity.fields.length > 5">...{{ selectedEntity.fields.length - 5 }} more</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-body" *ngIf="selectedEntity">
+      <div class="import-section" *ngIf="!showPreview">
+        <div class="upload-card">
+          <div class="upload-icon">📁</div>
+          <h3>Select File to Import</h3>
+          <p class="upload-description">
+            Supported formats: CSV, Excel (.xlsx, .xls)<br>
+            Maximum file size: 50MB
+          </p>
+          
+          <div class="file-input-wrapper">
+            <input type="file" accept=".csv,.xlsx,.xls" (change)="onFileSelected($event)" class="file-input">
+            <label for="file-input" class="file-label">
+              <span>Choose File</span>
+            </label>
+          </div>
+
+          <div class="format-options">
+            <button class="format-btn" [class.active]="importStrategy === 'insert'" (click)="importStrategy = 'insert'">
+              Insert Only
+            </button>
+            <button class="format-btn" [class.active]="importStrategy === 'update'" (click)="importStrategy = 'update'">
+              Update Existing
+            </button>
+            <button class="format-btn" [class.active]="importStrategy === 'merge'" (click)="importStrategy = 'merge'">
+              Merge
+            </button>
+            <button class="format-btn" [class.active]="importStrategy === 'ignore'" (click)="importStrategy = 'ignore'">
+              Ignore Duplicates
+            </button>
+          </div>
+
+          <div class="import-actions">
+            <button class="btn-secondary" (click)="closeImport()">Cancel</button>
+            <button class="btn-primary" 
+                    [disabled]="!importFile || isImporting"
+                    (click)="executeImport()">
+              <span *ngIf="isImporting">Importing...</span>
+              <span *ngIf="!isImporting">Import Records</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="instructions-card">
+          <h3>Import Instructions</h3>
+          <ul class="instructions-list">
+            <li>Ensure all required columns are present in your file</li>
+            <li>Use the template as a reference for data format</li>
+            <li>Duplicate records will be skipped or updated based on your selection</li>
+            <li>Large files may take longer to process</li>
+            <li>Review the preview before executing the import</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="preview-section" *ngIf="showPreview && importPreview.length > 0">
+        <div class="preview-card">
+          <h3>Preview ({{ importPreview.length }} rows)</h3>
+          <div class="preview-table-container">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th *ngFor="let header of getHeaders()">{{ header }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of importPreview; let i = index">
+                  <td *ngFor="let header of getHeaders()">{{ row[header] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="validation-card" *ngIf="validationErrors.length > 0">
+          <h3>Validation Errors ({{ validationErrors.length }})</h3>
+          <div class="error-list">
+            <div class="error-item" *ngFor="let error of validationErrors">{{ error }}</div>
+          </div>
+        </div>
+
+        <div class="duplicate-card" *ngIf="duplicateRecords.length > 0">
+          <h3>Potential Duplicates ({{ duplicateRecords.length }})</h3>
+          <div class="duplicate-list">
+            <div class="duplicate-item" *ngFor="let dup of duplicateRecords.slice(0, 5)">
+              {{ dup }}
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-actions">
+          <button class="btn-secondary" (click)="showPreview = false">Back</button>
+          <button class="btn-primary" 
+                  [disabled]="isImporting"
+                  (click)="executeImport()">
+            <span *ngIf="isImporting">Importing...</span>
+            <span *ngIf="!isImporting">Confirm Import</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!selectedEntity">
+      <div class="empty-icon">📊</div>
+      <h3>Select an Entity to Import</h3>
+      <p>Choose from the list to begin importing data.</p>
+    </div>
+
+    <div class="results-modal" *ngIf="importResults">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Import Results</h2>
+          <button class="close-btn" (click)="importResults = null">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="results-grid">
+            <div class="result-item">
+              <span class="result-label">Total Records</span>
+              <span class="result-value">{{ importResults.total }}</span>
+            </div>
+            <div class="result-item success">
+              <span class="result-label">Imported</span>
+              <span class="result-value">{{ importResults.imported }}</span>
+            </div>
+            <div class="result-item warning">
+              <span class="result-label">Updated</span>
+              <span class="result-value">{{ importResults.updated }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Skipped</span>
+              <span class="result-value">{{ importResults.skipped }}</span>
+            </div>
+            <div class="result-item error">
+              <span class="result-label">Errors</span>
+              <span class="result-value">{{ importResults.errors.length }}</span>
+            </div>
+          </div>
+
+          <div class="errors-list" *ngIf="importResults.errors.length > 0">
+            <h4>Error Details</h4>
+            <div class="error-item" *ngFor="let error of importResults.errors.slice(0, 10)">
+              {{ error }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="importResults = null">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

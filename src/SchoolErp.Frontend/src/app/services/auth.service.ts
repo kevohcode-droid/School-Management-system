@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser, GoogleLoginRequest } from '../models/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser, GoogleLoginRequest, UserProfile, UpdateProfileRequest } from '../models/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +19,21 @@ export class AuthService {
 
   getCurrentUser(): Observable<CurrentUser> {
     return this.apiService.get<CurrentUser>('/auth/me');
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    return this.apiService.get<UserProfile>('/users/me');
+  }
+
+  updateProfile(request: UpdateProfileRequest): Observable<any> {
+    return this.apiService.put('/users/me', request);
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.apiService.post('/auth/change-password', {
+      currentPassword,
+      newPassword
+    });
   }
 
   logout(): void {
@@ -54,6 +69,10 @@ export class AuthService {
 
   forgotPassword(email: string): Observable<any> {
     return this.apiService.post<any>('/auth/forgot-password', { email });
+  }
+
+  resetPassword(email: string, token: string, newPassword: string): Observable<any> {
+    return this.apiService.post<any>('/auth/reset-password', { email, token, newPassword });
   }
 
   googleLogin(request: GoogleLoginRequest): Observable<AuthResponse> {

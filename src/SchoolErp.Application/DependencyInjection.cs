@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using SchoolErp.Application.AuditLogs;
 using SchoolErp.Application.Dashboard;
 using SchoolErp.Application.Settings;
 using SchoolErp.Application.Staff;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IStaffService, StaffService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
         return services;
     }
 }

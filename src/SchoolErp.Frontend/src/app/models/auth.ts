@@ -37,3 +37,22 @@ export interface CurrentUser {
   tenantCode?: string;
   roles: string[];
 }
+
+export interface UserProfile {
+  fullName: string;
+  email: string;
+  phone?: string;
+  role: string;
+  school: string;
+  tenantCode?: string;
+  username: string;
+  lastLogin?: string;
+  dateJoined?: string;
+  address?: string;
+}
+
+export interface UpdateProfileRequest {
+  fullName: string;
+  phone?: string;
+  address?: string;
+}

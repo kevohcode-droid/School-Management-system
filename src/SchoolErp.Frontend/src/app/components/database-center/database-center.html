@@ -1,0 +1,255 @@
+<div class="database-center-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <h2>Database Center</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>Tables</h4>
+      <div class="table-list">
+        <div class="table-item" *ngFor="let table of tables" 
+             [class.active]="selectedTable === table.name"
+             (click)="selectTable(table.name)">
+          <span class="table-name">{{ table.name }}</span>
+          <span class="table-count">{{ table.recordCount || 0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" *ngIf="hasRole('SuperAdmin')" (click)="loadTables()">
+        <span class="btn-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="content-header" *ngIf="selectedTable">
+      <div class="header-info">
+        <h1>{{ selectedTable }}</h1>
+        <div class="table-stats" *ngIf="tableStats">
+          <span>Records: {{ tableStats.recordCount }}</span>
+          <span>Size: {{ (tableStats.tableSizeBytes / 1024) | number:'1.0-0' }} KB</span>
+          <span>Indexes: {{ tableStats.indexCount }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="action-btn" (click)="openImportModal()">
+          <span>📥 Import</span>
+        </button>
+        <button class="action-btn" (click)="openExportModal()">
+          <span>📤 Export</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-body" *ngIf="selectedTable">
+      <div class="controls">
+        <div class="search-box">
+          <input type="text" placeholder="Search records..." [(ngModel)]="searchQuery" (ngModelChange)="searchRecords()">
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th *ngFor="let column of getColumns(); let i = index">
+                <button class="sort-header" (click)="sortRecords(column)" *ngIf="column !== '_id'">
+                  <span>{{ column }}</span>
+                  <span class="sort-icon" [class.asc]="sortBy === column && sortDirection === 'asc'">▲</span>
+                  <span class="sort-icon" [class.desc]="sortBy === column && sortDirection === 'desc'">▼</span>
+                </button>
+                <span *ngIf="column === '_id'">ID</span>
+              </th>
+              <th *ngIf="hasRole(['Admin', 'SuperAdmin'])">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of records">
+              <td *ngFor="let column of getColumns()">
+                <span class="cell-value">{{ formatValue(record[column]) }}</span>
+              </td>
+              <td *ngIf="hasRole(['Admin', 'SuperAdmin'])">
+                <button class="delete-btn" (click)="deleteRecord(record.id ?? record._id ?? '')">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="no-records" *ngIf="!isLoadingRecords && records.length === 0">
+          No records found.
+        </div>
+
+        <div class="loading" *ngIf="isLoadingRecords">
+          <div class="spinner"></div>
+          <span>Loading records...</span>
+        </div>
+      </div>
+
+      <div class="pagination" *ngIf="totalRecords > pageSize">
+        <button class="page-btn" [class.active]="currentPage === 1" (click)="currentPage = 1">1</button>
+        <button class="page-btn" *ngFor="let page of getPageNumbers()" [class.active]="currentPage === page" (click)="currentPage = page">{{ page }}</button>
+        <button class="page-btn" *ngIf="currentPage < getTotalPages()" (click)="goToPage(currentPage + 1)">Next</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="selectedTable && !isLoadingRecords && records.length === 0">
+      <div class="empty-icon">📊</div>
+      <h3>No Records</h3>
+      <p>This table is empty or no records match your search criteria.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" *ngIf="showImportModal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <h2>Import Records to {{ selectedTable }}</h2>
+      <button class="close-modal" (click)="closeImportModal()">×</button>
+    </div>
+    <form>
+      <div class="form-group">
+        <label>Select File (CSV or Excel)</label>
+        <input type="file" accept=".csv,.xlsx,.xls" (change)="onFileSelected($event)" class="file-input">
+      </div>
+
+      <div class="form-group" *ngIf="importFile">
+        <label>File: {{ importFile.name }}</label>
+      </div>
+
+      <div class="form-group" *ngIf="importPreview.length > 0">
+        <label>Preview (first 5 rows)</label>
+        <div class="preview-table">
+          <table>
+            <thead>
+              <tr>
+                <th *ngFor="let header of getImportHeaders()">{{ header }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of importPreview">
+                <td *ngFor="let header of getImportHeaders()">{{ row[header] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="importErrors.length > 0">
+        <label class="error-label">Validation Errors</label>
+        <div class="error-list">
+          <div class="error-item" *ngFor="let error of importErrors">{{ error }}</div>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="importDuplicates.length > 0">
+        <label class="warning-label">Duplicate Records Detected</label>
+        <div class="duplicate-list">
+          <div class="duplicate-item" *ngFor="let dup of importDuplicates.slice(0, 5)">
+            {{ dup }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="importFile">
+        <label>Import Strategy</label>
+        <select [(ngModel)]="importStrategy">
+          <option value="insert">Insert Only</option>
+          <option value="update">Update Existing</option>
+          <option value="merge">Merge</option>
+          <option value="ignore">Ignore Duplicates</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeImportModal()">Cancel</button>
+        <button type="submit" class="btn-primary" (click)="executeImport()" [disabled]="!importFile">
+          Execute Import
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" *ngIf="showExportModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Export Records from {{ selectedTable }}</h2>
+      <button class="close-modal" (click)="closeExportModal()">×</button>
+    </div>
+    <form>
+      <div class="form-group">
+        <label>Export Format</label>
+        <select>
+          <option value="excel">Excel (.xlsx)</option>
+          <option value="csv">CSV (.csv)</option>
+          <option value="json">JSON (.json)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Filter Records</label>
+        <input type="text" placeholder="Enter filter value..." class="filter-input">
+      </div>
+
+      <div class="form-group">
+        <label>Selected Rows Only</label>
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeExportModal()">Cancel</button>
+        <button type="submit" class="btn-primary" (click)="exportRecords()">Export</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Import Results Modal -->
+<div class="modal-overlay" *ngIf="importResults">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Import Results</h2>
+      <button class="close-modal" (click)="importResults = null">×</button>
+    </div>
+    <div class="results-content">
+      <div class="result-summary">
+        <div class="result-item">
+          <span class="result-label">Total Records:</span>
+          <span class="result-value">{{ importResults.total }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Imported:</span>
+          <span class="result-value success">{{ importResults.imported }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Updated:</span>
+          <span class="result-value warning">{{ importResults.updated }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Skipped:</span>
+          <span class="result-value">{{ importResults.skipped }}</span>
+        </div>
+      </div>
+
+      <div class="errors-section" *ngIf="importResults.errors?.length > 0">
+        <h4>Errors ({{ importResults.errors.length }})</h4>
+        <div class="error-list">
+          <div class="error-item" *ngFor="let error of importResults.errors.slice(0, 10)">{{ error }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="importResults = null">Close</button>
+    </div>
+  </div>
+</div>

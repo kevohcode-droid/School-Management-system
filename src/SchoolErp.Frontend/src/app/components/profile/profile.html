@@ -1,0 +1,165 @@
+<div class="profile-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🏫</span>
+        <span class="brand-text">School ERP</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="sidebar-btn" (click)="goBack()">
+        <span class="sidebar-icon">←</span>
+        Back to Dashboard
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" (click)="logout()">
+        <span class="sidebar-icon">🚪</span>
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <div class="profile-container">
+    <header class="profile-header">
+      <h1>Profile</h1>
+      <p class="profile-subtitle">Manage your account settings and view your activity</p>
+    </header>
+
+    <main class="profile-content">
+      <div class="profile-card" *ngIf="!isLoading && profile">
+        <div class="profile-avatar-section">
+          <div class="profile-avatar-large">{{ profile.fullName?.charAt(0) || profile.email?.charAt(0) }}</div>
+          <h2 class="profile-name">{{ profile.fullName || profile.email }}</h2>
+          <span class="profile-role-badge">{{ profile.role }}</span>
+          <button class="edit-photo-btn" (click)="openEditProfile()">
+            <span>✏️</span> Edit Profile
+          </button>
+        </div>
+
+        <div class="profile-details">
+          <div class="profile-row">
+            <span class="profile-label">Full Name</span>
+            <span class="profile-value">{{ profile.fullName || 'Not set' }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Email</span>
+            <span class="profile-value">{{ profile.email }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Phone</span>
+            <span class="profile-value">{{ profile.phone || 'Not set' }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Role</span>
+            <span class="profile-value">{{ profile.role }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">School / Tenant</span>
+            <span class="profile-value">{{ profile.school }}</span>
+          </div>
+          <div class="profile-row" *ngIf="profile.tenantCode">
+            <span class="profile-label">Tenant Code</span>
+            <span class="profile-value">{{ profile.tenantCode }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Username</span>
+            <span class="profile-value">{{ profile.username }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Last Login</span>
+            <span class="profile-value">{{ formattedLastLogin }}</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Account Status</span>
+            <span class="profile-value status-active">{{ accountStatus }}</span>
+          </div>
+          <div class="profile-row" *ngIf="profile.dateJoined">
+            <span class="profile-label">Date Joined</span>
+            <span class="profile-value">{{ formattedDateJoined }}</span>
+          </div>
+          <div class="profile-row" *ngIf="profile.address">
+            <span class="profile-label">Address</span>
+            <span class="profile-value">{{ profile.address }}</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="action-btn primary" (click)="changePassword()">
+            <span>🔐</span> Change Password
+          </button>
+        </div>
+      </div>
+
+      <div class="profile-loading" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <span>Loading profile...</span>
+      </div>
+
+      <div class="profile-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+        <br><button (click)="goBack()" class="retry-btn">Back to Dashboard</button>
+      </div>
+
+      <div class="activity-section" *ngIf="profile">
+        <div class="activity-header">
+          <h3>Activity History</h3>
+          <button class="toggle-btn" (click)="toggleActivityHistory()">
+            {{ showActivityHistory ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+
+        <div class="activity-list" *ngIf="showActivityHistory">
+          <div class="activity-item" *ngFor="let activity of activities">
+            <div class="activity-header-item">
+              <span class="activity-action">{{ activity.action }}</span>
+              <span class="activity-date">{{ activity.date | date:'short' }}</span>
+            </div>
+            <div class="activity-details">
+              <span class="activity-module">{{ activity.module }}</span>
+              <span class="activity-description">{{ activity.details }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-activity" *ngIf="!showActivityHistory">
+          <p>Click "Show" to view your recent activity.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Profile Dialog -->
+  <div class="modal-overlay" *ngIf="editDialog.isOpen">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Edit Profile</h3>
+        <button class="modal-close" (click)="closeEditProfile()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" [(ngModel)]="editDialog.fullName" class="form-control" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" [(ngModel)]="editDialog.phone" class="form-control" placeholder="Enter your phone number">
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <textarea id="address" [(ngModel)]="editDialog.address" class="form-control" rows="2" placeholder="Enter your address"></textarea>
+        </div>
+        <div class="modal-error" *ngIf="editDialog.error">{{ editDialog.error }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" (click)="closeEditProfile()">Cancel</button>
+        <button class="action-btn primary" (click)="saveProfile()" [disabled]="!editDialog.fullName">
+          <span *ngIf="editDialog.isSaving">⏳</span>
+          <span *ngIf="!editDialog.isSaving">Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

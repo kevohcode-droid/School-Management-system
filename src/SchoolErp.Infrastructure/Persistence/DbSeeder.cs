@@ -12,9 +12,10 @@ namespace SchoolErp.Infrastructure.Persistence;
 /// </summary>
 public static class DbSeeder
 {
-    private const string DemoTenantCode = "demo";
-    private const string DemoAdminEmail = "admin@demo.school";
-    private const string DemoAdminPassword = "Passw0rd!";
+    // Default demo tenant and admin credentials (change as needed for local testing)
+    private const string DemoTenantCode = "100";
+    private const string DemoAdminEmail = "kevohkevi110@gmail.com";
+    private const string DemoAdminPassword = "Kevoh2060,!";
 
     public static async Task SeedAsync(IServiceProvider services)
     {
@@ -25,7 +26,16 @@ public static class DbSeeder
         var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
-        await db.Database.MigrateAsync();
+        try
+        {
+            await db.Database.MigrateAsync();
+        }
+        catch
+        {
+            // If migrations can't be applied (pending model changes, etc.),
+            // continue and attempt to seed what we can. This helps local
+            // developer workflows where migrations may be pending.
+        }
 
         foreach (var role in Roles.All)
         {
