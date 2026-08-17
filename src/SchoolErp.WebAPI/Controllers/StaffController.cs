@@ -61,8 +61,9 @@ public class StaffController : ControllerBase
 
         var headers = new[]
         {
-            "EmployeeId", "FirstName", "LastName", "Email", "Phone", "Gender",
-            "NationalId", "Designation", "Department", "DateOfJoining", "EmploymentStatus", "Qualifications"
+            "Employee ID / TSC Number", "Designation / Role", "Department", "Date of Joining",
+            "Employment Status", "Qualifications / Degree", "First Name", "Last Name",
+            "Gender", "National ID / Passport Number", "Phone Number", "Professional Email"
         };
 
         for (int i = 0; i < headers.Length; i++)
@@ -72,17 +73,17 @@ public class StaffController : ControllerBase
         {
             var s = staff[row];
             worksheet.Cell(row + 2, 1).Value = s.EmployeeId;
-            worksheet.Cell(row + 2, 2).Value = s.FirstName;
-            worksheet.Cell(row + 2, 3).Value = s.LastName;
-            worksheet.Cell(row + 2, 4).Value = s.Email ?? string.Empty;
-            worksheet.Cell(row + 2, 5).Value = s.Phone ?? string.Empty;
-            worksheet.Cell(row + 2, 6).Value = s.Gender;
-            worksheet.Cell(row + 2, 7).Value = s.NationalId ?? string.Empty;
-            worksheet.Cell(row + 2, 8).Value = s.Designation;
-            worksheet.Cell(row + 2, 9).Value = s.Department;
-            worksheet.Cell(row + 2, 10).Value = s.DateOfJoining ?? string.Empty;
-            worksheet.Cell(row + 2, 11).Value = s.EmploymentStatus;
-            worksheet.Cell(row + 2, 12).Value = s.Qualifications ?? string.Empty;
+            worksheet.Cell(row + 2, 2).Value = s.Designation;
+            worksheet.Cell(row + 2, 3).Value = s.Department;
+            worksheet.Cell(row + 2, 4).Value = s.DateOfJoining ?? string.Empty;
+            worksheet.Cell(row + 2, 5).Value = s.EmploymentStatus;
+            worksheet.Cell(row + 2, 6).Value = s.Qualifications ?? string.Empty;
+            worksheet.Cell(row + 2, 7).Value = s.FirstName;
+            worksheet.Cell(row + 2, 8).Value = s.LastName;
+            worksheet.Cell(row + 2, 9).Value = s.Gender;
+            worksheet.Cell(row + 2, 10).Value = s.NationalId ?? string.Empty;
+            worksheet.Cell(row + 2, 11).Value = s.Phone ?? string.Empty;
+            worksheet.Cell(row + 2, 12).Value = s.Email ?? string.Empty;
         }
 
         using var stream = new MemoryStream();
@@ -108,17 +109,17 @@ public class StaffController : ControllerBase
         var importRows = rows.Select(row => new StaffImportRow
         {
             EmployeeId = row.Cell(1).GetString(),
-            FirstName = row.Cell(2).GetString(),
-            LastName = row.Cell(3).GetString(),
-            Email = row.Cell(4).GetString(),
-            Phone = row.Cell(5).GetString(),
-            Gender = int.TryParse(row.Cell(6).GetString(), out var g) ? g : 0,
-            NationalId = row.Cell(7).GetString(),
-            Designation = row.Cell(8).GetString(),
-            Department = row.Cell(9).GetString(),
-            DateOfJoining = row.Cell(10).GetString(),
-            EmploymentStatus = row.Cell(11).GetString(),
-            Qualifications = row.Cell(12).GetString()
+            Designation = row.Cell(2).GetString(),
+            Department = row.Cell(3).GetString(),
+            DateOfJoining = row.Cell(4).GetString(),
+            EmploymentStatus = row.Cell(5).GetString(),
+            Qualifications = row.Cell(6).GetString(),
+            FirstName = row.Cell(7).GetString(),
+            LastName = row.Cell(8).GetString(),
+            Gender = int.TryParse(row.Cell(9).GetString(), out var g) ? g : 0,
+            NationalId = row.Cell(10).GetString(),
+            Phone = row.Cell(11).GetString(),
+            Email = row.Cell(12).GetString()
         }).ToList();
 
         var imported = await _staffService.ImportFromRowsAsync(importRows, ct);
@@ -134,25 +135,26 @@ public class StaffController : ControllerBase
 
         var headers = new[]
         {
-            "EmployeeId", "FirstName", "LastName", "Email", "Phone", "Gender",
-            "NationalId", "Designation", "Department", "DateOfJoining", "EmploymentStatus", "Qualifications"
+            "Employee ID / TSC Number", "Designation / Role", "Department", "Date of Joining",
+            "Employment Status", "Qualifications / Degree", "First Name", "Last Name",
+            "Gender", "National ID / Passport Number", "Phone Number", "Professional Email"
         };
 
         for (int i = 0; i < headers.Length; i++)
             worksheet.Cell(1, i + 1).Value = headers[i];
 
         worksheet.Row(2).Cell(1).Value = "EMP-1001";
-        worksheet.Row(2).Cell(2).Value = "Jane";
-        worksheet.Row(2).Cell(3).Value = "Doe";
-        worksheet.Row(2).Cell(4).Value = "jane@school.edu";
-        worksheet.Row(2).Cell(5).Value = "+254 700 000 000";
-        worksheet.Row(2).Cell(6).Value = "2";
-        worksheet.Row(2).Cell(7).Value = "12345678";
-        worksheet.Row(2).Cell(8).Value = "Teacher";
-        worksheet.Row(2).Cell(9).Value = "Sciences";
-        worksheet.Row(2).Cell(10).Value = "2024-01-15";
-        worksheet.Row(2).Cell(11).Value = "Full-time";
-        worksheet.Row(2).Cell(12).Value = "B.Ed Mathematics";
+        worksheet.Row(2).Cell(2).Value = "Teacher";
+        worksheet.Row(2).Cell(3).Value = "Sciences";
+        worksheet.Row(2).Cell(4).Value = "2024-01-15";
+        worksheet.Row(2).Cell(5).Value = "Full-time";
+        worksheet.Row(2).Cell(6).Value = "B.Ed Mathematics";
+        worksheet.Row(2).Cell(7).Value = "Jane";
+        worksheet.Row(2).Cell(8).Value = "Doe";
+        worksheet.Row(2).Cell(9).Value = "2";
+        worksheet.Row(2).Cell(10).Value = "12345678";
+        worksheet.Row(2).Cell(11).Value = "+254 700 000 000";
+        worksheet.Row(2).Cell(12).Value = "jane@school.edu";
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);

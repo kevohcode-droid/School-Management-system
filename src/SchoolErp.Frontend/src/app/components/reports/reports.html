@@ -1,0 +1,221 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <div>
+        <h1>Reports & Exports</h1>
+        <p class="page-subtitle">View school records and download detailed reports.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <!-- Report Cards -->
+    <div class="reports-grid">
+      <!-- Students Card -->
+      <div class="report-card" [class.active]="activeReport === 'students'">
+        <div class="report-icon">🎓</div>
+        <div class="report-content">
+          <h3>Students</h3>
+          <p class="report-desc">View and export student records.</p>
+        </div>
+        <button class="download-btn" (click)="setActiveReport('students')">
+          Download Excel
+        </button>
+      </div>
+
+      <!-- Staff Card -->
+      <div class="report-card" [class.active]="activeReport === 'staff'">
+        <div class="report-icon">👩‍🏫</div>
+        <div class="report-content">
+          <h3>Staff</h3>
+          <p class="report-desc">View and export staff records.</p>
+        </div>
+        <button class="download-btn" (click)="setActiveReport('staff')">
+          Download Excel
+        </button>
+      </div>
+
+      <!-- Classes Card -->
+      <div class="report-card" [class.active]="activeReport === 'classes'">
+        <div class="report-icon">📚</div>
+        <div class="report-content">
+          <h3>Classes</h3>
+          <p class="report-desc">View and export class information.</p>
+        </div>
+        <button class="download-btn" (click)="setActiveReport('classes')">
+          Download Excel
+        </button>
+      </div>
+
+      <!-- Attendance Card -->
+      <div class="report-card" [class.active]="activeReport === 'attendance'">
+        <div class="report-icon">🗓️</div>
+        <div class="report-content">
+          <h3>Attendance</h3>
+          <p class="report-desc">View and export attendance records.</p>
+        </div>
+        <button class="download-btn" (click)="setActiveReport('attendance')">
+          Download Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Students Report -->
+    <div class="report-section" *ngIf="activeReport === 'students' && !isLoading">
+      <h2>Student Records</h2>
+
+      <div class="search-filters">
+        <input type="text" placeholder="Search students..." [(ngModel)]="studentSearch" class="search-input">
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Admission No.</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Gender</th>
+              <th>Enrollment Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of getFilteredStudents()">
+              <td>{{ student.admissionNumber }}</td>
+              <td>{{ student.firstName }} {{ student.lastName }}</td>
+              <td>{{ student.section?.name || student.sectionName || '—' }}</td>
+              <td>{{ student.gender | titlecase }}</td>
+              <td>{{ student.enrollmentDate | date: 'shortDate' }}</td>
+              <td>Active</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state-small" *ngIf="getFilteredStudents().length === 0">
+          <p>No students found.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Report -->
+    <div class="report-section" *ngIf="activeReport === 'staff' && !isLoading">
+      <h2>Staff Records</h2>
+      <p class="note-text">Use the <a href="/staff">Staff Management</a> page for adding, editing, and exporting staff records.</p>
+    </div>
+
+    <!-- Classes Report -->
+    <div class="report-section" *ngIf="activeReport === 'classes' && !isLoading">
+      <h2>Class Records</h2>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Grade Level</th>
+              <th>Capacity</th>
+              <th>Students</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let classItem of classesList">
+              <td>{{ classItem.name }}</td>
+              <td>{{ classItem.gradeLevel || '—' }}</td>
+              <td>{{ classItem.capacity || '—' }}</td>
+              <td>{{ classItem.studentCount !== undefined ? classItem.studentCount : 0 }}</td>
+              <td>Active</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state-small" *ngIf="classesList.length === 0">
+          <p>No classes found.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Report -->
+    <div class="report-section" *ngIf="activeReport === 'attendance' && !isLoading">
+      <h2>Attendance Records</h2>
+
+      <div class="filters-section">
+        <h3>Filters</h3>
+        <div class="filter-grid">
+          <div class="form-group-filter">
+            <label>Date From</label>
+            <input type="date" [(ngModel)]="attendanceFilters.dateFrom">
+          </div>
+          <div class="form-group-filter">
+            <label>Date To</label>
+            <input type="date" [(ngModel)]="attendanceFilters.dateTo">
+          </div>
+          <div class="form-group-filter">
+            <label>Class</label>
+            <select [(ngModel)]="attendanceFilters.classId">
+              <option value="">All Classes</option>
+              <option *ngFor="let c of classesList" [value]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div class="form-group-filter">
+            <label>Status</label>
+            <select [(ngModel)]="attendanceFilters.status">
+              <option *ngFor="let s of attendanceStatuses" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+        <button class="filter-btn" (click)="filterAttendance()">Apply Filters</button>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Admission No.</th>
+              <th>Class</th>
+              <th>Status</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of attendanceList">
+              <td>{{ record.date | date: 'shortDate' }}</td>
+              <td>{{ record.student?.fullName || record.studentName || record.student || '—' }}</td>
+              <td>{{ record.student?.admissionNumber || record.admissionNumber || '—' }}</td>
+              <td>{{ record.class?.name || record.className || '—' }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(record.status)">
+                  {{ getStatusLabel(record.status) }}
+                </span>
+              </td>
+              <td>{{ record.remarks || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state-small" *ngIf="attendanceList.length === 0">
+          <p>No attendance records found.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

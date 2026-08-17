@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -30,31 +30,34 @@ export class SectionsService {
 
   exportSections(): void {
     const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/sections/export';
-    if (headers?.Authorization) {
-      link.setAttribute('headers', JSON.stringify(headers));
+    if (!token) {
+      alert('Please log in first to export sections.');
+      return;
     }
-    link.download = 'Sections.xlsx';
-    link.click();
+
+    this.apiService.download('/sections/export', 'Sections.xlsx');
   }
 
   importSections(file: File): Observable<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to import sections.');
+      return of(null);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
-
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
     return this.apiService.upload<any>('/sections/import', formData);
   }
 
   downloadTemplate(): void {
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/sections/template';
-    link.download = 'Sections-Template.xlsx';
-    link.click();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to download the template.');
+      return;
+    }
+
+    this.apiService.download('/sections/template', 'Sections-Template.xlsx');
   }
 }

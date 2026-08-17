@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
 import { Staff, CreateStaffRequest } from '../models/staff';
 
@@ -27,31 +27,34 @@ export class StaffService {
 
   exportStaff(): void {
     const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/staff/export';
-    if (headers?.Authorization) {
-      link.setAttribute('headers', JSON.stringify(headers));
+    if (!token) {
+      alert('Please log in first to export staff.');
+      return;
     }
-    link.download = 'Staff.xlsx';
-    link.click();
+
+    this.apiService.download('/staff/export', 'Staff.xlsx');
   }
 
   importStaff(file: File): Observable<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to import staff.');
+      return of(null);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
-
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
     return this.apiService.upload<any>('/staff/import', formData);
   }
 
   downloadTemplate(): void {
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/staff/template';
-    link.download = 'Staff-Template.xlsx';
-    link.click();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to download the template.');
+      return;
+    }
+
+    this.apiService.download('/staff/template', 'Staff-Template.xlsx');
   }
 }

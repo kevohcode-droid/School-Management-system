@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
 import { Student, CreateStudentRequest, UpdateStudentRequest } from '../models/student';
 
@@ -31,31 +31,34 @@ export class StudentService {
 
   exportStudents(): void {
     const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/students/export';
-    if (headers?.Authorization) {
-      link.setAttribute('headers', JSON.stringify(headers));
+    if (!token) {
+      alert('Please log in first to export students.');
+      return;
     }
-    link.download = 'Students.xlsx';
-    link.click();
+
+    this.apiService.download('/students/export', 'Students.xlsx');
   }
 
   downloadTemplate(): void {
-    const link = document.createElement('a');
-    link.href = 'http://localhost:5110/api/students/template';
-    link.download = 'Students-Template.xlsx';
-    link.click();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to download the template.');
+      return;
+    }
+
+    this.apiService.download('/students/template', 'Students-Template.xlsx');
   }
 
-  importStudents(file: File): Observable<any> {
+importStudents(file: File): Observable<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in first to import students.');
+      return of(null);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
-    
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    
+
     return this.apiService.upload<any>('/students/import', formData);
   }
 }

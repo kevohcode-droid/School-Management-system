@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolErp.Application.Common.Interfaces;
-using SchoolErp.Domain.Entities;
 using SchoolErp.Domain.Common;
+using SchoolErp.Domain.Entities;
 
 namespace SchoolErp.WebAPI.Controllers;
 
@@ -14,17 +14,22 @@ namespace SchoolErp.WebAPI.Controllers;
 public class SectionsController : ControllerBase
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUser _currentUser;
 
-    public SectionsController(IApplicationDbContext db)
+    public SectionsController(IApplicationDbContext db, ICurrentUser currentUser)
     {
         _db = db;
+        _currentUser = currentUser;
     }
 
     [HttpGet]
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Teacher}")]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+
         var sections = await _db.Sections
+            .Where(s => s.TenantId == tenantId)
             .AsNoTracking()
             .OrderBy(s => s.Name)
             .ToListAsync(ct);
@@ -35,7 +40,8 @@ public class SectionsController : ControllerBase
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Teacher}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
-        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id, ct);
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id && s.TenantId == tenantId, ct);
         return section is null ? NotFound() : Ok(section);
     }
 
@@ -43,8 +49,11 @@ public class SectionsController : ControllerBase
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
     public async Task<IActionResult> Create([FromBody] CreateSectionRequest request, CancellationToken ct)
     {
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+
         var section = new Section
         {
+            TenantId = tenantId,
             Name = request.Name,
             GradeLevel = request.GradeLevel,
             Capacity = request.Capacity
@@ -59,7 +68,8 @@ public class SectionsController : ControllerBase
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSectionRequest request, CancellationToken ct)
     {
-        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id, ct);
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id && s.TenantId == tenantId, ct);
         if (section is null) return NotFound();
 
         section.Name = request.Name;
@@ -74,7 +84,8 @@ public class SectionsController : ControllerBase
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id, ct);
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+        var section = await _db.Sections.FirstOrDefaultAsync(s => s.Id == id && s.TenantId == tenantId, ct);
         if (section is null) return NotFound();
 
         _db.Sections.Remove(section);
@@ -86,26 +97,34 @@ public class SectionsController : ControllerBase
     [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Teacher}")]
     public async Task<IActionResult> Export(CancellationToken ct)
     {
-        var sections = await _db.Sections.AsNoTracking().OrderBy(s => s.Name).ToListAsync(ct);
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+
+        var sections = await _db.Sections
+            .Where(s => s.TenantId == tenantId)
+            .AsNoTracking()
+            .ToListAsync(ct);
 
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sections");
 
-        var headers = new[] { "Name", "GradeLevel", "Capacity" };
+        var headers = new[] { "Class", "Code", "Grade Level", "Capacity", "Status" };
         for (int i = 0; i < headers.Length; i++)
             worksheet.Cell(1, i + 1).Value = headers[i];
 
-        for (int row = 0; row < sections.Count; row++)
+        int rowNum = 2;
+        foreach (var s in sections)
         {
-            var s = sections[row];
-            worksheet.Cell(row + 2, 1).Value = s.Name;
-            worksheet.Cell(row + 2, 2).Value = s.GradeLevel;
-            worksheet.Cell(row + 2, 3).Value = s.Capacity;
+            worksheet.Cell(rowNum, 1).Value = s.Name;
+            worksheet.Cell(rowNum, 2).Value = s.GradeLevel;
+            worksheet.Cell(rowNum, 3).Value = s.GradeLevel;
+            worksheet.Cell(rowNum, 4).Value = s.Capacity;
+            worksheet.Cell(rowNum, 5).Value = "Active";
+            rowNum++;
         }
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
-        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Sections.xlsx");
+        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Classes.xlsx");
     }
 
     [HttpPost("import")]
@@ -114,6 +133,8 @@ public class SectionsController : ControllerBase
     {
         if (file == null || file.Length <= 0)
             return BadRequest(new { errors = new[] { "No file uploaded." } });
+
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
 
         using var stream = new MemoryStream();
         await file.CopyToAsync(stream, ct);
@@ -131,6 +152,7 @@ public class SectionsController : ControllerBase
 
             var section = new Section
             {
+                TenantId = tenantId,
                 Name = name,
                 GradeLevel = row.Cell(2).GetString(),
                 Capacity = int.TryParse(row.Cell(3).GetString(), out var cap) ? cap : 0
@@ -151,17 +173,19 @@ public class SectionsController : ControllerBase
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sections");
 
-        var headers = new[] { "Name", "GradeLevel", "Capacity" };
+        var headers = new[] { "Class", "Code", "Grade Level", "Capacity", "Status" };
         for (int i = 0; i < headers.Length; i++)
             worksheet.Cell(1, i + 1).Value = headers[i];
 
         worksheet.Row(2).Cell(1).Value = "Grade 7 A";
         worksheet.Row(2).Cell(2).Value = "Grade 7";
-        worksheet.Row(2).Cell(3).Value = 40;
+        worksheet.Row(2).Cell(3).Value = "Grade 7";
+        worksheet.Row(2).Cell(4).Value = 40;
+        worksheet.Row(2).Cell(5).Value = "Active";
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
-        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Sections-Template.xlsx");
+        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Classes-Template.xlsx");
     }
 }
 

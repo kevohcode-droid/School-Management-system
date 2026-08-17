@@ -17,6 +17,7 @@ import { NotificationsComponent } from './components/notifications/notifications
 import { ChangePasswordComponent } from './components/change-password/change-password';
 import { PreferencesComponent } from './components/preferences/preferences';
 import { ResetPasswordComponent } from './components/reset-password/reset-password';
+import { ReportsComponent } from './components/reports/reports';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'staff', component: StaffComponent },
   { path: 'classes', component: ClassesComponent },
   { path: 'attendance', component: DailyAttendanceComponent },
+  { path: 'reports', component: ReportsComponent },
   { path: 'settings', component: SystemSettingsComponent },
   { path: 'database-center', component: DatabaseCenterComponent },
   { path: 'import-center', component: ImportCenterComponent },

@@ -18,17 +18,81 @@ export class StaffComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
+  submittedStaff?: Partial<CreateStaffRequest>;
   showAddModal: boolean = false;
 
-  // Dropdown options
-  designations: string[] = ['Teacher', 'Principal', 'Vice Principal', 'Accountant', 'Lab Technician', 'Librarian', 'Counselor', 'Administrative Officer', 'Support Staff'];
-  departments: string[] = ['Sciences', 'Humanities', 'Mathematics', 'Languages', 'Technical', 'Arts', 'Physical Education', 'Administration'];
-  employmentStatuses: string[] = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Volunteer'];
+  designations: string[] = [
+    'Teacher',
+    'Principal',
+    'Vice Principal',
+    'Accountant',
+    'Lab Technician',
+    'Librarian',
+    'Counselor',
+    'Administrative Officer',
+    'Support Staff'
+  ];
 
-  newStaff: CreateStaffRequest = this.defaultStaff();
+  departments: string[] = [
+    'Sciences',
+    'Humanities',
+    'Mathematics',
+    'Languages',
+    'Technical',
+    'Arts',
+    'Physical Education',
+    'Administration'
+  ];
 
-  private defaultStaff(): CreateStaffRequest {
-    return {
+  employmentStatuses: string[] = [
+    'Full-time',
+    'Part-time',
+    'Contract',
+    'Internship',
+    'Volunteer'
+  ];
+
+  newStaff: CreateStaffRequest = {
+    employeeId: 'EMP-' + Math.floor(1000 + Math.random() * 9000),
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    gender: 1,
+    nationalId: '',
+    designation: '',
+    department: '',
+    dateOfJoining: new Date().toISOString().split('T')[0],
+    employmentStatus: 'Full-time',
+    qualifications: ''
+  };
+
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    public staffService: StaffService
+  ) {}
+
+  ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.loadStaff();
+  }
+
+  private loadStaff(): void {
+    this.staffService.getStaff().subscribe({
+      next: (data) => { this.staffList = data; },
+      error: (err) => {
+        console.error('Failed to load staff', err);
+        this.errorMessage = 'Failed to load staff list';
+      }
+    });
+  }
+
+  openAddModal(): void {
+    this.newStaff = {
       employeeId: 'EMP-' + Math.floor(1000 + Math.random() * 9000),
       firstName: '',
       lastName: '',
@@ -42,46 +106,48 @@ export class StaffComponent implements OnInit {
       employmentStatus: 'Full-time',
       qualifications: ''
     };
-  }
-
-  constructor(
-    public authService: AuthService,
-    private router: Router,
-    public staffService: StaffService
-  ) {}
-
-  ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-    }
-  }
-
-  openAddModal(): void {
-    this.newStaff = this.defaultStaff();
     this.errorMessage = '';
     this.successMessage = '';
+    this.submittedStaff = undefined;
     this.showAddModal = true;
   }
 
   closeAddModal(): void {
     this.showAddModal = false;
+    this.submittedStaff = undefined;
   }
 
   submitAddStaff(): void {
+    this.submittedStaff = { ...this.newStaff };
+
+    const hasRequiredFields = (
+      this.newStaff.employeeId.trim() !== '' &&
+      this.newStaff.firstName.trim() !== '' &&
+      this.newStaff.lastName.trim() !== '' &&
+      this.newStaff.phone.trim() !== '' &&
+      this.newStaff.designation.trim() !== '' &&
+      this.newStaff.department.trim() !== ''
+    );
+
+    if (!hasRequiredFields) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
-    // Stubbed — backend endpoint not yet implemented
-    setTimeout(() => {
-      this.staffList.unshift({
-        id: crypto.randomUUID(),
-        tenantId: '',
-        ...this.newStaff,
-        createdAtUtc: new Date().toISOString()
-      } as Staff);
-      this.isLoading = false;
-      this.successMessage = `${this.newStaff.firstName} ${this.newStaff.lastName} has been onboarded successfully.`;
-      this.closeAddModal();
-    }, 800);
+
+    this.staffService.createStaff(this.newStaff).subscribe({
+      next: (created) => {
+        this.staffList.unshift(created);
+        this.successMessage = `${this.newStaff.firstName} ${this.newStaff.lastName} has been onboarded successfully.`;
+        this.closeAddModal();
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        this.errorMessage = err.error?.errors?.[0] || err.message || 'Failed to add staff member';
+        this.isLoading = false;
+      }
+    });
   }
 
   getGenderLabel(val: any): string {
@@ -105,9 +171,9 @@ export class StaffComponent implements OnInit {
       if (file) {
         this.staffService.importStaff(file).subscribe({
           next: (result: any) => {
-            alert(`Imported ${result.imported || 0} staff successfully`);
+            this.successMessage = `Imported ${result.imported || 0} staff successfully`;
           },
-          error: (err: any) => alert('Import failed: ' + (err.message || err.error?.errors?.[0] || 'Unknown error'))
+          error: (err: any) => { this.errorMessage = 'Import failed: ' + (err.message || err.error?.errors?.[0] || 'Unknown error'); }
         });
       }
     };

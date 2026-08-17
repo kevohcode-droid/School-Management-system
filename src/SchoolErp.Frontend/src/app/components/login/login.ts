@@ -55,9 +55,9 @@ export class LoginComponent implements OnInit {
 
   private initForms(): void {
     this.loginForm = this.fb.group({
-      tenantCode: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      tenantCode: ['100', [Validators.required, Validators.minLength(2)]],
+      email: ['kevohkevi110@gmail.com', [Validators.required, Validators.email]],
+      password: ['Kevoh2060,!', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
 

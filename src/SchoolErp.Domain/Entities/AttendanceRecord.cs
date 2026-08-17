@@ -13,6 +13,6 @@ public class AttendanceRecord : AuditableEntity, ITenantEntity
     public string? Remarks { get; set; }
     public Guid MarkedByUserId { get; set; }
 
-    // Navigation Properties
     public Student Student { get; set; } = null!;
+    public Section Class { get; set; } = null!;
 }

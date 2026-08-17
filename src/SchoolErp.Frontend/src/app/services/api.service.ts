@@ -55,9 +55,10 @@ export class ApiService {
     return this.http.post<T>(`${this.baseUrl}${endpoint}`, formData, { headers });
   }
 
-  download(endpoint: string): void {
+  download(endpoint: string, filename?: string): void {
     const token = localStorage.getItem('token');
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    
     this.http.get(`${this.baseUrl}${endpoint}`, { 
       headers, 
       responseType: 'blob' as const 
@@ -66,7 +67,7 @@ export class ApiService {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = endpoint.split('/').pop() || 'download';
+        link.download = filename || endpoint.split('/').pop() || 'download';
         link.click();
         window.URL.revokeObjectURL(url);
       }

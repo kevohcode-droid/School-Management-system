@@ -47,12 +47,12 @@ Prerequisites: .NET 10 SDK and a PostgreSQL instance.
 3. Open Swagger at `http://localhost:<port>/swagger`.
 
 ### Seeded demo credentials
-| Field    | Value                |
-|----------|----------------------|
-| Tenant   | `demo`               |
-| Email    | `admin@demo.school`  |
-| Password | `Passw0rd!`          |
-| Roles    | SuperAdmin, Admin    |
+| Field    | Value                  |
+|----------|------------------------|
+| Tenant   | `100`                  |
+| Email    | `kevohkevi110@gmail.com` |
+| Password | `Kevoh2060,!`          |
+| Roles    | Admin                  |
 
 ## Key Endpoints
 - `POST /api/auth/register` — create a user in a tenant
