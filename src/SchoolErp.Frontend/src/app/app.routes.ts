@@ -18,6 +18,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
 import { PreferencesComponent } from './components/preferences/preferences';
 import { ResetPasswordComponent } from './components/reset-password/reset-password';
 import { ReportsComponent } from './components/reports/reports';
+import { FeesComponent } from './components/fees/fees';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -33,6 +34,11 @@ export const routes: Routes = [
   { path: 'classes', component: ClassesComponent },
   { path: 'attendance', component: DailyAttendanceComponent },
   { path: 'reports', component: ReportsComponent },
+  { path: 'fees', component: FeesComponent },
+  { path: 'payments', component: FeesComponent },
+  { path: 'receipts', component: FeesComponent },
+  { path: 'fee-structures', component: FeesComponent },
+  { path: 'payment-methods', component: FeesComponent },
   { path: 'settings', component: SystemSettingsComponent },
   { path: 'database-center', component: DatabaseCenterComponent },
   { path: 'import-center', component: ImportCenterComponent },

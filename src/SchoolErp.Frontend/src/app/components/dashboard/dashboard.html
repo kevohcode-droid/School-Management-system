@@ -42,6 +42,22 @@
     </div>
 
     <div class="sidebar-section">
+      <h4>💳 FINANCE</h4>
+      <button class="sidebar-btn" (click)="navigateTo('/payments')">
+        <span class="sidebar-icon">🧾</span>
+        Transactions &amp; Balances
+      </button>
+      <button class="sidebar-btn" (click)="navigateTo('/fees')">
+        <span class="sidebar-icon">📋</span>
+        Fee Management
+      </button>
+      <button class="sidebar-btn" (click)="navigateTo('/payment-methods')">
+        <span class="sidebar-icon">⚙️</span>
+        Payment Methods
+      </button>
+    </div>
+
+    <div class="sidebar-section">
       <h4>ADMINISTRATION</h4>
       <button class="sidebar-btn" (click)="navigateToTenants()" *ngIf="authService.hasRole('SuperAdmin')">
         <span class="sidebar-icon">🏫</span>

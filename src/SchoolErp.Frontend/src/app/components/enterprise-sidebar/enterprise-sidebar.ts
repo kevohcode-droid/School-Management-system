@@ -93,13 +93,12 @@ export class EnterpriseSidebarComponent implements OnInit {
       { label: 'Examinations', icon: '📝', route: '/examinations' },
       {
         label: 'Finance',
-        icon: '💰',
+        icon: '💳',
         hasChildren: true,
         children: [
-          { label: 'Fees', icon: '💵', route: '/fees' },
-          { label: 'Payments', icon: '💳', route: '/payments' },
-          { label: 'Receipts', icon: '🧾', route: '/receipts' },
-          { label: 'Fee Structures', icon: '📋', route: '/fee-structures' }
+          { label: 'Transactions & Balances', icon: '🧾', route: '/payments' },
+          { label: 'Fee Management', icon: '📋', route: '/fees' },
+          { label: 'Payment Methods', icon: '⚙️', route: '/payment-methods' }
         ]
       },
       { label: 'Library', icon: '📚', route: '/library' },

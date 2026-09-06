@@ -20,6 +20,29 @@ services:
     networks:
       - schoolerp-network
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: schoolerp-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@schoolerp.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - schoolerp-network
+
+  adminer:
+    image: adminer:latest
+    container_name: schoolerp-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - schoolerp-network
+
   backend:
     build:
       context: ./backend

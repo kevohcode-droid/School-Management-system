@@ -1,0 +1,553 @@
+<div class="fees-container">
+  <!-- Header -->
+  <header class="fees-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <div>
+        <h1>Fee & Payment Management</h1>
+        <p class="subtitle">Track fee invoices, record payments across multiple options, and configure payment methods.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openCreateCategoryModal()" class="btn-secondary">
+        + Fee Category
+      </button>
+      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openCreateInvoiceModal()" class="btn-secondary">
+        + New Invoice
+      </button>
+      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openRecordPaymentModal()" class="btn-primary">
+        💳 Record Payment
+      </button>
+    </div>
+  </header>
+
+  <!-- Global Alerts -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span>⚠️ {{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="close-alert">×</button>
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success">
+    <span>✅ {{ successMessage }}</span>
+    <button (click)="successMessage = ''" class="close-alert">×</button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card bg-emerald">
+      <div class="metric-icon">💰</div>
+      <div class="metric-info">
+        <span class="metric-label">Total Revenue Collected</span>
+        <span class="metric-value">KSh {{ totalRevenueCollected.toLocaleString() }}</span>
+      </div>
+    </div>
+    <div class="metric-card bg-amber">
+      <div class="metric-icon">📉</div>
+      <div class="metric-info">
+        <span class="metric-label">Outstanding Balance</span>
+        <span class="metric-value">KSh {{ totalOutstandingBalance.toLocaleString() }}</span>
+      </div>
+    </div>
+    <div class="metric-card bg-indigo">
+      <div class="metric-icon">📄</div>
+      <div class="metric-info">
+        <span class="metric-label">Total Invoices</span>
+        <span class="metric-value">{{ totalInvoicesCount }}</span>
+      </div>
+    </div>
+    <div class="metric-card bg-rose">
+      <div class="metric-icon">⏰</div>
+      <div class="metric-info">
+        <span class="metric-label">Overdue Invoices</span>
+        <span class="metric-value">{{ overdueInvoicesCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button [class.active]="activeTab === 'payments'" (click)="setActiveTab('payments')">
+      🧾 Transactions & Balances ({{ payments.length }})
+    </button>
+    <button [class.active]="activeTab === 'invoices'" (click)="setActiveTab('invoices')">
+      📋 Invoices ({{ invoices.length }})
+    </button>
+    <button [class.active]="activeTab === 'categories'" (click)="setActiveTab('categories')">
+      🏷️ Fee Categories ({{ categories.length }})
+    </button>
+    <button [class.active]="activeTab === 'templates'" (click)="setActiveTab('templates')">
+      📚 Class Structures ({{ templates.length }})
+    </button>
+    <button [class.active]="activeTab === 'methods'" (click)="setActiveTab('methods')">
+      ⚙️ Payment Methods ({{ paymentMethods.length }})
+    </button>
+  </nav>
+
+  <!-- TAB 1: PAYMENTS (TRANSACTIONS & BALANCES) -->
+  <section *ngIf="activeTab === 'payments'" class="tab-content">
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by Transaction Ref, Invoice #..."
+          class="search-input"
+        />
+      </div>
+      <div class="filter-group">
+        <label>Payment Option:</label>
+        <select [(ngModel)]="selectedPaymentMode" class="filter-select">
+          <option value="ALL">All Payment Options</option>
+          <option value="MobileMoney">📱 Mobile Money (M-Pesa / Airtel)</option>
+          <option value="BankTransfer">🏦 Bank Transfer</option>
+          <option value="Cash">💵 Cash</option>
+          <option value="Cheque">📝 Cheque</option>
+          <option value="Card">💳 Credit / Debit Card (Stripe)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ref / Code</th>
+            <th>Invoice #</th>
+            <th>Payment Option</th>
+            <th>Payment Date</th>
+            <th>Amount Paid</th>
+            <th>Status</th>
+            <th>Recorded By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredPayments">
+            <td class="font-mono text-bold">{{ p.transactionReference }}</td>
+            <td><span class="invoice-tag">{{ p.invoiceNumber }}</span></td>
+            <td>
+              <span class="mode-badge">
+                {{ getPaymentModeIcon(p.paymentMode) }} {{ getPaymentModeName(p.paymentMode) }}
+              </span>
+            </td>
+            <td>{{ p.paymentDateUtc | date:'mediumDate' }}</td>
+            <td class="amount-cell text-emerald">KSh {{ p.amount.toLocaleString() }}</td>
+            <td><span class="status-chip chip-completed">Completed</span></td>
+            <td>{{ p.receivedByUserName || 'System' }}</td>
+            <td>
+              <button (click)="viewReceipt(p)" class="btn-sm btn-outline">
+                🧾 View Receipt
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredPayments.length === 0">
+            <td colspan="8" class="empty-state">
+              No payment transactions found matching your filter criteria.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAB 2: INVOICES -->
+  <section *ngIf="activeTab === 'invoices'" class="tab-content">
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by Invoice #, Student Name, Adm #..."
+          class="search-input"
+        />
+      </div>
+      <div class="filter-group">
+        <label>Invoice Status:</label>
+        <select [(ngModel)]="selectedInvoiceStatus" class="filter-select">
+          <option value="ALL">All Statuses</option>
+          <option value="0">Pending</option>
+          <option value="1">Partially Paid</option>
+          <option value="2">Paid</option>
+          <option value="3">Overdue</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Student</th>
+            <th>Section</th>
+            <th>Due Date</th>
+            <th>Total Amount</th>
+            <th>Paid</th>
+            <th>Balance</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of filteredInvoices">
+            <td class="font-mono text-bold">{{ inv.invoiceNumber }}</td>
+            <td>
+              <div class="student-name">{{ inv.studentName }}</div>
+              <div class="sub-text">{{ inv.admissionNumber }}</div>
+            </td>
+            <td>{{ inv.sectionName || '-' }}</td>
+            <td>{{ inv.dueDateUtc | date:'mediumDate' }}</td>
+            <td class="text-bold">KSh {{ inv.amount.toLocaleString() }}</td>
+            <td class="text-emerald">KSh {{ inv.amountPaid.toLocaleString() }}</td>
+            <td class="text-rose text-bold">KSh {{ inv.balance.toLocaleString() }}</td>
+            <td>
+              <span class="status-chip" [ngClass]="getInvoiceStatusBadge(inv.status)">
+                {{ getInvoiceStatusText(inv.status) }}
+              </span>
+            </td>
+            <td>
+              <button
+                *ngIf="inv.balance > 0 && authService.hasAnyRole(['SuperAdmin', 'Admin'])"
+                (click)="openRecordPaymentModal(inv)"
+                class="btn-sm btn-primary"
+              >
+                + Record Payment
+              </button>
+              <span *ngIf="inv.balance <= 0" class="badge-cleared">Cleared</span>
+            </td>
+          </tr>
+          <tr *ngIf="filteredInvoices.length === 0">
+            <td colspan="9" class="empty-state">
+              No fee invoices found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAB 3: CATEGORIES -->
+  <section *ngIf="activeTab === 'categories'" class="tab-content">
+    <div class="tab-header">
+      <h3>Fee Categories</h3>
+      <button (click)="openCreateCategoryModal()" class="btn-secondary">+ Add Category</button>
+    </div>
+
+    <div class="grid-cards">
+      <div *ngFor="let cat of categories" class="category-card">
+        <div class="cat-code">{{ cat.code }}</div>
+        <h4>{{ cat.name }}</h4>
+        <p>{{ cat.description || 'No description provided.' }}</p>
+        <span class="active-badge" *ngIf="cat.isActive">Active</span>
+      </div>
+      <div *ngIf="categories.length === 0" class="empty-state full-width">
+        No fee categories configured yet.
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: TEMPLATES -->
+  <section *ngIf="activeTab === 'templates'" class="tab-content">
+    <div class="tab-header">
+      <h3>Class Fee Structures & Templates</h3>
+    </div>
+
+    <div class="grid-cards">
+      <div *ngFor="let t of templates" class="template-card">
+        <div class="template-header">
+          <h4>{{ t.name }}</h4>
+          <span class="frequency-tag">{{ t.billingFrequency === 2 ? 'Termly' : 'Annual' }}</span>
+        </div>
+        <p>{{ t.description || 'Class fee template breakdown.' }}</p>
+        <div class="template-items-list">
+          <div *ngFor="let item of t.items" class="template-item">
+            <span>{{ item.categoryName }}</span>
+            <span class="text-bold">KSh {{ item.amount.toLocaleString() }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="templates.length === 0" class="empty-state full-width">
+        No fee templates configured yet.
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: PAYMENT METHODS (ADMIN CONTROL PANEL) -->
+  <section *ngIf="activeTab === 'methods'" class="tab-content">
+    <div class="tab-header">
+      <div>
+        <h3>💳 Payment Methods & Gateway Control Panel</h3>
+        <p class="sub-text">Admin control panel to enable, disable, or configure modes of payment (Cash, Bank Transfer, M-Pesa, Stripe Card).</p>
+      </div>
+    </div>
+
+    <div class="methods-grid">
+      <div *ngFor="let m of paymentMethods" class="method-card" [class.method-disabled]="!m.enabled">
+        <div class="method-header">
+          <div class="method-title">
+            <span class="method-icon">{{ m.icon }}</span>
+            <div>
+              <h4>{{ m.name }}</h4>
+              <span class="status-pill" [class.pill-active]="m.enabled" [class.pill-inactive]="!m.enabled">
+                {{ m.enabled ? 'ACTIVE & ENABLED' : 'DISABLED' }}
+              </span>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" [checked]="m.enabled" (change)="togglePaymentMethod(m)" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <p class="method-desc">{{ m.description }}</p>
+
+        <div class="method-details">
+          <div *ngFor="let d of m.details" class="detail-row">
+            <span class="detail-label">{{ d.label }}:</span>
+            <span class="detail-value">{{ d.value }}</span>
+          </div>
+        </div>
+
+        <div class="method-footer">
+          <button (click)="openConfigureMethodModal(m)" class="btn-sm btn-outline">
+            ⚙️ Configure Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL 1: RECORD PAYMENT -->
+  <div *ngIf="showRecordPaymentModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💳 Record Payment Transaction</h3>
+        <button (click)="closeRecordPaymentModal()" class="modal-close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Select Fee Invoice *</label>
+          <select [(ngModel)]="paymentForm.feeInvoiceId" (change)="onInvoiceSelectChange()" class="form-control">
+            <option value="">-- Select Invoice --</option>
+            <option *ngFor="let inv of invoices" [value]="inv.id">
+              {{ inv.invoiceNumber }} - {{ inv.studentName }} (Balance: KSh {{ inv.balance.toLocaleString() }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Option / Method *</label>
+          <select [(ngModel)]="paymentForm.paymentMode" class="form-control">
+            <option *ngFor="let opt of paymentModeOptions" [ngValue]="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Transaction Reference / Code *</label>
+            <input type="text" [(ngModel)]="paymentForm.transactionReference" placeholder="e.g. MPESA-Q12345 / Bank Ref" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Payment Date *</label>
+            <input type="date" [(ngModel)]="paymentForm.paymentDateUtc" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Amount (KSh) * (Max: KSh {{ selectedInvoiceBalance.toLocaleString() }})</label>
+          <input type="number" step="0.01" [(ngModel)]="paymentForm.amount" class="form-control font-mono" />
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Comments</label>
+          <textarea [(ngModel)]="paymentForm.notes" placeholder="Additional notes or depositor name..." class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeRecordPaymentModal()" class="btn-secondary">Cancel</button>
+        <button (click)="submitRecordPayment()" [disabled]="isLoading" class="btn-primary">
+          {{ isLoading ? 'Processing...' : 'Confirm & Save Payment' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CREATE INVOICE -->
+  <div *ngIf="showCreateInvoiceModal" class="modal-overlay">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>📄 Issue New Fee Invoice</h3>
+        <button (click)="closeCreateInvoiceModal()" class="modal-close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Select Student *</label>
+            <select [(ngModel)]="invoiceForm.studentId" class="form-control">
+              <option value="">-- Select Student --</option>
+              <option *ngFor="let s of students" [value]="s.id">
+                {{ s.firstName }} {{ s.lastName }} (Adm: {{ s.admissionNumber }})
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Academic Year & Term</label>
+            <input type="text" [(ngModel)]="invoiceForm.academicYear" placeholder="2026" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Due Date *</label>
+            <input type="date" [(ngModel)]="invoiceForm.dueDateUtc" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Invoice Description</label>
+            <input type="text" [(ngModel)]="invoiceForm.description" placeholder="Term Tuition Fee" class="form-control" />
+          </div>
+        </div>
+
+        <h4>Fee Breakdown Items</h4>
+        <div *ngFor="let item of invoiceForm.items; let i = index" class="item-row">
+          <select [(ngModel)]="item.feeCategoryId" class="form-control flex-1">
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+          <input type="text" [(ngModel)]="item.description" placeholder="Item description" class="form-control flex-2" />
+          <input type="number" [(ngModel)]="item.amount" placeholder="Amount" class="form-control flex-1 font-mono" />
+          <button (click)="removeInvoiceItem(i)" class="btn-icon-danger">✕</button>
+        </div>
+
+        <button (click)="addInvoiceItem()" class="btn-sm btn-outline">+ Add Fee Item</button>
+
+        <div class="invoice-summary-box">
+          <span>Total Invoice Amount:</span>
+          <span class="total-amount">KSh {{ invoiceFormTotal.toLocaleString() }}</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeCreateInvoiceModal()" class="btn-secondary">Cancel</button>
+        <button (click)="submitCreateInvoice()" [disabled]="isLoading" class="btn-primary">
+          {{ isLoading ? 'Creating...' : 'Issue Invoice' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CREATE CATEGORY -->
+  <div *ngIf="showCreateCategoryModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🏷️ Create Fee Category</h3>
+        <button (click)="closeCreateCategoryModal()" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Category Name *</label>
+          <input type="text" [(ngModel)]="categoryForm.name" placeholder="e.g. Tuition Fee, Transport Fee" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Category Code *</label>
+          <input type="text" [(ngModel)]="categoryForm.code" placeholder="e.g. TUITION, BUS, EXAM" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="categoryForm.description" placeholder="Brief description of fee..." class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeCreateCategoryModal()" class="btn-secondary">Cancel</button>
+        <button (click)="submitCreateCategory()" [disabled]="isLoading" class="btn-primary">
+          Save Category
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: CONFIGURE PAYMENT METHOD -->
+  <div *ngIf="showConfigureMethodModal && selectedMethodToConfig" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ Configure {{ selectedMethodToConfig.name }}</h3>
+        <button (click)="closeConfigureMethodModal()" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text">{{ selectedMethodToConfig.description }}</p>
+
+        <div *ngFor="let d of selectedMethodToConfig.details" class="form-group">
+          <label>{{ d.label }}</label>
+          <input type="text" [(ngModel)]="d.value" class="form-control" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeConfigureMethodModal()" class="btn-secondary">Cancel</button>
+        <button (click)="saveMethodConfiguration()" class="btn-primary">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: PRINTABLE RECEIPT -->
+  <div *ngIf="showReceiptModal && selectedReceipt" class="modal-overlay">
+    <div class="modal-card receipt-card">
+      <div class="modal-header print-hide">
+        <h3>🧾 Payment Receipt Preview</h3>
+        <button (click)="closeReceiptModal()" class="modal-close">✕</button>
+      </div>
+
+      <div class="receipt-content">
+        <div class="receipt-header">
+          <h2>SCHOOL ERP SYSTEM</h2>
+          <p>Official Student Fee Payment Receipt</p>
+          <div class="receipt-badge">PAID IN FULL / PARTIAL</div>
+        </div>
+
+        <div class="receipt-grid">
+          <div><strong>Receipt Ref:</strong> {{ selectedReceipt.transactionReference }}</div>
+          <div><strong>Date:</strong> {{ selectedReceipt.paymentDateUtc | date:'mediumDate' }}</div>
+          <div><strong>Invoice #:</strong> {{ selectedReceipt.invoiceNumber }}</div>
+          <div><strong>Payment Option:</strong> {{ getPaymentModeName(selectedReceipt.paymentMode) }}</div>
+          <div *ngIf="associatedInvoice"><strong>Student:</strong> {{ associatedInvoice.studentName }}</div>
+          <div *ngIf="associatedInvoice"><strong>Adm #:</strong> {{ associatedInvoice.admissionNumber }}</div>
+        </div>
+
+        <div class="receipt-table-box">
+          <table class="receipt-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th class="text-right">Amount Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Payment towards Invoice {{ selectedReceipt.invoiceNumber }}</td>
+                <td class="text-right font-mono">KSh {{ selectedReceipt.amount.toLocaleString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="receipt-total font-mono">
+          <span>Amount Received:</span>
+          <span>KSh {{ selectedReceipt.amount.toLocaleString() }}</span>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Received By: {{ selectedReceipt.receivedByUserName || 'School Administrator' }}</p>
+          <p class="thank-you">Thank you for your payment!</p>
+        </div>
+      </div>
+
+      <div class="modal-footer print-hide">
+        <button (click)="closeReceiptModal()" class="btn-secondary">Close</button>
+        <button (click)="printReceipt()" class="btn-primary">🖨️ Print Receipt</button>
+      </div>
+    </div>
+  </div>
+</div>

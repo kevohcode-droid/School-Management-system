@@ -177,6 +177,10 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/settings']);
   }
 
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+  }
+
   addStudent(): void {
     this.router.navigate(['/students']);
   }

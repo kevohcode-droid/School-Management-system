@@ -121,12 +121,12 @@ export class StaffComponent implements OnInit {
     this.submittedStaff = { ...this.newStaff };
 
     const hasRequiredFields = (
-      this.newStaff.employeeId.trim() !== '' &&
-      this.newStaff.firstName.trim() !== '' &&
-      this.newStaff.lastName.trim() !== '' &&
-      this.newStaff.phone.trim() !== '' &&
-      this.newStaff.designation.trim() !== '' &&
-      this.newStaff.department.trim() !== ''
+      (this.newStaff.employeeId?.trim() ?? '') !== '' &&
+      (this.newStaff.firstName?.trim() ?? '') !== '' &&
+      (this.newStaff.lastName?.trim() ?? '') !== '' &&
+      (this.newStaff.phone?.trim() ?? '') !== '' &&
+      (this.newStaff.designation?.trim() ?? '') !== '' &&
+      (this.newStaff.department?.trim() ?? '') !== ''
     );
 
     if (!hasRequiredFields) {

@@ -311,8 +311,7 @@
   color: #9a3412;
 }
 
-.status-badge.Excused,
-.status-badge.4 {
+.status-badge.Excused {
   background: #eff6ff;
   color: #1e40af;
 }
