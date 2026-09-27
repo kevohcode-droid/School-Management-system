@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolErp.Application.Common.Interfaces;
+using SchoolErp.Application.Profile.Dtos;
 using SchoolErp.Infrastructure.Identity;
 
 namespace SchoolErp.WebAPI.Controllers;
@@ -86,11 +87,4 @@ public class UsersController : ControllerBase
 
         return Ok(new { message = "Profile updated successfully" });
     }
-}
-
-public record UpdateProfileRequest
-{
-    public string FullName { get; init; } = string.Empty;
-    public string? Phone { get; init; }
-    public string? Address { get; init; }
 }

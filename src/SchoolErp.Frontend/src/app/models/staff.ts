@@ -30,4 +30,12 @@ export interface CreateStaffRequest {
   dateOfJoining: string | null;
   employmentStatus: string;
   qualifications?: string | null;
+  createLoginAccount?: boolean;
+  accountRole?: 'Teacher' | 'Staff' | 'Accountant' | null;
+}
+
+export interface CreateStaffResponse {
+  staff: Staff;
+  loginEmail?: string | null;
+  temporaryPassword?: string | null;
 }

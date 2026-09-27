@@ -36,7 +36,7 @@ public class ProfileController : ControllerBase
 
     [HttpPut]
     [Authorize]
-    public async Task<IActionResult> Update([FromBody] SchoolErp.Application.Profile.Dtos.UpdateProfileRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update([FromBody] UpdateProfileRequest request, CancellationToken ct)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

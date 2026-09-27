@@ -8,5 +8,6 @@ public interface IJwtTokenGenerator
         string userName,
         Guid tenantId,
         IEnumerable<string> roles,
-        string fullName);
+        string fullName,
+        IEnumerable<Guid>? linkedStudentIds = null);
 }

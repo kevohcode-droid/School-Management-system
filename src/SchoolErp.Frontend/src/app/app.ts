@@ -5,10 +5,12 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
-  templateUrl: './app.html',
-  styleUrls: ['./app.css']
+  imports: [CommonModule, RouterOutlet],
+  template: `
+    <router-outlet></router-outlet>
+  `,
+  styles: [`
+    :host { display: block; }
+  `]
 })
-export class AppComponent {
-  title = 'School ERP';
-}
+export class AppComponent {}

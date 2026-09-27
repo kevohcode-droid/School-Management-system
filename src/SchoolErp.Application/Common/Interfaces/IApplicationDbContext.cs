@@ -10,9 +10,11 @@ public interface IApplicationDbContext
     DbSet<Section> Sections { get; }
     DbSet<StaffMember> StaffMembers { get; }
     DbSet<Parent> Parents { get; }
+    DbSet<ParentStudent> ParentStudents { get; }
     DbSet<Announcement> Announcements { get; }
     DbSet<Course> Courses { get; }
     DbSet<Grade> Grades { get; }
+    DbSet<StudentMark> StudentMarks { get; }
     DbSet<FeeInvoice> FeeInvoices { get; }
     DbSet<FeeCategory> FeeCategories { get; }
     DbSet<FeeTemplate> FeeTemplates { get; }

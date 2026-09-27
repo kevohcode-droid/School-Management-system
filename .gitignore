@@ -19,3 +19,20 @@ Thumbs.db
 *.log
 appsettings.*.local.json
 node_modules/ 
+# .NET build output
+bin/
+obj/
+
+# Published/deployment output
+publish/
+IIS/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Visual Studio
+.vs/
+*.user
+*.suo

@@ -16,6 +16,15 @@ public record CreateStaffRequest
     public string? DateOfJoining { get; init; }
     public string EmploymentStatus { get; init; } = string.Empty;
     public string? Qualifications { get; init; }
+    public bool CreateLoginAccount { get; init; }
+    public string? AccountRole { get; init; }
+}
+
+public record CreateStaffResponse
+{
+    public StaffDto Staff { get; init; } = new();
+    public string? LoginEmail { get; init; }
+    public string? TemporaryPassword { get; init; }
 }
 
 public record UpdateStaffRequest

@@ -26,6 +26,7 @@ export class NotificationsComponent implements OnInit {
   notifications: Notification[] = [];
   filteredNotifications: Notification[] = [];
   isLoading = true;
+  searchQuery = '';
   filterType = '';
   showUnreadOnly = false;
   currentPage = 1;
@@ -116,22 +117,24 @@ export class NotificationsComponent implements OnInit {
       }
     ];
 
-    setTimeout(() => {
-      this.notifications = mockNotifications;
-      this.filteredNotifications = mockNotifications;
-      this.isLoading = false;
-    }, 500);
+    this.notifications = mockNotifications;
+    this.filteredNotifications = mockNotifications;
+    this.isLoading = false;
   }
 
   filterNotifications(): void {
     this.currentPage = 1;
     const type = this.filterType.toLowerCase().trim();
+    const query = this.searchQuery.toLowerCase().trim();
     const unreadOnly = this.showUnreadOnly;
 
     this.filteredNotifications = this.notifications.filter(n => {
       const matchesType = type ? n.type === type : true;
+      const matchesQuery = query
+        ? `${n.title} ${n.message}`.toLowerCase().includes(query)
+        : true;
       const matchesUnread = unreadOnly ? !n.isRead : true;
-      return matchesType && matchesUnread;
+      return matchesType && matchesQuery && matchesUnread;
     });
   }
 
@@ -170,12 +173,12 @@ export class NotificationsComponent implements OnInit {
 
   getNotificationIcon(type: string): string {
     const icons: { [key: string]: string } = {
-      'success': '✅',
+      'success': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span>',
       'info': 'ℹ️',
-      'warning': '⚠️',
-      'error': '❌'
+      'warning': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">warning</span>️',
+      'error': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">cancel</span>'
     };
-    return icons[type] || '📢';
+    return icons[type] || '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">campaign</span>';
   }
 
   getTypeBadgeClass(type: string): string {

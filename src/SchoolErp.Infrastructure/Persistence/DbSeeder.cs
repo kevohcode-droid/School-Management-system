@@ -8,14 +8,14 @@ using SchoolErp.Infrastructure.Identity;
 namespace SchoolErp.Infrastructure.Persistence;
 
 /// <summary>
-/// Applies migrations and seeds baseline data: roles and a local demo admin.
+/// Applies migrations and seeds baseline data: roles and a local administrator.
 /// </summary>
 public static class DbSeeder
 {
-    // Default demo tenant and admin credentials (change as needed for local testing)
-    private const string DemoTenantCode = "100";
-    private const string DemoAdminEmail = "kevohkevi110@gmail.com";
-    private const string DemoAdminPassword = "Kevoh2060,!";
+    private const string SeedTenantCode = "100";
+    private const string SeedSchoolName = "Maina Group of Schools";
+    private const string SeedAdminEmail = "kevohkevi110@gmail.com";
+    private const string SeedAdminPassword = "Kevoh2060,!";
 
     public static async Task SeedAsync(IServiceProvider services)
     {
@@ -26,16 +26,7 @@ public static class DbSeeder
         var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
-        try
-        {
-            await db.Database.MigrateAsync();
-        }
-        catch
-        {
-            // If migrations can't be applied (pending model changes, etc.),
-            // continue and attempt to seed what we can. This helps local
-            // developer workflows where migrations may be pending.
-        }
+        await db.Database.MigrateAsync();
 
         foreach (var role in Roles.All)
         {
@@ -45,61 +36,67 @@ public static class DbSeeder
 
         var tenant = await db.Tenants
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(t => t.Code == DemoTenantCode);
+            .FirstOrDefaultAsync(t => t.Code == SeedTenantCode);
 
         if (tenant is null)
         {
             tenant = new Tenant
             {
-                Name = "Demo School",
-                Code = DemoTenantCode,
-                ContactEmail = DemoAdminEmail,
+                Name = SeedSchoolName,
+                Code = SeedTenantCode,
+                ContactEmail = SeedAdminEmail,
                 IsActive = true
             };
 
             db.Tenants.Add(tenant);
             await db.SaveChangesAsync();
         }
-        else if (!tenant.IsActive)
+        else if (!tenant.IsActive || tenant.Name == "Demo School")
         {
             tenant.IsActive = true;
+            tenant.Name = SeedSchoolName;
             await db.SaveChangesAsync();
         }
 
-        var admin = await userManager.FindByEmailAsync(DemoAdminEmail);
+        var admin = await userManager.FindByEmailAsync(SeedAdminEmail);
         if (admin is null)
         {
             admin = new ApplicationUser
             {
-                UserName = DemoAdminEmail,
-                Email = DemoAdminEmail,
+                UserName = SeedAdminEmail,
+                Email = SeedAdminEmail,
                 EmailConfirmed = true,
-                FirstName = "Demo",
-                LastName = "Admin",
+                FirstName = "School",
+                LastName = "Administrator",
                 TenantId = tenant.Id
             };
 
-            var created = await userManager.CreateAsync(admin, DemoAdminPassword);
+            var created = await userManager.CreateAsync(admin, SeedAdminPassword);
             if (!created.Succeeded)
             {
                 throw new InvalidOperationException(
-                    $"Failed to seed demo admin: {string.Join("; ", created.Errors.Select(e => e.Description))}");
+                    $"Failed to seed local administrator: {string.Join("; ", created.Errors.Select(e => e.Description))}");
             }
         }
         else
         {
             admin.TenantId = tenant.Id;
             admin.EmailConfirmed = true;
+            if (admin.FirstName == "Demo")
+            {
+                admin.FirstName = "School";
+                admin.LastName = "Administrator";
+            }
             await userManager.UpdateAsync(admin);
 
-            if (!await userManager.CheckPasswordAsync(admin, DemoAdminPassword))
+            if (!await userManager.CheckPasswordAsync(admin, SeedAdminPassword))
             {
                 var resetToken = await userManager.GeneratePasswordResetTokenAsync(admin);
-                var reset = await userManager.ResetPasswordAsync(admin, resetToken, DemoAdminPassword);
+                var reset = await userManager.ResetPasswordAsync(admin, resetToken, SeedAdminPassword);
                 if (!reset.Succeeded)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to reset demo admin password: {string.Join("; ", reset.Errors.Select(e => e.Description))}");
+                        $"Failed to reset local administrator password: {string.Join("; ", reset.Errors.Select(e => e.Description))}");
                 }
             }
         }
@@ -108,6 +105,45 @@ public static class DbSeeder
         {
             if (!await userManager.IsInRoleAsync(admin, role))
                 await userManager.AddToRoleAsync(admin, role);
+        }
+
+        // Seed test users for role-based access checks.
+        var dummyUsers = new List<(string Email, string FirstName, string LastName, string Role)>
+        {
+            ("superadmin@demo.com", "Super", "Admin", Roles.SuperAdmin),
+            ("teacher@demo.com", "Alex", "Teacher", Roles.Teacher),
+            ("student@demo.com", "Alex", "Student", Roles.Student),
+            ("parent@demo.com", "Alex", "Parent", Roles.Parent),
+            ("staff@demo.com", "Alex", "Staff", Roles.Staff),
+            ("accountant@demo.com", "Alex", "Accountant", Roles.Accountant)
+        };
+
+        foreach (var u in dummyUsers)
+        {
+            var user = await userManager.FindByEmailAsync(u.Email);
+            if (user is null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = u.Email,
+                    Email = u.Email,
+                    EmailConfirmed = true,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    TenantId = tenant.Id
+                };
+                await userManager.CreateAsync(user, "Test1234!");
+            }
+            else if (user.FirstName == "Demo")
+            {
+                user.FirstName = u.FirstName;
+                user.LastName = u.LastName;
+                await userManager.UpdateAsync(user);
+            }
+            if (!await userManager.IsInRoleAsync(user, u.Role))
+            {
+                await userManager.AddToRoleAsync(user, u.Role);
+            }
         }
     }
 

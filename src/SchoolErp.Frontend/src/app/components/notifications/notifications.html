@@ -1,7 +1,7 @@
 <div class="notifications-layout">
   <nav class="sidebar">
     <div class="sidebar-header">
-      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <button class="back-btn" (click)="goBack()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <h2>Notifications</h2>
     </div>
 
@@ -12,7 +12,7 @@
           <span class="stat-value">{{ notifications.filter(n => !n.isRead).length }}</span>
         </div>
         <button class="mark-all-btn" (click)="markAllAsRead()">
-          <span>✓</span> Mark All Read
+          <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check</span></span> Mark All Read
         </button>
       </div>
     </div>
@@ -28,8 +28,8 @@
       <div class="filters">
         <div class="search-box">
           <input type="text" placeholder="Search notifications..." 
-                 [(ngModel)]="filterType" (ngModelChange)="filterNotifications()">
-          <span class="search-icon">🔍</span>
+               [(ngModel)]="searchQuery" (ngModelChange)="filterNotifications()">
+          <span class="search-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
         </div>
 
         <div class="filter-row">
@@ -64,17 +64,17 @@
             </div>
             <div class="notification-actions" (click)="$event.stopPropagation()">
               <button class="action-btn" (click)="markAsRead(notification)" *ngIf="!notification.isRead">
-                ✓
+                <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check</span>
               </button>
               <button class="action-btn delete-btn" (click)="deleteNotification(notification.id)">
-                🗑️
+                <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">delete</span>️
               </button>
             </div>
           </div>
         </div>
 
         <div class="no-notifications" *ngIf="!isLoading && filteredNotifications.length === 0">
-          <div class="empty-icon">🔔</div>
+          <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">notifications</span></div>
           <h3>No notifications found</h3>
           <p>Try adjusting your filters or check back later.</p>
         </div>

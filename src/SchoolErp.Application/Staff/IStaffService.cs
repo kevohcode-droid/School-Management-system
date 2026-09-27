@@ -7,7 +7,7 @@ public interface IStaffService
 {
     Task<IReadOnlyList<StaffDto>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<StaffMember>> GetForExportAsync(CancellationToken ct = default);
-    Task<StaffDto> CreateAsync(CreateStaffRequest request, CancellationToken ct = default);
+    Task<CreateStaffResponse> CreateAsync(CreateStaffRequest request, CancellationToken ct = default);
     Task<StaffDto> UpdateAsync(Guid id, UpdateStaffRequest request, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);
     Task<int> ImportFromRowsAsync(IReadOnlyList<StaffImportRow> rows, CancellationToken ct = default);

@@ -1,7 +1,7 @@
 <div class="page-container">
   <header class="page-header">
     <div class="header-left">
-      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <button (click)="goBack()" class="back-btn"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <div>
         <h1>Reports & Exports</h1>
         <p class="page-subtitle">View school records and download detailed reports.</p>
@@ -14,7 +14,7 @@
     <div class="reports-grid">
       <!-- Students Card -->
       <div class="report-card" [class.active]="activeReport === 'students'">
-        <div class="report-icon">🎓</div>
+        <div class="report-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></div>
         <div class="report-content">
           <h3>Students</h3>
           <p class="report-desc">View and export student records.</p>
@@ -26,7 +26,7 @@
 
       <!-- Staff Card -->
       <div class="report-card" [class.active]="activeReport === 'staff'">
-        <div class="report-icon">👩‍🏫</div>
+        <div class="report-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></div>
         <div class="report-content">
           <h3>Staff</h3>
           <p class="report-desc">View and export staff records.</p>
@@ -38,7 +38,7 @@
 
       <!-- Classes Card -->
       <div class="report-card" [class.active]="activeReport === 'classes'">
-        <div class="report-icon">📚</div>
+        <div class="report-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">book</span></div>
         <div class="report-content">
           <h3>Classes</h3>
           <p class="report-desc">View and export class information.</p>
@@ -50,7 +50,7 @@
 
       <!-- Attendance Card -->
       <div class="report-card" [class.active]="activeReport === 'attendance'">
-        <div class="report-icon">🗓️</div>
+        <div class="report-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">calendar_today</span>️</div>
         <div class="report-content">
           <h3>Attendance</h3>
           <p class="report-desc">View and export attendance records.</p>
@@ -63,11 +63,11 @@
 
     <!-- Success/Error Messages -->
     <div class="success-message" *ngIf="successMessage">
-      ✅ {{ successMessage }}
+      <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span> {{ successMessage }}
     </div>
 
     <div class="error-message" *ngIf="errorMessage">
-      ⚠️ {{ errorMessage }}
+      <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">warning</span>️ {{ errorMessage }}
     </div>
 
     <!-- Loading -->

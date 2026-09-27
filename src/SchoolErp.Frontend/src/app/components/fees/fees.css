@@ -142,9 +142,16 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  background: var(--glass-bg, #ffffff);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border, #e2e8f0);
+  box-shadow: var(--shadow-xs, 0 4px 12px rgba(0, 0, 0, 0.03));
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(0,0,0,0.1), 0 0 15px rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .metric-icon {
@@ -568,6 +575,12 @@
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.category-card:hover, .template-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  border-color: #93c5fd;
 }
 
 .cat-code {
@@ -617,20 +630,22 @@
 }
 
 .method-card {
-  background: #ffffff;
+  background: var(--glass-bg, #ffffff);
+  backdrop-filter: blur(8px);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--glass-border, #e2e8f0);
   padding: 1.5rem;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-sm, 0 4px 14px rgba(0, 0, 0, 0.03));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: all 0.2s ease;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .method-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), 0 0 15px rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-5px) scale(1.01);
 }
 
 .method-disabled {
@@ -761,3 +776,43 @@ input:checked + .slider:before { transform: translateX(20px); }
     display: none !important;
   }
 }
+
+
+/* ── Fees page additions — design-system upgrades ─────────── */
+
+.search-box { position: relative; display: flex; align-items: center; flex: 1; min-width: 220px; }
+.search-icon-svg {
+  position: absolute;
+  left: var(--space-3);
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-400);
+  pointer-events: none;
+}
+.search-input-inline {
+  padding-left: calc(var(--space-3) + 22px) !important;
+  border-radius: var(--radius-full) !important;
+}
+.filter-select-sm {
+  max-width: 160px;
+  font-size: var(--text-sm);
+}
+.admission-code {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: var(--text-xs);
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  user-select: none;
+}
+.text-muted { color: var(--text-muted); font-size: var(--text-xs); }

@@ -26,6 +26,8 @@ export interface AuthResponse {
   fullName: string;
   tenantId: string;
   roles: string[];
+  linkedStudentIds?: string[];
+  mustChangePassword?: boolean;
 }
 
 export interface CurrentUser {
@@ -36,6 +38,7 @@ export interface CurrentUser {
   tenantName?: string;
   tenantCode?: string;
   roles: string[];
+  linkedStudentIds?: string[];
 }
 
 export interface UserProfile {

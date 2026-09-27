@@ -1,61 +1,153 @@
-<div class="enterprise-sidebar">
+<!-- Mobile backdrop -->
+<div
+  class="sidebar-backdrop"
+  [class.visible]="mobileOpen()"
+  (click)="requestCloseMobile.emit()"
+  aria-hidden="true"
+></div>
+
+<!-- Sidebar -->
+<aside
+  class="sidebar"
+  [class.collapsed]="collapsed()"
+  [class.mobile-open]="mobileOpen()"
+  role="navigation"
+  aria-label="Main navigation"
+>
+  <!-- Header: Brand + Collapse Toggle -->
   <div class="sidebar-header">
-    <div class="sidebar-brand">
-      <span class="brand-icon">🏫</span>
-      <span class="brand-text">{{ currentUser?.tenantName || 'School ERP' }}</span>
-    </div>
-    <div class="sidebar-academic-info" *ngIf="summary || currentUser">
-      <small *ngIf="summary?.academicYear">AY: {{ summary.academicYear }}</small>
-      <small *ngIf="summary?.currentTerm">Term: {{ summary.currentTerm }}</small>
-      <small *ngIf="summary?.currentSemester">Sem: {{ summary.currentSemester }}</small>
-    </div>
+    <a routerLink="/dashboard" class="sidebar-brand" [attr.aria-label]="collapsed() ? 'School ERP home' : null">
+      <!-- School icon SVG -->
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 7l8-4 8 4v2l-8 4-8-4V7z M4 13l8 4 8-4 M4 7v10 M20 7v10 M12 3v18"/>
+      </svg>
+      <span class="brand-text" [class.sr-only]="collapsed()">
+        {{ currentUser?.tenantName || 'School ERP' }}
+      </span>
+    </a>
+
+    <button
+      class="collapse-toggle"
+      (click)="toggleCollapse()"
+      [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      [attr.aria-expanded]="!collapsed()"
+      title="{{ collapsed() ? 'Expand' : 'Collapse' }}"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          [attr.d]="collapsed()
+            ? 'M13 5l7 7-7 7M5 5l7 7-7 7'
+            : 'M11 19l-7-7 7-7M19 19l-7-7 7-7'"/>
+      </svg>
+    </button>
   </div>
 
-  <nav class="sidebar-nav">
-    <div class="sidebar-section" *ngFor="let item of sidebarItems">
-      <button
-        class="sidebar-item"
-        [class.active]="isActive(item)"
-        [class.has-children]="item.hasChildren"
-        (click)="item.hasChildren ? toggleExpand(item) : navigateTo(item.route!)"
-        *ngIf="!(item.adminOnly && !hasAnyRole(['Admin', 'SuperAdmin']))"
-      >
-        <span class="sidebar-icon">{{ item.icon }}</span>
-        <span class="sidebar-label">{{ item.label }}</span>
-        <span class="sidebar-arrow" *ngIf="item.hasChildren">
-          {{ expandedItems.has(item.label) ? '▼' : '▶' }}
-        </span>
-      </button>
+  <!-- Academic context chip -->
+  <div class="sidebar-context" *ngIf="currentUser && !collapsed()">
+    <span class="context-chip" *ngIf="currentUser?.academicYear">
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+      AY {{ currentUser.academicYear }}
+    </span>
+  </div>
 
-      <div class="sidebar-children" *ngIf="item.hasChildren && expandedItems.has(item.label)">
-        <button
-          class="sidebar-child-item"
-          [class.active]="isActive(child)"
-          (click)="navigateTo(child.route!)"
-          *ngFor="let child of item.children"
-        >
-          <span class="sidebar-icon">{{ child.icon }}</span>
-          <span class="sidebar-label">{{ child.label }}</span>
-        </button>
-      </div>
-    </div>
+  <!-- Nav items -->
+  <nav class="sidebar-nav" aria-label="Site pages">
+    <ul class="nav-list" role="list">
+      @for (item of visibleItems; track item.id) {
+        <li class="nav-item" [class.has-children]="item.children?.length">
+          <!-- Group toggle (parent with children) -->
+          @if (item.children?.length) {
+            <button
+              class="nav-btn nav-group-btn"
+              [class.active]="isGroupActive(item)"
+              [class.expanded]="isGroupExpanded(item)"
+              (click)="toggleGroup(item)"
+              (keydown)="onKeydown($event, item)"
+              [attr.aria-expanded]="isGroupExpanded(item)"
+              [attr.aria-controls]="'group-' + item.id"
+              [title]="collapsed() ? item.label : null"
+            >
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/>
+              </svg>
+              <span class="nav-label" [class.sr-only]="collapsed()">{{ item.label }}</span>
+              <svg class="nav-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+                [class.sr-only]="collapsed()">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            <!-- Children -->
+            <ul
+              [id]="'group-' + item.id"
+              class="nav-children"
+              [class.open]="isGroupExpanded(item)"
+              role="list"
+            >
+              @for (child of item.children; track child.id) {
+                <li>
+                  <button
+                    class="nav-btn nav-child-btn"
+                    [class.active]="child.route ? isActive(child.route) : false"
+                    (click)="child.route ? navigate(child.route) : null"
+                    (keydown)="onKeydown($event, child)"
+                    [attr.aria-current]="child.route && isActive(child.route) ? 'page' : null"
+                    [title]="collapsed() ? child.label : null"
+                  >
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="child.icon"/>
+                    </svg>
+                    <span class="nav-label" [class.sr-only]="collapsed()">{{ child.label }}</span>
+                    @if (child.badge) {
+                      <span class="nav-badge" aria-label="{{ child.badge }} notifications">{{ child.badge }}</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <!-- Leaf nav item -->
+            <button
+              class="nav-btn"
+              [class.active]="item.route ? isActive(item.route) : false"
+              (click)="item.route ? navigate(item.route) : null"
+              (keydown)="onKeydown($event, item)"
+              [attr.aria-current]="item.route && isActive(item.route) ? 'page' : null"
+              [title]="collapsed() ? item.label : null"
+            >
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/>
+              </svg>
+              <span class="nav-label" [class.sr-only]="collapsed()">{{ item.label }}</span>
+              @if (item.badge) {
+                <span class="nav-badge" aria-label="{{ item.badge }} notifications">{{ item.badge }}</span>
+              }
+            </button>
+          }
+        </li>
+      }
+    </ul>
   </nav>
 
+  <!-- Footer: Profile + Logout -->
   <div class="sidebar-footer">
-    <button class="sidebar-item" (click)="navigateTo('/profile')">
-      <span class="sidebar-icon">👤</span>
-      <span class="sidebar-label">Profile</span>
+    <button class="nav-btn footer-btn" (click)="navigate(currentUser?.roles?.includes('Student') ? '/student/profile' : '/profile')" title="{{ collapsed() ? 'Profile' : null }}">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="nav-label" [class.sr-only]="collapsed()">
+        {{ currentUser ? (currentUser.fullName || currentUser.email) : 'Profile' }}
+      </span>
     </button>
-    <button class="sidebar-item" (click)="logout()">
-      <span class="sidebar-icon">🚪</span>
-      <span class="sidebar-label">Logout</span>
-    </button>
-  </div>
-</div>
 
-<!-- Summary data for academic info -->
-<ng-container *ngIf="currentUser">
-  <div class="summary-data" *ngIf="summary">
-    {{ summary | json }}
+    <button class="nav-btn footer-btn logout-btn" (click)="logout()" title="{{ collapsed() ? 'Logout' : null }}" aria-label="Log out">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      <span class="nav-label" [class.sr-only]="collapsed()">Log out</span>
+    </button>
   </div>
-</ng-container>
+</aside>

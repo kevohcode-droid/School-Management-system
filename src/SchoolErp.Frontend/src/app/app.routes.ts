@@ -19,32 +19,72 @@ import { PreferencesComponent } from './components/preferences/preferences';
 import { ResetPasswordComponent } from './components/reset-password/reset-password';
 import { ReportsComponent } from './components/reports/reports';
 import { FeesComponent } from './components/fees/fees';
+import { PerformanceComponent } from './components/performance/performance';
+import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
+import { AuthLayoutComponent } from './layouts/auth-layout.component';
+import { DashboardLayoutComponent } from './layouts/dashboard-layout.component';
+import { StudentDashboardComponent } from './components/student-portal/student-dashboard/student-dashboard';
+import { StudentAttendanceComponent } from './components/student-portal/student-attendance/student-attendance';
+import { StudentFeesComponent } from './components/student-portal/student-fees/student-fees';
+import { StudentPerformanceComponent } from './components/student-portal/student-performance/student-performance';
+import { StudentProfileComponent } from './components/student-portal/student-profile/student-profile';
+import { studentGuard } from './guards/student.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'analytics', component: AnalyticsComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: 'change-password', component: ChangePasswordComponent },
-  { path: 'preferences', component: PreferencesComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'students', component: StudentsComponent },
-  { path: 'tenants', component: TenantsComponent },
-  { path: 'staff', component: StaffComponent },
-  { path: 'classes', component: ClassesComponent },
-  { path: 'attendance', component: DailyAttendanceComponent },
-  { path: 'reports', component: ReportsComponent },
-  { path: 'fees', component: FeesComponent },
-  { path: 'payments', component: FeesComponent },
-  { path: 'receipts', component: FeesComponent },
-  { path: 'fee-structures', component: FeesComponent },
-  { path: 'payment-methods', component: FeesComponent },
-  { path: 'settings', component: SystemSettingsComponent },
-  { path: 'database-center', component: DatabaseCenterComponent },
-  { path: 'import-center', component: ImportCenterComponent },
-  { path: 'export-center', component: ExportCenterComponent },
-  { path: 'audit-logs', component: AuditLogsComponent },
-  { path: 'notifications', component: NotificationsComponent },
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  {
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
+      { path: '', redirectTo: '/login', pathMatch: 'full' }
+    ]
+  },
+  {
+    path: '',
+    component: DashboardLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: 'dashboard', component: DashboardComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Teacher', 'Parent', 'Accountant', 'Staff'] } },
+      { path: 'student', component: StudentDashboardComponent, canActivate: [studentGuard] },
+      { path: 'student/attendance', component: StudentAttendanceComponent, canActivate: [studentGuard] },
+      { path: 'student/fees', component: StudentFeesComponent, canActivate: [studentGuard] },
+      { path: 'student/performance', component: StudentPerformanceComponent, canActivate: [studentGuard] },
+      { path: 'student/profile', component: StudentProfileComponent, canActivate: [studentGuard] },
+      { path: 'analytics', component: AnalyticsComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'profile', component: ProfileComponent },
+      { path: 'change-password', component: ChangePasswordComponent },
+      { path: 'preferences', component: PreferencesComponent },
+      { path: 'students', component: StudentsComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Teacher'] } },
+      { path: 'tenants', component: TenantsComponent, canActivate: [roleGuard], data: { roles: ['SuperAdmin'] } },
+      { path: 'staff', component: StaffComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'classes', component: ClassesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Teacher'] } },
+      { path: 'attendance', component: DailyAttendanceComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Teacher'] } },
+      {
+        path: 'academics/performance',
+        component: PerformanceComponent,
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SuperAdmin', 'Teacher', 'Student'] }
+      },
+      { path: 'reports', component: ReportsComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Teacher', 'Accountant'] } },
+      { path: 'fees', component: FeesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Accountant'] } },
+      { path: 'payments', component: FeesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Accountant'] } },
+      { path: 'receipts', component: FeesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Accountant'] } },
+      { path: 'fee-structures', component: FeesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Accountant'] } },
+      { path: 'payment-methods', component: FeesComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin', 'Accountant'] } },
+      { path: 'settings', component: SystemSettingsComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'database-center', component: DatabaseCenterComponent, canActivate: [roleGuard], data: { roles: ['SuperAdmin'] } },
+      { path: 'import-center', component: ImportCenterComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'export-center', component: ExportCenterComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'audit-logs', component: AuditLogsComponent, canActivate: [roleGuard], data: { roles: ['Admin', 'SuperAdmin'] } },
+      { path: 'notifications', component: NotificationsComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
+  { path: 'admin', redirectTo: '/settings', pathMatch: 'full' },
+  { path: 'teacher', redirectTo: '/academics/performance', pathMatch: 'full' },
+  { path: 'parent', redirectTo: '/academics/performance', pathMatch: 'full' },
+  { path: 'performance', redirectTo: '/academics/performance', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
 ];

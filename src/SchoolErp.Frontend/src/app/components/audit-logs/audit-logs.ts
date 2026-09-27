@@ -133,17 +133,17 @@ export class AuditLogsComponent implements OnInit {
 
   getActionIcon(action: string): string {
     const icons: { [key: string]: string } = {
-      'LOGIN': '🔐',
-      'REGISTER': '➕',
-      'UPDATE': '✏️',
-      'DELETE': '🗑️',
-      'BACKUP_COMPLETED': '💾',
-      'ATTENDANCE_MARKED': '📋',
-      'PAYMENT': '💰',
-      'CHANGE_PASSWORD': '🔑',
-      'UPDATE_PROFILE': '👤'
+      'LOGIN': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">lock</span>',
+      'REGISTER': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">add</span>',
+      'UPDATE': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">edit</span>️',
+      'DELETE': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">delete</span>️',
+      'BACKUP_COMPLETED': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">save</span>',
+      'ATTENDANCE_MARKED': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span>',
+      'PAYMENT': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span>',
+      'CHANGE_PASSWORD': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">key</span>',
+      'UPDATE_PROFILE': '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">person</span>'
     };
-    return icons[action] || '📝';
+    return icons[action] || '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">note</span>';
   }
 
   goBack(): void {

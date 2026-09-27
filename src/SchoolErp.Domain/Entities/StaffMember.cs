@@ -5,6 +5,10 @@ namespace SchoolErp.Domain.Entities;
 public class StaffMember : AuditableEntity, ITenantEntity
 {
     public Guid TenantId { get; set; }
+
+    /// <summary>Optional link to the ASP.NET Identity user backing this staff member.</summary>
+    public string? UserId { get; set; }
+
     public string EmployeeId { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;

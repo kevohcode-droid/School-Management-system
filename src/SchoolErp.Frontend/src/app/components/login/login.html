@@ -1,214 +1,527 @@
-<div class="login-container">
-  <div class="login-layout">
-    <aside class="welcome-panel">
-      <div class="brand-hero">
-        <div class="brand-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 4L6 7v5a6 6 0 0 0 12 0V7l-6-3z"></path>
-            <path d="M6 7l6 3 6-3M12 10v6"></path>
-            <path d="M9 16h6"></path>
+<!-- Login page — standalone, outside the app shell -->
+<a href="#login-form" class="skip-link">Skip to sign-in form</a>
+
+<div class="lp-bg">
+  <!-- Ambient blobs -->
+  <div class="lp-blob lp-blob--1" aria-hidden="true"></div>
+  <div class="lp-blob lp-blob--2" aria-hidden="true"></div>
+  <div class="lp-blob lp-blob--3" aria-hidden="true"></div>
+
+  <!-- ── Single floating glass card ──────────────────────── -->
+  <div class="lp-card">
+    <div class="lp-grid">
+
+      <!-- ════════════════════════════════════════
+           LEFT COLUMN — Branding & info overview
+           ════════════════════════════════════════ -->
+      <aside class="lp-left" aria-label="School overview">
+
+        <!-- Brand header -->
+        <header class="lp-brand">
+          <div class="lp-brand__logo" aria-hidden="true">
+            <!-- School shield icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3L4 7v5a9 9 0 008 8.94A9 9 0 0020 12V7L12 3z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="lp-brand__copy">
+            <span class="lp-eyebrow">Integrated Educational Platform</span>
+            <h1 class="lp-brand__name">{{ schoolName }}</h1>
+            <p class="lp-brand__tagline">{{ schoolMotto }}</p>
+          </div>
+        </header>
+
+        <!-- 2×2 metric grid -->
+        <div class="lp-metrics" role="list" aria-label="School key metrics">
+
+          <div class="lp-metric lp-metric--blue" role="listitem">
+            <span class="lp-metric__icon" aria-hidden="true">
+              <!-- Users icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+              </svg>
+            </span>
+            <span class="lp-metric__value">
+              {{ isLoadingPublicData ? '…' : ((publicData?.totalStudents ?? 250) | number) }}+
+            </span>
+            <span class="lp-metric__label">Students</span>
+          </div>
+
+          <div class="lp-metric lp-metric--indigo" role="listitem">
+            <span class="lp-metric__icon" aria-hidden="true">
+              <!-- GraduationCap icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/>
+              </svg>
+            </span>
+            <span class="lp-metric__value">
+              {{ isLoadingPublicData ? '…' : ((publicData?.totalStaff ?? 35) | number) }}+
+            </span>
+            <span class="lp-metric__label">Teachers</span>
+          </div>
+
+          <div class="lp-metric lp-metric--violet" role="listitem">
+            <span class="lp-metric__icon" aria-hidden="true">
+              <!-- UserCheck icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </span>
+            <span class="lp-metric__value">
+              {{ isLoadingPublicData ? '…' : ((publicData?.totalParents ?? 180) | number) }}+
+            </span>
+            <span class="lp-metric__label">Parents</span>
+          </div>
+
+          <div class="lp-metric lp-metric--cyan" role="listitem">
+            <span class="lp-metric__icon" aria-hidden="true">
+              <!-- BookOpen icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+            </span>
+            <span class="lp-metric__value">
+              {{ isLoadingPublicData ? '…' : ((publicData?.totalClasses ?? 20) | number) }}+
+            </span>
+            <span class="lp-metric__label">Classes</span>
+          </div>
+
+        </div><!-- /lp-metrics -->
+
+        <!-- System status + announcements row -->
+        <div class="lp-info-row">
+
+          <!-- System status box -->
+          <div class="lp-status-box" aria-label="System status">
+            <h3 class="lp-box-heading">
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <circle cx="8" cy="8" r="3" fill="#22c55e"/>
+                <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM1 8a7 7 0 1114 0A7 7 0 011 8z"/>
+              </svg>
+              System Status
+            </h3>
+            <dl class="lp-status-dl">
+              <div class="lp-status-row">
+                <dt>Academic Year</dt>
+                <dd>{{ publicData?.academicYear || '2025–2026' }}</dd>
+              </div>
+              <div class="lp-status-row">
+                <dt>Current Term</dt>
+                <dd>
+                  {{ publicData?.currentTerm || 'Term 1' }}
+                  <span class="lp-active-badge">Active</span>
+                </dd>
+              </div>
+              <div class="lp-status-row">
+                <dt>Today</dt>
+                <dd>{{ todayDate }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Announcements box -->
+          <div class="lp-announce-box" aria-label="School announcements">
+            <h3 class="lp-box-heading">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+              </svg>
+              Announcements
+            </h3>
+            <ng-container *ngIf="publicData?.announcements?.length; else defaultAnnounce">
+              <div class="lp-notice-badge" *ngFor="let a of publicData.announcements">
+                <svg viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                {{ a }}
+              </div>
+            </ng-container>
+            <ng-template #defaultAnnounce>
+              <div class="lp-notice-badge lp-notice-badge--blue">
+                <svg viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                Parent-Teacher Meeting — Fri 20 Sep
+              </div>
+              <div class="lp-notice-badge lp-notice-badge--violet">
+                <svg viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                Science Fair — Mon 23 Sep
+              </div>
+              <div class="lp-notice-badge lp-notice-badge--green">
+                <svg viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                System Update v2.4 — Tonight 11 PM
+              </div>
+            </ng-template>
+          </div>
+
+        </div><!-- /lp-info-row -->
+
+      </aside><!-- /lp-left -->
+
+      <!-- ════════════════════════════════════════
+           RIGHT COLUMN — Navigation & Auth form
+           ════════════════════════════════════════ -->
+      <main class="lp-right" id="login-form">
+
+        <!-- Mini top-nav bar -->
+        <nav class="lp-topnav" aria-label="Quick navigation">
+          <div class="lp-topnav__links">
+            <a href="#" class="lp-topnav__link">Home</a>
+            <a href="#" class="lp-topnav__link">Features</a>
+            <a href="#" class="lp-topnav__link">Parent Portal</a>
+            <a href="#" class="lp-topnav__link">Admin Access</a>
+          </div>
+          <button class="lp-topnav__search" aria-label="Search">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </nav>
+
+        <!-- Form header -->
+        <div class="lp-form-header">
+          <p class="lp-eyebrow lp-eyebrow--dark">Secure Access</p>
+          <h2 class="lp-form-title">Login to your dashboard</h2>
+        </div>
+
+        <!-- Role tabs -->
+        <div class="lp-roles" role="tablist" aria-label="Select your role">
+
+          <!-- Admin -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Admin'"
+            (click)="selectLoginRole('Admin')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Admin'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <!-- Shield icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+              </svg>
+            </span>
+            School Administrator
+          </button>
+
+          <!-- Teacher -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Teacher'"
+            (click)="selectLoginRole('Teacher')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Teacher'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <!-- BookOpen icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+            </span>
+            Teacher
+          </button>
+
+          <!-- Accountant -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Accountant'"
+            (click)="selectLoginRole('Accountant')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Accountant'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m3-9.5c-.6-.9-1.6-1.5-3-1.5-1.7 0-3 .9-3 2s1.3 2 3 2 3 .9 3 2-1.3 2-3 2c-1.4 0-2.4-.6-3-1.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </span>
+            Accountant
+          </button>
+
+          <!-- Staff -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Staff'"
+            (click)="selectLoginRole('Staff')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Staff'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 19h6v-1a4 4 0 00-6.4-3.2M16 19H2v-1a7 7 0 0114 0v1zm-3-11a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </span>
+            Staff
+          </button>
+
+          <!-- Student -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Student'"
+            (click)="selectLoginRole('Student')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Student'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <!-- GraduationCap icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/>
+              </svg>
+            </span>
+            Student
+          </button>
+
+          <!-- Parent -->
+          <button type="button" class="lp-role-tab"
+            [class.lp-role-tab--active]="selectedRole === 'Parent'"
+            (click)="selectLoginRole('Parent')"
+            role="tab" [attr.aria-selected]="selectedRole === 'Parent'">
+            <span class="lp-role-tab__icon" aria-hidden="true">
+              <!-- Users icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+              </svg>
+            </span>
+            Parent
+          </button>
+
+        </div><!-- /lp-roles -->
+        <p class="lp-role-description" aria-live="polite">{{ getSelectedRoleDescription() }}</p>
+
+        <!-- Error alert -->
+        <div *ngIf="errorMessage" role="alert" class="lp-alert lp-alert--error">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
           </svg>
-        </div>
-        <div class="brand-copy">
-          <span class="eyebrow">Welcome to</span>
-          <h1>{{ schoolName }}</h1>
-          <p class="motto">“{{ schoolMotto }}”</p>
-        </div>
-      </div>
-
-      <p class="hero-description">A modern school ERP experience for administrators, teachers, students, and parents.</p>
-
-      <div class="hero-stats">
-        <div class="stat-card">
-          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalStudents ?? 0) | number }}</span>
-          <span class="stat-label">Students</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalStaff ?? 0) | number }}</span>
-          <span class="stat-label">Teachers</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalParents ?? 0) | number }}</span>
-          <span class="stat-label">Parents</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ isLoadingPublicData ? '...' : (publicData?.totalClasses ?? 0) | number }}</span>
-          <span class="stat-label">Classes</span>
-        </div>
-      </div>
-
-      <div class="summary-grid">
-        <div class="summary-card">
-          <span class="summary-title">Academic Year</span>
-          <strong>{{ publicData?.academicYear || 'Not Configured' }}</strong>
-        </div>
-        <div class="summary-card">
-          <span class="summary-title">Current Term</span>
-          <strong>{{ publicData?.currentTerm || 'Not Configured' }}</strong>
-        </div>
-        <div class="summary-card">
-          <span class="summary-title">Today's Date</span>
-          <strong>{{ todayDate }}</strong>
-        </div>
-      </div>
-
-      <div class="announcements-panel">
-        <div class="announcements-header">
-          <h3>Announcements</h3>
-        </div>
-        <ul *ngIf="publicData?.announcements && publicData.announcements.length > 0; else noAnnouncements">
-          <li *ngFor="let announcement of publicData.announcements">{{ announcement }}</li>
-        </ul>
-        <ng-template #noAnnouncements>
-          <ul>
-            <li>No announcements available</li>
-          </ul>
-        </ng-template>
-      </div>
-    </aside>
-
-    <main class="auth-panel">
-      <div class="auth-card">
-        <div class="auth-header">
-          <div>
-            <p class="eyebrow">Sign in to your account</p>
-            <h2>Access your dashboard</h2>
-          </div>
-          <div class="auth-note">Secure login protected by School ERP Security</div>
+          {{ errorMessage }}
         </div>
 
-        <div class="role-tabs">
-          <button type="button" class="role-tab" *ngFor="let option of roleOptions" [class.active]="selectedRole === option.key" (click)="selectLoginRole(option.key)">
-            <span class="role-icon">{{ option.icon }}</span>
-            <span>{{ option.label }}</span>
-          </button>
-        </div>
+        <!-- ── SIGN IN FORM ──────────────────────────── -->
+        <form *ngIf="!isRegisterMode" [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate aria-label="Sign in">
 
-        <form *ngIf="!isRegisterMode" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label for="tenantCode">School / Tenant Code</label>
-            <input type="text" id="tenantCode" formControlName="tenantCode" placeholder="Enter your school code">
-            <div class="error-text" *ngIf="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid">
-              <span *ngIf="loginControls['tenantCode'].errors?.['required']">Tenant code is required</span>
-              <span *ngIf="loginControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" formControlName="email" placeholder="Enter your email">
-            <div class="error-text" *ngIf="loginControls['email'].touched && loginControls['email'].invalid">
-              <span *ngIf="loginControls['email'].errors?.['required']">Email is required</span>
-              <span *ngIf="loginControls['email'].errors?.['email']">Please enter a valid email</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            <div class="password-input-wrapper">
-              <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="Enter your password">
-              <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">{{ showPassword ? 'Hide' : 'Show' }}</button>
-            </div>
-            <div class="error-text" *ngIf="loginControls['password'].touched && loginControls['password'].invalid">
-              <span *ngIf="loginControls['password'].errors?.['required']">Password is required</span>
-              <span *ngIf="loginControls['password'].errors?.['minlength']">Must be at least 6 characters</span>
-            </div>
-          </div>
-
-          <div class="login-actions">
-            <label class="checkbox-wrapper">
-              <input type="checkbox" formControlName="rememberMe">
-              <span class="checkmark"></span>
-              Remember me
+          <!-- School Code -->
+          <div class="lp-field">
+            <label class="lp-label" for="lp-tenant">
+              School Code <span class="lp-req" aria-hidden="true">*</span>
             </label>
-            <button type="button" class="text-link" (click)="onForgotPassword()">Forgot Password?</button>
+            <div class="lp-input-wrap">
+              <span class="lp-input-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2H5a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              <input
+                class="lp-input"
+                [class.lp-input--error]="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid"
+                [class.lp-input--ok]="loginControls['tenantCode'].touched && loginControls['tenantCode'].valid"
+                type="text" id="lp-tenant" formControlName="tenantCode"
+                placeholder="e.g. 100"
+                autocomplete="organization"
+                aria-required="true"
+                [attr.aria-invalid]="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid"
+                aria-describedby="lp-tenant-hint lp-tenant-err"
+              >
+            </div>
+            <p class="lp-hint" id="lp-tenant-hint">Your school's unique tenant identifier</p>
+            <p class="lp-err" id="lp-tenant-err" role="alert"
+              *ngIf="loginControls['tenantCode'].touched && loginControls['tenantCode'].invalid">
+              <ng-container *ngIf="loginControls['tenantCode'].errors?.['required']">School code is required.</ng-container>
+              <ng-container *ngIf="loginControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters.</ng-container>
+            </p>
           </div>
 
-          <button type="submit" class="submit-button" [disabled]="isLoading || loginForm.invalid">
-            {{ isLoading ? 'Authenticating...' : 'Sign In' }}
+          <!-- Email -->
+          <div class="lp-field">
+            <label class="lp-label" for="lp-email">
+              Email Address <span class="lp-req" aria-hidden="true">*</span>
+            </label>
+            <div class="lp-input-wrap">
+              <span class="lp-input-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+              </span>
+              <input
+                class="lp-input"
+                [class.lp-input--error]="loginControls['email'].touched && loginControls['email'].invalid"
+                [class.lp-input--ok]="loginControls['email'].touched && loginControls['email'].valid"
+                type="email" id="lp-email" formControlName="email"
+                placeholder="you@school.edu"
+                autocomplete="email"
+                aria-required="true"
+                [attr.aria-invalid]="loginControls['email'].touched && loginControls['email'].invalid"
+                aria-describedby="lp-email-err"
+              >
+            </div>
+            <p class="lp-err" id="lp-email-err" role="alert"
+              *ngIf="loginControls['email'].touched && loginControls['email'].invalid">
+              <ng-container *ngIf="loginControls['email'].errors?.['required']">Email is required.</ng-container>
+              <ng-container *ngIf="loginControls['email'].errors?.['email']">Enter a valid email address.</ng-container>
+            </p>
+          </div>
+
+          <!-- Password -->
+          <div class="lp-field">
+            <div class="lp-label-row">
+              <label class="lp-label" for="lp-password">
+                Password <span class="lp-req" aria-hidden="true">*</span>
+              </label>
+              <button type="button" class="lp-forgot" (click)="onForgotPassword()">Forgot password?</button>
+            </div>
+            <div class="lp-input-wrap lp-input-wrap--pw">
+              <span class="lp-input-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              <input
+                class="lp-input"
+                [class.lp-input--error]="loginControls['password'].touched && loginControls['password'].invalid"
+                [class.lp-input--ok]="loginControls['password'].touched && loginControls['password'].valid"
+                [type]="showPassword ? 'text' : 'password'"
+                id="lp-password" formControlName="password"
+                placeholder="Your password"
+                autocomplete="current-password"
+                aria-required="true"
+                [attr.aria-invalid]="loginControls['password'].touched && loginControls['password'].invalid"
+                aria-describedby="lp-pw-err"
+              >
+              <button type="button" class="lp-pw-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="showPassword">
+                <svg *ngIf="!showPassword" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                </svg>
+                <svg *ngIf="showPassword" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
+                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+                </svg>
+              </button>
+            </div>
+            <p class="lp-err" id="lp-pw-err" role="alert"
+              *ngIf="loginControls['password'].touched && loginControls['password'].invalid">
+              <ng-container *ngIf="loginControls['password'].errors?.['required']">Password is required.</ng-container>
+              <ng-container *ngIf="loginControls['password'].errors?.['minlength']">Must be at least 6 characters.</ng-container>
+            </p>
+          </div>
+
+          <!-- Remember me -->
+          <label class="lp-remember">
+            <input type="checkbox" formControlName="rememberMe" class="lp-checkbox">
+            <span>Remember me for 7 days</span>
+          </label>
+
+          <!-- Submit -->
+          <button type="submit" class="lp-submit"
+            [disabled]="isLoading || loginForm.invalid"
+            aria-live="polite">
+            <span class="lp-spinner" *ngIf="isLoading" aria-hidden="true"></span>
+            <svg *ngIf="!isLoading" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            {{ isLoading ? 'Signing in…' : 'Sign In' }}
           </button>
         </form>
 
-        <form *ngIf="isRegisterMode" [formGroup]="registerForm" (ngSubmit)="onRegister()">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="reg-first">First Name</label>
-              <input type="text" id="reg-first" formControlName="firstName" placeholder="First name">
-              <div class="error-text" *ngIf="registerControls['firstName'].touched && registerControls['firstName'].invalid">
-                <span *ngIf="registerControls['firstName'].errors?.['required']">Required</span>
-                <span *ngIf="registerControls['firstName'].errors?.['minlength']">Min 2 characters</span>
-              </div>
+        <!-- ── REGISTER FORM ────────────────────────── -->
+        <form *ngIf="isRegisterMode" [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate aria-label="Create account">
+
+          <div class="lp-field-row">
+            <div class="lp-field">
+              <label class="lp-label" for="lp-reg-first">First Name <span class="lp-req" aria-hidden="true">*</span></label>
+              <input class="lp-input"
+                [class.lp-input--error]="registerControls['firstName'].touched && registerControls['firstName'].invalid"
+                [class.lp-input--ok]="registerControls['firstName'].touched && registerControls['firstName'].valid"
+                type="text" id="lp-reg-first" formControlName="firstName" placeholder="Alice" autocomplete="given-name">
+              <p class="lp-err" role="alert" *ngIf="registerControls['firstName'].touched && registerControls['firstName'].invalid">
+                <ng-container *ngIf="registerControls['firstName'].errors?.['required']">Required.</ng-container>
+                <ng-container *ngIf="registerControls['firstName'].errors?.['minlength']">Min 2 chars.</ng-container>
+              </p>
             </div>
-            <div class="form-group">
-              <label for="reg-last">Last Name</label>
-              <input type="text" id="reg-last" formControlName="lastName" placeholder="Last name">
-              <div class="error-text" *ngIf="registerControls['lastName'].touched && registerControls['lastName'].invalid">
-                <span *ngIf="registerControls['lastName'].errors?.['required']">Required</span>
-                <span *ngIf="registerControls['lastName'].errors?.['minlength']">Min 2 characters</span>
-              </div>
+            <div class="lp-field">
+              <label class="lp-label" for="lp-reg-last">Last Name <span class="lp-req" aria-hidden="true">*</span></label>
+              <input class="lp-input"
+                [class.lp-input--error]="registerControls['lastName'].touched && registerControls['lastName'].invalid"
+                [class.lp-input--ok]="registerControls['lastName'].touched && registerControls['lastName'].valid"
+                type="text" id="lp-reg-last" formControlName="lastName" placeholder="Johnson" autocomplete="family-name">
+              <p class="lp-err" role="alert" *ngIf="registerControls['lastName'].touched && registerControls['lastName'].invalid">
+                <ng-container *ngIf="registerControls['lastName'].errors?.['required']">Required.</ng-container>
+                <ng-container *ngIf="registerControls['lastName'].errors?.['minlength']">Min 2 chars.</ng-container>
+              </p>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="reg-email">Email Address</label>
-            <input type="email" id="reg-email" formControlName="email" placeholder="Enter your email">
-            <div class="error-text" *ngIf="registerControls['email'].touched && registerControls['email'].invalid">
-              <span *ngIf="registerControls['email'].errors?.['required']">Email is required</span>
-              <span *ngIf="registerControls['email'].errors?.['email']">Please enter a valid email</span>
+          <div class="lp-field">
+            <label class="lp-label" for="lp-reg-email">Email <span class="lp-req" aria-hidden="true">*</span></label>
+            <input class="lp-input"
+              [class.lp-input--error]="registerControls['email'].touched && registerControls['email'].invalid"
+              [class.lp-input--ok]="registerControls['email'].touched && registerControls['email'].valid"
+              type="email" id="lp-reg-email" formControlName="email" placeholder="you@school.edu" autocomplete="email">
+            <p class="lp-err" role="alert" *ngIf="registerControls['email'].touched && registerControls['email'].invalid">
+              <ng-container *ngIf="registerControls['email'].errors?.['required']">Email is required.</ng-container>
+              <ng-container *ngIf="registerControls['email'].errors?.['email']">Valid email required.</ng-container>
+            </p>
+          </div>
+
+          <div class="lp-field-row">
+            <div class="lp-field">
+              <label class="lp-label" for="lp-reg-tenant">School Code <span class="lp-req" aria-hidden="true">*</span></label>
+              <input class="lp-input"
+                [class.lp-input--error]="registerControls['tenantCode'].touched && registerControls['tenantCode'].invalid"
+                type="text" id="lp-reg-tenant" formControlName="tenantCode" placeholder="e.g. 100">
+            </div>
+            <div class="lp-field">
+              <label class="lp-label" for="lp-reg-role">Role <span class="lp-req" aria-hidden="true">*</span></label>
+              <select class="lp-input lp-select" id="lp-reg-role" formControlName="role">
+                <option *ngFor="let opt of roleOptions" [value]="opt.key">{{ opt.label }}</option>
+              </select>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="reg-tenant">School / Tenant Code</label>
-            <input type="text" id="reg-tenant" formControlName="tenantCode" placeholder="Enter your school code">
-            <div class="error-text" *ngIf="registerControls['tenantCode'].touched && registerControls['tenantCode'].invalid">
-              <span *ngIf="registerControls['tenantCode'].errors?.['required']">Tenant code is required</span>
-              <span *ngIf="registerControls['tenantCode'].errors?.['minlength']">Must be at least 2 characters</span>
+          <div class="lp-field">
+            <label class="lp-label" for="lp-reg-pw">Password <span class="lp-req" aria-hidden="true">*</span></label>
+            <div class="lp-input-wrap lp-input-wrap--pw">
+              <input class="lp-input"
+                [class.lp-input--error]="registerControls['password'].touched && registerControls['password'].invalid"
+                [class.lp-input--ok]="registerControls['password'].touched && registerControls['password'].valid"
+                [type]="showRegisterPassword ? 'text' : 'password'"
+                id="lp-reg-pw" formControlName="password" placeholder="Min 8 characters" autocomplete="new-password">
+              <button type="button" class="lp-pw-toggle" (click)="toggleRegisterPasswordVisibility()"
+                [attr.aria-label]="showRegisterPassword ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="showRegisterPassword">
+                <svg *ngIf="!showRegisterPassword" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+                <svg *ngIf="showRegisterPassword" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/></svg>
+              </button>
             </div>
+            <p class="lp-hint">Uppercase, lowercase, number, and special character required.</p>
+            <p class="lp-err" role="alert" *ngIf="registerControls['password'].touched && registerControls['password'].invalid">
+              <ng-container *ngIf="registerControls['password'].errors?.['required']">Password is required.</ng-container>
+              <ng-container *ngIf="registerControls['password'].errors?.['minlength']">Min 8 characters.</ng-container>
+              <ng-container *ngIf="registerControls['password'].errors?.['pattern']">Doesn't meet complexity requirements.</ng-container>
+            </p>
           </div>
 
-          <div class="form-group">
-            <label for="reg-role">Account Role</label>
-            <select id="reg-role" formControlName="role">
-              <option *ngFor="let option of roleOptions" [value]="option.key">{{ option.label }}</option>
-            </select>
+          <div class="lp-field">
+            <label class="lp-label" for="lp-reg-confirm">Confirm Password <span class="lp-req" aria-hidden="true">*</span></label>
+            <input class="lp-input"
+              [class.lp-input--error]="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid"
+              [class.lp-input--ok]="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].valid"
+              type="password" id="lp-reg-confirm" formControlName="confirmPassword" placeholder="Repeat password" autocomplete="new-password">
+            <p class="lp-err" role="alert" *ngIf="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid">
+              <ng-container *ngIf="registerControls['confirmPassword'].errors?.['required']">Required.</ng-container>
+              <ng-container *ngIf="registerControls['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match.</ng-container>
+            </p>
           </div>
 
-          <div class="form-group">
-            <label for="reg-password">Password</label>
-            <div class="password-input-wrapper">
-              <input [type]="showRegisterPassword ? 'text' : 'password'" id="reg-password" formControlName="password" placeholder="Create a password">
-              <button type="button" class="toggle-password" (click)="toggleRegisterPasswordVisibility()">{{ showRegisterPassword ? 'Hide' : 'Show' }}</button>
-            </div>
-            <div class="error-text" *ngIf="registerControls['password'].touched && registerControls['password'].invalid">
-              <span *ngIf="registerControls['password'].errors?.['required']">Password is required</span>
-              <span *ngIf="registerControls['password'].errors?.['minlength']">Minimum 8 characters</span>
-              <span *ngIf="registerControls['password'].errors?.['pattern']">Must contain uppercase, lowercase, number and special character</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="reg-confirm">Confirm Password</label>
-            <input type="password" id="reg-confirm" formControlName="confirmPassword" placeholder="Confirm password">
-            <div class="error-text" *ngIf="registerControls['confirmPassword'].touched && registerControls['confirmPassword'].invalid">
-              <span *ngIf="registerControls['confirmPassword'].errors?.['required']">Confirmation is required</span>
-              <span *ngIf="registerControls['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match</span>
-            </div>
-          </div>
-
-          <button type="submit" class="submit-button" [disabled]="isLoading || registerForm.invalid">
-            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+          <button type="submit" class="lp-submit" [disabled]="isLoading || registerForm.invalid">
+            <span class="lp-spinner" *ngIf="isLoading" aria-hidden="true"></span>
+            {{ isLoading ? 'Creating account…' : 'Create Account' }}
           </button>
         </form>
 
-        <div class="switch-mode">
+        <!-- Mode switch footer -->
+        <p class="lp-switch">
           <span *ngIf="!isRegisterMode">Don't have an account?</span>
           <span *ngIf="isRegisterMode">Already have an account?</span>
-          <button type="button" class="link-button" (click)="toggleMode()">
-            {{ isRegisterMode ? 'Sign In here' : 'Register here' }}
+          <button type="button" class="lp-switch__btn" (click)="toggleMode()">
+            {{ isRegisterMode ? 'Sign in' : 'Register here' }}
           </button>
-        </div>
-      </div>
-    </main>
-  </div>
-</div>
+        </p>
+
+      </main><!-- /lp-right -->
+
+    </div><!-- /lp-grid -->
+  </div><!-- /lp-card -->
+</div><!-- /lp-bg -->

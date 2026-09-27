@@ -13,4 +13,10 @@ public class ApplicationUser : IdentityUser
     [NotMapped]
     public string? Address { get; set; }
     public DateTime? LastLoginAt { get; set; }
+
+    /// <summary>
+    /// Set to true when an admin creates the account with a temporary password.
+    /// The user is forced to change their password before accessing the dashboard.
+    /// </summary>
+    public bool MustChangePassword { get; set; }
 }

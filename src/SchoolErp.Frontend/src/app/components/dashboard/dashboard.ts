@@ -19,48 +19,49 @@ import { CurrentUser } from '../../models/auth';
 export class DashboardComponent implements OnInit {
   currentUser: CurrentUser | null = null;
   currentDate: Date = new Date();
-  
-  notificationCount: number = 0;
-  showNotifications: boolean = false;
-  showProfile: boolean = false;
 
-  notifications: string[] = [];
-  activities: string[] = [
-    'Student John registered',
-    'Attendance submitted',
-    'Teacher Mary added',
-    'Fee payment received',
-    'Class 8A created'
-  ];
-
-  systemStatus: string[] = [
-    'Database Connected',
-    'API Running',
-    'Backup Completed',
-    'Email Service Active'
-  ];
-
-  enrollmentData: { month: string; percentage: number }[] = [
-    { month: 'Jan', percentage: 30 },
-    { month: 'Feb', percentage: 45 },
-    { month: 'Mar', percentage: 65 },
-    { month: 'Apr', percentage: 80 },
-    { month: 'May', percentage: 95 },
-    { month: 'Jun', percentage: 100 }
-  ];
+  // Header/notification/profile UI is handled by the global TopNavbarComponent.
+  // No showProfile / showNotifications / notificationCount needed here.
 
   summary: DashboardSummary | null = null;
   isLoadingSummary = false;
+
+  get isTeacher(): boolean {
+    return this.currentUser?.roles?.includes('Teacher') ?? false;
+  }
+
+  get isAdmin(): boolean {
+    return this.currentUser?.roles?.some(role => role === 'Admin' || role === 'SuperAdmin') ?? false;
+  }
+
+  get isAccountant(): boolean {
+    return this.currentUser?.roles?.includes('Accountant') ?? false;
+  }
+
+  get canUseAcademicTools(): boolean {
+    return this.isTeacher || this.isAdmin;
+  }
+
+  get attendancePresent(): number {
+    const percentage = this.summary?.attendancePercentage;
+    return percentage == null ? 0 : Math.max(0, Math.min(100, percentage));
+  }
+
+  get attendanceAbsent(): number {
+    return 100 - this.attendancePresent;
+  }
+
+  get dashboardStatus(): string {
+    if (this.isLoadingSummary) return 'Checking dashboard data';
+    return this.summary ? 'Dashboard data available' : 'Dashboard data unavailable';
+  }
 
   get lastLogin(): string {
     if (!this.summary?.lastLogin) return 'Never';
     const date = new Date(this.summary.lastLogin);
     return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   }
 
@@ -80,9 +81,7 @@ export class DashboardComponent implements OnInit {
     }
 
     const cachedUser = this.authService.getCurrentUserFromStorage();
-    if (cachedUser) {
-      this.currentUser = cachedUser;
-    }
+    if (cachedUser) this.currentUser = cachedUser;
 
     this.authService.getCurrentUser().subscribe({
       next: (user: CurrentUser) => {
@@ -90,9 +89,7 @@ export class DashboardComponent implements OnInit {
         this.authService.saveCurrentUser(user);
       },
       error: () => {
-        if (!this.currentUser) {
-          this.router.navigate(['/login']);
-        }
+        if (!this.currentUser) this.router.navigate(['/login']);
       }
     });
 
@@ -104,7 +101,6 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getSummary().subscribe({
       next: (data) => {
         this.summary = data;
-        this.notificationCount = data.notifications;
         this.isLoadingSummary = false;
       },
       error: (err) => {
@@ -114,146 +110,61 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+  // ── Navigation helpers ──────────────────────────────────
+  logout(): void { this.authService.logout(); this.router.navigate(['/login']); }
+  navigateToStudents(): void   { this.router.navigate(['/students']); }
+  navigateToTenants(): void    { this.router.navigate(['/tenants']); }
+  navigateToStaff(): void      { this.router.navigate(['/staff']); }
+  navigateToClasses(): void    { this.router.navigate(['/classes']); }
+  navigateToAttendance(): void { this.router.navigate(['/attendance']); }
+  navigateToSettings(): void   { this.router.navigate(['/settings']); }
+  navigateTo(route: string): void { this.router.navigate([route]); }
+  navigateToPerformance(): void { this.router.navigate(['/academics/performance']); }
+  addStudent(): void   { this.router.navigate(['/students']); }
+  addStaff(): void     { this.router.navigate(['/staff']); }
+  createClass(): void  { this.router.navigate(['/classes']); }
+  markAttendance(): void { this.router.navigate(['/attendance']); }
+  openStudentPerformance(): void { this.router.navigate(['/academics/performance']); }
 
-  toggleNotifications(): void {
-    this.showNotifications = !this.showNotifications;
-    this.showProfile = false;
-  }
-
-  toggleProfile(): void {
-    this.showProfile = !this.showProfile;
-    this.showNotifications = false;
-  }
-
-  viewProfile(): void {
-    this.showProfile = false;
-    this.router.navigate(['/profile']);
-  }
-
-  changePassword(): void {
-    this.showProfile = false;
-    this.router.navigate(['/change-password']);
-  }
-
-  openPreferences(): void {
-    this.showProfile = false;
-    this.router.navigate(['/preferences']);
-  }
-
-  openAuditLogs(): void {
-    this.showProfile = false;
-    if (!this.authService.hasAnyRole(['Admin', 'SuperAdmin'])) {
-      alert('Access denied. Administrator privileges required.');
-      return;
-    }
-    this.router.navigate(['/audit-logs']);
-  }
-
-  navigateToStudents(): void {
-    this.router.navigate(['/students']);
-  }
-
-  navigateToTenants(): void {
-    this.router.navigate(['/tenants']);
-  }
-
-  navigateToStaff(): void {
-    this.router.navigate(['/staff']);
-  }
-
-  navigateToClasses(): void {
-    this.router.navigate(['/classes']);
-  }
-
-  navigateToAttendance(): void {
-    this.router.navigate(['/attendance']);
-  }
-
-  navigateToSettings(): void {
-    this.router.navigate(['/settings']);
-  }
-
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
-  }
-
-  addStudent(): void {
-    this.router.navigate(['/students']);
-  }
-
-  addStaff(): void {
-    this.router.navigate(['/staff']);
-  }
-
-  createClass(): void {
-    this.router.navigate(['/classes']);
-  }
-
-  markAttendance(): void {
-    this.router.navigate(['/attendance']);
-  }
+  exportReport(): void      { this.studentService.exportStudents(); }
+  exportStaffReport(): void { this.staffService.exportStaff(); }
+  exportClassReport(): void { this.sectionsService.exportSections(); }
 
   importExcel(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx,.xls,.csv';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        this.studentService.importStudents(file).subscribe({
-          next: (result) => alert(`Imported ${result.imported || 0} students successfully`),
-          error: (err) => alert('Import failed: ' + err.message)
-        });
-      }
-    };
-    input.click();
-  }
-
-  exportReport(): void {
-    this.studentService.exportStudents();
+    this.openFilePicker('.xlsx,.xls,.csv', (file) => {
+      this.studentService.importStudents(file).subscribe({
+        next: (r) => alert(`Imported ${r.imported || 0} students successfully`),
+        error: (e) => alert('Import failed: ' + e.message)
+      });
+    });
   }
 
   importStaffExcel(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx,.xls,.csv';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        this.staffService.importStaff(file).subscribe({
-          next: (result) => alert(`Imported ${result.imported || 0} staff successfully`),
-          error: (err) => alert('Import failed: ' + err.message)
-        });
-      }
-    };
-    input.click();
-  }
-
-  exportStaffReport(): void {
-    this.staffService.exportStaff();
+    this.openFilePicker('.xlsx,.xls,.csv', (file) => {
+      this.staffService.importStaff(file).subscribe({
+        next: (r) => alert(`Imported ${r.imported || 0} staff successfully`),
+        error: (e) => alert('Import failed: ' + e.message)
+      });
+    });
   }
 
   importClassExcel(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx,.xls,.csv';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        this.sectionsService.importSections(file).subscribe({
-          next: (result) => alert(`Imported ${result.imported || 0} sections successfully`),
-          error: (err) => alert('Import failed: ' + err.message)
-        });
-      }
-    };
-    input.click();
+    this.openFilePicker('.xlsx,.xls,.csv', (file) => {
+      this.sectionsService.importSections(file).subscribe({
+        next: (r) => alert(`Imported ${r.imported || 0} sections successfully`),
+        error: (e) => alert('Import failed: ' + e.message)
+      });
+    });
   }
 
-  exportClassReport(): void {
-    this.sectionsService.exportSections();
+  private openFilePicker(accept: string, callback: (f: File) => void): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.onchange = (e: any) => {
+      const file: File = e.target.files[0];
+      if (file) callback(file);
+    };
+    input.click();
   }
 }

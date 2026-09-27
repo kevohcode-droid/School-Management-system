@@ -82,6 +82,8 @@ public record AuthResponse
     public string FullName { get; init; } = string.Empty;
     public Guid TenantId { get; init; }
     public IReadOnlyList<string> Roles { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<Guid> LinkedStudentIds { get; init; } = Array.Empty<Guid>();
+    public bool MustChangePassword { get; init; }
 }
 
 public record AuthResult

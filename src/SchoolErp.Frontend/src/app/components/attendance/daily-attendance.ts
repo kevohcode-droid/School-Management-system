@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AttendanceService } from '../../services/attendance.service';
+import { SectionsService } from '../../services/sections.service';
+import { Section } from '../../models/student';
 import { 
   AttendanceRecord, 
   AttendanceStatus, 
@@ -26,21 +28,31 @@ export class DailyAttendanceComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
-  // Class options - should be loaded from API in a real implementation
-  classOptions = [
-    { id: 'class-1', name: 'Class 10-A' },
-    { id: 'class-2', name: 'Class 10-B' },
-    { id: 'class-3', name: 'Class 9-A' }
-  ];
+  classOptions: Section[] = [];
 
   constructor(
     private attendanceService: AttendanceService,
+    private sectionsService: SectionsService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Load initial data if a class is pre-selected
+    this.sectionsService.getSections().subscribe({
+      next: sections => this.classOptions = sections || [],
+      error: () => this.errorMessage = 'Failed to load classes. Please try again.'
+    });
   }
+
+  // ── Bulk actions ──────────────────────────────────────────
+  markAll(status: AttendanceStatus): void {
+    this.attendanceList.forEach(r => r.status = status);
+  }
+
+  get presentCount(): number  { return this.attendanceList.filter(r => r.status === AttendanceStatus.Present).length; }
+  get absentCount(): number   { return this.attendanceList.filter(r => r.status === AttendanceStatus.Absent).length; }
+  get lateCount(): number     { return this.attendanceList.filter(r => r.status === AttendanceStatus.Late).length; }
+  get excusedCount(): number  { return this.attendanceList.filter(r => r.status === AttendanceStatus.Excused).length; }
+  readonly AttendanceStatus = AttendanceStatus;
 
   loadStudents(): void {
     if (!this.selectedClassId) return;

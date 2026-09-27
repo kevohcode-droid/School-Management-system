@@ -1,7 +1,7 @@
 <div class="page-container">
   <header class="page-header">
     <div class="header-left">
-      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <button (click)="goBack()" class="back-btn"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <div>
         <h1>Staff Management</h1>
         <p class="page-subtitle">Onboard teachers, administrators, and support staff</p>
@@ -20,17 +20,27 @@
   <main class="page-content">
     <!-- Success message -->
     <div class="success-message" *ngIf="successMessage">
-      ✅ {{ successMessage }}
+      <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span> {{ successMessage }}
     </div>
+
+    <section class="temporary-credentials" *ngIf="temporaryCredentials" aria-live="polite">
+      <div>
+        <strong>One-time login details</strong>
+        <p>Email: {{ temporaryCredentials.email }}</p>
+        <p>Temporary password: <code>{{ temporaryCredentials.password }}</code></p>
+        <small>The user will be required to change this password after signing in.</small>
+      </div>
+      <button type="button" class="dismiss-credentials" (click)="temporaryCredentials = null" aria-label="Dismiss temporary credentials">&times;</button>
+    </section>
 
     <!-- Error message -->
     <div class="error-message" *ngIf="errorMessage">
-      ⚠️ {{ errorMessage }}
+      <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">warning</span>️ {{ errorMessage }}
     </div>
 
     <!-- Empty state -->
     <div class="empty-state" *ngIf="staffList.length === 0 && !isLoading">
-      <div class="empty-icon">👩‍🏫</div>
+      <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></div>
       <h3>No Staff Records Yet</h3>
       <p>Start by adding your first staff member using the button above.</p>
     </div>
@@ -45,8 +55,8 @@
           <span class="staff-dept">{{ staff.department }}</span>
         </div>
         <div class="staff-meta">
-          <span class="meta-item">📱 {{ staff.phone || '—' }}</span>
-          <span class="meta-item">✉️ {{ staff.email || '—' }}</span>
+          <span class="meta-item"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">smartphone</span> {{ staff.phone || '—' }}</span>
+          <span class="meta-item"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">mail</span>️ {{ staff.email || '—' }}</span>
           <span class="meta-item">🪪 {{ staff.employeeId }}</span>
           <span class="badge-status">{{ staff.employmentStatus }}</span>
         </div>
@@ -70,7 +80,7 @@
       <!-- Employment Details -->
       <div class="form-section">
         <div class="form-section-header">
-          <span class="section-icon">💼</span>
+          <span class="section-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">work</span></span>
           <h3>Employment Details</h3>
         </div>
         <div class="modal-grid">
@@ -115,7 +125,7 @@
       <!-- Personal & Contact Info -->
       <div class="form-section">
         <div class="form-section-header">
-          <span class="section-icon">👤</span>
+          <span class="section-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">person</span></span>
           <h3>Personal & Contact Information</h3>
         </div>
         <div class="modal-grid">
@@ -150,6 +160,27 @@
             <label for="staff-email">Professional Email</label>
             <input type="email" id="staff-email" [(ngModel)]="newStaff.email" name="email" placeholder="jane.doe@school.edu">
           </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">key</span></span>
+          <h3>Login Access</h3>
+        </div>
+        <label class="account-toggle">
+          <input type="checkbox" [(ngModel)]="newStaff.createLoginAccount" name="createLoginAccount">
+          <span>Create a login account for this employee</span>
+        </label>
+        <div class="form-group account-role-field" *ngIf="newStaff.createLoginAccount">
+          <label for="staff-account-role">Account Role <span class="required">*</span></label>
+          <select id="staff-account-role" [(ngModel)]="newStaff.accountRole" name="accountRole" required>
+            <option value="Teacher">Teacher</option>
+            <option value="Staff">Staff</option>
+            <option value="Accountant">Accountant</option>
+          </select>
+          <small>A random temporary password will be generated. The employee must change it at first sign-in.</small>
+          <div class="error-text" *ngIf="submittedStaff?.createLoginAccount && !newStaff.email">Email is required to create a login.</div>
         </div>
       </div>
 

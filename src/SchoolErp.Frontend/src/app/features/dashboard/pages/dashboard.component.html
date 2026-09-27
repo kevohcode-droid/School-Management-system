@@ -2,7 +2,7 @@
   <nav class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
-        <span class="brand-icon">🏫</span>
+        <span class="brand-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></span>
         <span class="brand-text">{{ currentUser?.tenantName || 'School ERP' }}</span>
       </div>
       <div class="sidebar-academic-info" *ngIf="summary || currentUser">
@@ -14,54 +14,54 @@
 
     <div class="sidebar-nav">
       <button class="sidebar-item active" (click)="navigateTo('/dashboard')">
-        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></span>
         <span class="sidebar-label">Dashboard</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/analytics')">
-        <span class="sidebar-icon">📈</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">trending_up</span></span>
         <span class="sidebar-label">Analytics</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/students')">
-        <span class="sidebar-icon">👨‍🎓</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">man</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></span>
         <span class="sidebar-label">Students</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/staff')">
-        <span class="sidebar-icon">👩‍🏫</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></span>
         <span class="sidebar-label">Staff</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/attendance')">
-        <span class="sidebar-icon">📋</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span></span>
         <span class="sidebar-label">Attendance</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/finance')">
-        <span class="sidebar-icon">💰</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span></span>
         <span class="sidebar-label">Finance</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/reports')">
-        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></span>
         <span class="sidebar-label">Reports</span>
       </button>
 
       <button class="sidebar-item" (click)="navigateTo('/database-center')">
-        <span class="sidebar-icon">🗄️</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inventory</span>️</span>
         <span class="sidebar-label">Database</span>
       </button>
 
 <button class="sidebar-item" (click)="navigateTo('/settings')">
-        <span class="sidebar-icon">⚙️</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">settings</span>️</span>
         <span class="sidebar-label">Settings</span>
       </button>
     </div>
 
     <div class="sidebar-footer">
       <button class="sidebar-item" (click)="logout()">
-        <span class="sidebar-icon">🚪</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">logout</span></span>
         <span class="sidebar-label">Logout</span>
       </button>
     </div>
@@ -76,7 +76,7 @@
 
       <div class="header-right" *ngIf="currentUser">
         <div class="notifications-wrapper" (click)="toggleNotifications()">
-          <span class="notification-bell">🔔</span>
+          <span class="notification-bell"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">notifications</span></span>
           <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
         </div>
 
@@ -110,19 +110,19 @@
         <h3>Quick Actions</h3>
         <div class="quick-actions-grid">
           <button class="quick-action-btn" (click)="addStudent()">
-            <span class="action-icon">➕</span>
+            <span class="action-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">add</span></span>
             <span>Add Student</span>
           </button>
           <button class="quick-action-btn" (click)="addStaff()">
-            <span class="action-icon">➕</span>
+            <span class="action-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">add</span></span>
             <span>Add Staff</span>
           </button>
           <button class="quick-action-btn" (click)="createClass()">
-            <span class="action-icon">➕</span>
+            <span class="action-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">add</span></span>
             <span>Create Class</span>
           </button>
           <button class="quick-action-btn" (click)="markAttendance()">
-            <span class="action-icon">📋</span>
+            <span class="action-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span></span>
             <span>Take Attendance</span>
           </button>
         </div>
@@ -149,7 +149,7 @@
         <h3>Recent Activities</h3>
         <div class="activities-list">
           <div class="activity-item" *ngFor="let activity of activities">
-            <span class="activity-icon">📋</span>
+            <span class="activity-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span></span>
             <span class="activity-text">{{ activity }}</span>
             <span class="activity-time">2h</span>
           </div>
@@ -160,7 +160,7 @@
         <h3>System Health</h3>
         <div class="status-grid">
           <div class="status-item" *ngFor="let status of systemStatus">
-            <span class="status-icon">✓</span>
+            <span class="status-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check</span></span>
             <span class="status-text">{{ status }}</span>
           </div>
         </div>

@@ -25,9 +25,11 @@ public class ApplicationDbContext
     public DbSet<Section> Sections => Set<Section>();
     public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
     public DbSet<Parent> Parents => Set<Parent>();
+    public DbSet<ParentStudent> ParentStudents => Set<ParentStudent>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Grade> Grades => Set<Grade>();
+    public DbSet<StudentMark> StudentMarks => Set<StudentMark>();
     public DbSet<FeeInvoice> FeeInvoices => Set<FeeInvoice>();
     public DbSet<FeeCategory> FeeCategories => Set<FeeCategory>();
     public DbSet<FeeTemplate> FeeTemplates => Set<FeeTemplate>();

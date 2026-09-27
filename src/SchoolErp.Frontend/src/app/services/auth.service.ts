@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import { LoginRequest, RegisterRequest, AuthResponse, CurrentUser, GoogleLoginRequest, UserProfile, UpdateProfileRequest } from '../models/auth';
 
@@ -33,12 +33,13 @@ export class AuthService {
     return this.apiService.post('/auth/change-password', {
       currentPassword,
       newPassword
-    });
+    }).pipe(tap(() => localStorage.removeItem('mustChangePassword')));
   }
 
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('mustChangePassword');
   }
 
   isLoggedIn(): boolean {
@@ -82,5 +83,41 @@ export class AuthService {
   hasAnyRole(roles: string[]): boolean {
     const user = this.getCurrentUserFromStorage();
     return user ? roles.some(role => user.roles.includes(role)) : false;
+  }
+
+  getLinkedStudentIds(): string[] {
+    const user = this.getCurrentUserFromStorage();
+    if (user?.linkedStudentIds?.length) {
+      return user.linkedStudentIds;
+    }
+
+    const payload = this.getTokenPayload();
+    const claimValue = payload?.linkedStudentIds;
+    if (!claimValue) {
+      return [];
+    }
+
+    return String(claimValue)
+      .split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+  }
+
+  private getTokenPayload(): any | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    const [, payload] = token.split('.');
+    if (!payload) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    } catch {
+      return null;
+    }
   }
 }

@@ -19,7 +19,19 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "http://localhost:63505")
+        policy.WithOrigins(
+                  "http://localhost:8080",
+                  "http://localhost:4200",
+                  "http://localhost:63505",
+                  "http://127.0.0.1:8080",
+                  "http://127.0.0.1:4200")
+              .SetIsOriginAllowed(origin =>
+              {
+                  if (string.IsNullOrEmpty(origin)) return false;
+                  return Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+                         (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                          uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase));
+              })
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -55,11 +67,18 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin", "SuperAdmin"));
+    options.AddPolicy("TeacherAccess", policy => policy.RequireRole("Admin", "SuperAdmin", "Teacher"));
+    options.AddPolicy("StudentAccess", policy => policy.RequireRole("Student"));
+    options.AddPolicy("ParentAccess", policy => policy.RequireRole("Parent"));
+});
 
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "School ERP API", Version = "v1" });
+    options.CustomSchemaIds(type => type.FullName);
 
     var scheme = new OpenApiSecurityScheme
     {
@@ -92,6 +111,8 @@ app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 app.MapControllers();
 
 try
@@ -101,7 +122,8 @@ try
 catch (Exception ex)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "Database seeding failed; continuing without seeding.");
+    logger.LogCritical(ex, "Database migration or seeding failed; the API cannot start safely.");
+    throw;
 }
 
 app.Run();

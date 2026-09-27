@@ -128,7 +128,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: this.summary?.totalStudents ?? 0,
         trend: 5.2,
         previousValue: (this.summary?.totalStudents ?? 0) - 10,
-        icon: '👨‍🎓',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">man</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>',
         color: '#3b82f6',
         action: 'students'
       },
@@ -137,7 +137,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: this.summary?.totalStaff ?? 0,
         trend: 2.1,
         previousValue: (this.summary?.totalStaff ?? 0) - 2,
-        icon: '👩‍🏫',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>',
         color: '#10b981',
         action: 'staff'
       },
@@ -146,7 +146,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: Math.round((this.summary?.totalStaff ?? 0) * 0.7),
         trend: 3.5,
         previousValue: Math.round(((this.summary?.totalStaff ?? 0) - 2) * 0.7),
-        icon: '👩‍🏫',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>',
         color: '#059669',
         action: 'staff'
       },
@@ -155,7 +155,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: this.summary?.totalClasses ?? 0,
         trend: 4.8,
         previousValue: (this.summary?.totalClasses ?? 0) - 1,
-        icon: '📚',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">book</span>',
         color: '#8b5cf6',
         action: 'classes'
       },
@@ -164,7 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: 24,
         trend: 2.5,
         previousValue: 23,
-        icon: '📖',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">menu_book</span>',
         color: '#06b6d4',
         action: 'subjects'
       },
@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: this.summary?.attendancePercentage != null ? `${Math.round(this.summary.attendancePercentage)}%` : 'N/A',
         trend: 1.2,
         previousValue: this.summary?.attendancePercentage != null ? (this.summary.attendancePercentage - 1.2) : undefined,
-        icon: '📅',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">calendar_month</span>',
         color: '#f59e0b'
       },
       {
@@ -181,7 +181,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: `KSh ${(this.summary?.todayCollections ?? 0).toLocaleString()}`,
         trend: 7.3,
         previousValue: (this.summary?.todayCollections ?? 0) - 5000,
-        icon: '💰',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span>',
         color: '#10b981'
       },
       {
@@ -189,7 +189,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: `KSh ${(this.summary?.pendingFees ?? 0).toLocaleString()}`,
         trend: -2.1,
         previousValue: (this.summary?.pendingFees ?? 0) + 3000,
-        icon: '💸',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">money_off</span>',
         color: '#ef4444'
       },
       {
@@ -197,7 +197,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: `KSh ${(this.summary?.monthlyCollections ?? 0).toLocaleString()}`,
         trend: 12.4,
         previousValue: (this.summary?.monthlyCollections ?? 0) - 15000,
-        icon: '📈',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">trending_up</span>',
         color: '#059669'
       },
       {
@@ -205,7 +205,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: this.summary?.newAdmissions ?? 0,
         trend: 8.5,
         previousValue: (this.summary?.newAdmissions ?? 0) - 3,
-        icon: '🎯',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">ads_click</span>',
         color: '#8b5cf6'
       },
       {
@@ -221,21 +221,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: 12,
         trend: 3.8,
         previousValue: 11,
-        icon: '🟢',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">circle</span>',
         color: '#10b981'
       },
       {
         title: 'Database Status',
         value: 'Healthy',
         trend: 0,
-        icon: '🗄️',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inventory</span>️',
         color: '#10b981'
       },
       {
         title: 'API Status',
         value: 'Running',
         trend: 0,
-        icon: '⚡',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bolt</span>',
         color: '#059669'
       },
       {
@@ -243,14 +243,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         value: '42%',
         trend: 2.1,
         previousValue: 40,
-        icon: '💾',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">save</span>',
         color: '#f59e0b'
       },
       {
         title: 'Server Health',
         value: 'Good',
         trend: 1.5,
-        icon: '🖥️',
+        icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">desktop_windows</span>️',
         color: '#059669'
       }
     ];

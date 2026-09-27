@@ -35,7 +35,7 @@ export class ImportCenterComponent implements OnInit {
   importableEntities: ImportableEntity[] = [
     {
       name: 'Students',
-      icon: '👨‍🎓',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">man</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>',
       description: 'Import student enrollment records, personal information, and guardian details',
       fields: ['Admission Number', 'First Name', 'Last Name', 'Email', 'Gender', 'Date of Birth', 'Section', 'Guardian Name', 'Guardian Phone', 'Guardian Email'],
       template: [
@@ -44,7 +44,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Staff',
-      icon: '👩‍🏫',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>',
       description: 'Import staff and teacher records, employment details, and qualifications',
       fields: ['Employee ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Department', 'Position', 'Hire Date', 'Salary'],
       template: [
@@ -53,7 +53,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Classes',
-      icon: '📚',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">book</span>',
       description: 'Import class sections, grade levels, and teacher assignments',
       fields: ['Class Name', 'Grade Level', 'Section', 'Teacher Name', 'Capacity'],
       template: [
@@ -62,7 +62,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Subjects',
-      icon: '📖',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">menu_book</span>',
       description: 'Import subject catalog, teachers, and class assignments',
       fields: ['Subject Code', 'Subject Name', 'Teacher', 'Class', 'Period'],
       template: [
@@ -71,7 +71,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Fee Structures',
-      icon: '💰',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span>',
       description: 'Import fee categories, amounts, and payment schedules',
       fields: ['Fee Name', 'Amount', 'Due Date', 'Class', 'Description'],
       template: [
@@ -80,7 +80,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Payments',
-      icon: '💳',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">credit_card</span>',
       description: 'Import payment transactions and receipts',
       fields: ['Student ID', 'Amount', 'Payment Date', 'Payment Mode', 'Transaction ID', 'Reference'],
       template: [
@@ -89,7 +89,7 @@ export class ImportCenterComponent implements OnInit {
     },
     {
       name: 'Attendance',
-      icon: '📋',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span>',
       description: 'Import daily attendance records for students',
       fields: ['Student ID', 'Date', 'Status', 'Remarks'],
       template: [

@@ -1,7 +1,7 @@
 <div class="database-center-layout">
   <nav class="sidebar">
     <div class="sidebar-header">
-      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <button class="back-btn" (click)="goBack()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <h2>Database Center</h2>
     </div>
 
@@ -19,7 +19,7 @@
 
     <div class="sidebar-footer">
       <button class="sidebar-btn" *ngIf="hasRole('SuperAdmin')" (click)="loadTables()">
-        <span class="btn-icon">🔄</span>
+        <span class="btn-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">sync</span></span>
         Refresh
       </button>
     </div>
@@ -37,10 +37,10 @@
       </div>
       <div class="header-actions">
         <button class="action-btn" (click)="openImportModal()">
-          <span>📥 Import</span>
+          <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Import</span>
         </button>
         <button class="action-btn" (click)="openExportModal()">
-          <span>📤 Export</span>
+          <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">publish</span> Export</span>
         </button>
       </div>
     </div>
@@ -49,7 +49,7 @@
       <div class="controls">
         <div class="search-box">
           <input type="text" placeholder="Search records..." [(ngModel)]="searchQuery" (ngModelChange)="searchRecords()">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@
                 <span class="cell-value">{{ formatValue(record[column]) }}</span>
               </td>
               <td *ngIf="hasRole(['Admin', 'SuperAdmin'])">
-                <button class="delete-btn" (click)="deleteRecord(record.id ?? record._id ?? '')">🗑️</button>
+                <button class="delete-btn" (click)="deleteRecord(record.id ?? record._id ?? '')"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">delete</span>️</button>
               </td>
             </tr>
           </tbody>
@@ -98,7 +98,7 @@
     </div>
 
     <div class="empty-state" *ngIf="selectedTable && !isLoadingRecords && records.length === 0">
-      <div class="empty-icon">📊</div>
+      <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></div>
       <h3>No Records</h3>
       <p>This table is empty or no records match your search criteria.</p>
     </div>

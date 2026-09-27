@@ -1,225 +1,162 @@
-<div class="profile-layout">
+<div class="audit-logs-layout">
   <nav class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-brand">
-        <span class="brand-icon">🏫</span>
-        <span class="brand-text">School ERP</span>
-      </div>
+      <h2>School ERP</h2>
     </div>
 
     <div class="sidebar-section">
-      <button class="sidebar-btn" (click)="goBack()">
-        <span class="sidebar-icon">←</span>
-        Back to Dashboard
+      <button class="back-btn" (click)="goBack()">
+        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Back to Dashboard
       </button>
-    </div>
-
-    <div class="sidebar-footer">
-      <button class="sidebar-btn" (click)="logout()">
-        <span class="sidebar-icon">🚪</span>
-        Logout
+      <button class="back-btn" (click)="logout()">
+        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">logout</span> Logout
       </button>
     </div>
   </nav>
 
-  <div class="profile-container">
-    <header class="profile-header">
+  <div class="main-content">
+    <header class="content-header" style="padding: 2rem 2rem 0;">
       <h1>Audit Logs</h1>
-      <p class="profile-subtitle">View system activity and user actions</p>
+      <p class="header-subtitle">View system activity and user actions</p>
     </header>
 
-    <main class="profile-content">
-      <div class="profile-card">
-        <div class="profile-avatar-section">
-          <div class="profile-avatar-large">📋</div>
-          <h2 class="profile-name">System Audit Logs</h2>
+    <main class="content-body">
+      <!-- Filters -->
+      <div class="filters">
+        <div class="search-box">
+          <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" (ngModelChange)="filterLogs()">
+          <span class="search-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
         </div>
-
-        <div class="profile-details">
-          <!-- Filters -->
-          <div class="filters-section">
-            <div class="form-group">
-              <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" (ngModelChange)="filterLogs()" class="form-control">
-            </div>
-            <div class="filter-row">
-              <select [(ngModel)]="filterAction" (ngModelChange)="filterLogs()" class="form-control">
-                <option value="">All Actions</option>
-                <option value="LOGIN">Login</option>
-                <option value="LOGOUT">Logout</option>
-                <option value="UPDATE">Update</option>
-                <option value="CREATE">Create</option>
-                <option value="DELETE">Delete</option>
-                <option value="CHANGE_PASSWORD">Change Password</option>
-                <option value="UPDATE_PROFILE">Update Profile</option>
-              </select>
-              <select [(ngModel)]="filterModule" (ngModelChange)="filterLogs()" class="form-control">
-                <option value="">All Modules</option>
-                <option value="Authentication">Authentication</option>
-                <option value="Students">Students</option>
-                <option value="Staff">Staff</option>
-                <option value="Fees">Fees</option>
-                <option value="Attendance">Attendance</option>
-                <option value="Settings">Settings</option>
-              </select>
-            </div>
-            <div class="filter-row">
-              <button class="action-btn" (click)="filterLogs()">Filter</button>
-              <button class="action-btn secondary" (click)="exportToExcel()">Export Excel</button>
-              <button class="action-btn secondary" (click)="exportToPDF()">Export PDF</button>
-            </div>
-          </div>
-
-          <!-- Loading State -->
-          <div class="loading-state" *ngIf="isLoading">
-            <div class="spinner"></div>
-            <span>Loading audit logs...</span>
-          </div>
-
-          <!-- Audit Logs Table -->
-          <div class="audit-logs-table" *ngIf="!isLoading && filteredLogs.length > 0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Module</th>
-                  <th>Action</th>
-                  <th>Entity</th>
-                  <th>IP Address</th>
-                  <th>Browser</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let log of paginatedLogs" (click)="viewLogDetails(log)">
-                  <td>{{ log.date }}</td>
-                  <td>{{ log.time }}</td>
-                  <td>{{ log.userName }}</td>
-                  <td>{{ log.userRole }}</td>
-                  <td>{{ log.module }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getActionBadge(log.action)">
-                      {{ getActionIcon(log.action) }} {{ log.action }}
-                    </span>
-                  </td>
-                  <td>{{ log.entity || '-' }}</td>
-                  <td>{{ log.ipAddress }}</td>
-                  <td>{{ log.browser }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="log.status === 'Success' ? 'badge-success' : 'badge-danger'">
-                      {{ log.status }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Empty State -->
-          <div class="empty-state" *ngIf="!isLoading && filteredLogs.length === 0">
-            <div class="empty-icon">📋</div>
-            <h3>No audit logs found</h3>
-            <p>Try adjusting your search or filter criteria.</p>
-          </div>
-
-          <!-- Pagination -->
-          <div class="pagination" *ngIf="!isLoading && totalLogs > pageSize">
-            <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)">First</button>
-            <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Prev</button>
-            
-            <div class="page-numbers">
-              <button class="page-btn" *ngFor="let page of getPageNumbers()" 
-                      [class.active]="page === currentPage"
-                      (click)="goToPage(page)">
-                {{ page }}
-              </button>
-            </div>
-
-            <button class="page-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(currentPage + 1)">Next</button>
-            <button class="page-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(getTotalPages())">Last</button>
-          </div>
-
-          <div class="pagination-info" *ngIf="!isLoading && totalLogs > 0">
-            Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ min(currentPage * pageSize, totalLogs) }} of {{ totalLogs }} records
-          </div>
+        <div class="filter-row">
+          <select [(ngModel)]="filterAction" (ngModelChange)="filterLogs()">
+            <option value="">All Actions</option>
+            <option value="LOGIN">Login</option>
+            <option value="LOGOUT">Logout</option>
+            <option value="UPDATE">Update</option>
+            <option value="CREATE">Create</option>
+            <option value="DELETE">Delete</option>
+            <option value="CHANGE_PASSWORD">Change Password</option>
+            <option value="UPDATE_PROFILE">Update Profile</option>
+          </select>
+          <select [(ngModel)]="filterModule" (ngModelChange)="filterLogs()">
+            <option value="">All Modules</option>
+            <option value="Authentication">Authentication</option>
+            <option value="Students">Students</option>
+            <option value="Staff">Staff</option>
+            <option value="Fees">Fees</option>
+            <option value="Attendance">Attendance</option>
+            <option value="Settings">Settings</option>
+          </select>
+          <button class="export-btn" (click)="filterLogs()">Filter</button>
+          <button class="export-btn" (click)="exportToExcel()">Export Excel</button>
+          <button class="export-btn" (click)="exportToPDF()">Export PDF</button>
         </div>
       </div>
+
+      <!-- Loading State -->
+      <div class="loading" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <span>Loading audit logs...</span>
+      </div>
+
+      <!-- Audit Logs Table -->
+      <div class="logs-table-container" *ngIf="!isLoading && filteredLogs.length > 0">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Module</th>
+              <th>Action</th>
+              <th>Entity</th>
+              <th>IP Address</th>
+              <th>Browser</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of paginatedLogs" (click)="viewLogDetails(log)" style="cursor: pointer;">
+              <td>{{ log.date }}</td>
+              <td>{{ log.time }}</td>
+              <td>{{ log.userName }}</td>
+              <td>{{ log.userRole }}</td>
+              <td>{{ log.module }}</td>
+              <td>
+                <span class="action-badge" [ngClass]="log.action === 'LOGIN' || log.action === 'CREATE' ? 'success' : (log.action === 'DELETE' ? 'danger' : 'info')">
+                  {{ log.action }}
+                </span>
+              </td>
+              <td>{{ log.entity || '-' }}</td>
+              <td class="ip-address">{{ log.ipAddress }}</td>
+              <td>{{ log.browser }}</td>
+              <td>
+                <span class="action-badge" [ngClass]="log.status === 'Success' ? 'success' : 'danger'">
+                  {{ log.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div class="no-logs" *ngIf="!isLoading && filteredLogs.length === 0">
+        <h3>No audit logs found</h3>
+        <p>Try adjusting your search or filter criteria.</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="!isLoading && totalLogs > pageSize">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)">«</button>
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
+        
+        <button class="page-btn" *ngFor="let page of getPageNumbers()" 
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+
+        <button class="page-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(currentPage + 1)">›</button>
+        <button class="page-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(getTotalPages())">»</button>
+      </div>
+
     </main>
   </div>
 
   <!-- Log Details Modal -->
-  <div class="modal-overlay" *ngIf="showDetails && selectedLog">
-    <div class="modal-dialog modal-large">
+  <div class="details-modal" *ngIf="showDetails && selectedLog">
+    <div class="modal-content">
       <div class="modal-header">
         <h3>Audit Log Details</h3>
-        <button class="modal-close" (click)="closeDetails()">✕</button>
+        <button class="close-btn" (click)="closeDetails()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">close</span></button>
       </div>
       <div class="modal-body">
-        <div class="details-grid">
-          <div class="detail-item">
-            <span class="detail-label">Date</span>
-            <span class="detail-value">{{ selectedLog.date }} {{ selectedLog.time }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">User</span>
-            <span class="detail-value">{{ selectedLog.userName }} ({{ selectedLog.userEmail }})</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Role</span>
-            <span class="detail-value">{{ selectedLog.userRole }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Module</span>
-            <span class="detail-value">{{ selectedLog.module }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Action</span>
-            <span class="detail-value">
-              <span class="badge" [ngClass]="getActionBadge(selectedLog.action)">
-                {{ getActionIcon(selectedLog.action) }} {{ selectedLog.action }}
-              </span>
-            </span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Entity</span>
-            <span class="detail-value">{{ selectedLog.entity || '-' }}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">Description</span>
-            <span class="detail-value">{{ selectedLog.description }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">IP Address</span>
-            <span class="detail-value">{{ selectedLog.ipAddress }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Browser</span>
-            <span class="detail-value">{{ selectedLog.browser }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Status</span>
-            <span class="detail-value">
-              <span class="badge" [ngClass]="selectedLog.status === 'Success' ? 'badge-success' : 'badge-danger'">
-                {{ selectedLog.status }}
-              </span>
-            </span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">Old Value</span>
-            <span class="detail-value" *ngIf="selectedLog.oldValue; else noOldValue">{{ selectedLog.oldValue }}</span>
-            <ng-template #noOldValue><span class="detail-value">-</span></ng-template>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">New Value</span>
-            <span class="detail-value" *ngIf="selectedLog.newValue; else noNewValue">{{ selectedLog.newValue }}</span>
-            <ng-template #noNewValue><span class="detail-value">-</span></ng-template>
-          </div>
+        <div class="detail-row">
+          <span class="detail-label">Date & Time</span>
+          <span class="detail-value">{{ selectedLog.date }} {{ selectedLog.time }}</span>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="action-btn secondary" (click)="closeDetails()">Close</button>
+        <div class="detail-row">
+          <span class="detail-label">User</span>
+          <span class="detail-value">{{ selectedLog.userName }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Module</span>
+          <span class="detail-value">{{ selectedLog.module }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Action</span>
+          <span class="detail-value">{{ selectedLog.action }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Description</span>
+          <span class="detail-value">{{ selectedLog.description }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">IP Address</span>
+          <span class="detail-value ip-address">{{ selectedLog.ipAddress }}</span>
+        </div>
       </div>
     </div>
   </div>

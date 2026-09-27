@@ -8,10 +8,12 @@ namespace SchoolErp.Application.Staff;
 public class StaffService : IStaffService
 {
     private readonly IApplicationDbContext _db;
+    private readonly IAccountProvisioningService _provisioning;
 
-    public StaffService(IApplicationDbContext db)
+    public StaffService(IApplicationDbContext db, IAccountProvisioningService provisioning)
     {
         _db = db;
+        _provisioning = provisioning;
     }
 
     public async Task<IReadOnlyList<StaffDto>> GetAllAsync(CancellationToken ct = default)
@@ -43,8 +45,12 @@ public class StaffService : IStaffService
         return await _db.StaffMembers.AsNoTracking().OrderBy(s => s.LastName).ToListAsync(ct);
     }
 
-    public async Task<StaffDto> CreateAsync(CreateStaffRequest request, CancellationToken ct = default)
+    public async Task<CreateStaffResponse> CreateAsync(CreateStaffRequest request, CancellationToken ct = default)
     {
+        if (request.CreateLoginAccount &&
+            (request.AccountRole is not ("Teacher" or "Staff" or "Accountant") || string.IsNullOrWhiteSpace(request.Email)))
+            throw new InvalidOperationException("Choose Teacher, Staff, or Accountant and provide an email to create a login account.");
+
         var staff = new StaffMember
         {
             EmployeeId = request.EmployeeId,
@@ -64,7 +70,30 @@ public class StaffService : IStaffService
         _db.StaffMembers.Add(staff);
         await _db.SaveChangesAsync(ct);
 
-        return new StaffDto
+        string? temporaryPassword = null;
+        if (request.CreateLoginAccount)
+        {
+            var provision = await _provisioning.ProvisionAsync(
+                staff.TenantId,
+                staff.FirstName,
+                staff.LastName,
+                staff.Email,
+                request.AccountRole!,
+                ct);
+
+            if (!provision.Succeeded)
+            {
+                _db.StaffMembers.Remove(staff);
+                await _db.SaveChangesAsync(ct);
+                throw new InvalidOperationException(string.Join(" ", provision.Errors));
+            }
+
+            staff.UserId = provision.UserId;
+            temporaryPassword = provision.TemporaryPassword;
+            await _db.SaveChangesAsync(ct);
+        }
+
+        var staffDto = new StaffDto
         {
             Id = staff.Id,
             EmployeeId = staff.EmployeeId,
@@ -79,6 +108,13 @@ public class StaffService : IStaffService
             DateOfJoining = staff.DateOfJoining,
             EmploymentStatus = staff.EmploymentStatus,
             Qualifications = staff.Qualifications
+        };
+
+        return new CreateStaffResponse
+        {
+            Staff = staffDto,
+            LoginEmail = request.CreateLoginAccount ? staff.Email : null,
+            TemporaryPassword = temporaryPassword
         };
     }
 

@@ -57,7 +57,8 @@ public class IdentityService : IIdentityService
                 x.ConcurrencyStamp,
                 x.FirstName,
                 x.LastName,
-                x.LastLoginAt
+                x.LastLoginAt,
+                x.MustChangePassword
             })
             .SingleOrDefaultAsync(ct);
 
@@ -75,14 +76,15 @@ public class IdentityService : IIdentityService
             ConcurrencyStamp = u.ConcurrencyStamp,
             FirstName = u.FirstName,
             LastName = u.LastName,
-            LastLoginAt = u.LastLoginAt
+            LastLoginAt = u.LastLoginAt,
+            MustChangePassword = u.MustChangePassword
         };
     }
 
     public async Task<AuthResult> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
-        if (!Roles.TenantRoles.Contains(request.Role))
-            return AuthResult.Failure($"Invalid role '{request.Role}'.");
+        if (request.Role is not (Roles.Student or Roles.Parent))
+            return AuthResult.Failure("Self-registration is available only for Student and Parent accounts.");
 
         var tenant = await _db.Tenants
             .IgnoreQueryFilters()
@@ -132,21 +134,53 @@ public class IdentityService : IIdentityService
 
     public async Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
+        // Step 1: Validate tenant
         var tenant = await _db.Tenants
+            .AsNoTracking()
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(t => t.Code == request.TenantCode && t.IsActive, ct);
         if (tenant is null)
             return AuthResult.Failure("Invalid credentials.");
 
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user is null || user.TenantId != tenant.Id)
+        // Step 2: Lean user projection - only needed columns, no full entity load
+        var userRow = await _db.Users
+            .AsNoTracking()
+            .Where(u => u.NormalizedEmail == request.Email.ToUpperInvariant() && u.TenantId == tenant.Id)
+            .Select(u => new
+            {
+                u.Id, u.UserName, u.Email, u.EmailConfirmed,
+                u.PasswordHash, u.TenantId, u.SecurityStamp,
+                u.ConcurrencyStamp, u.FirstName, u.LastName,
+                u.LastLoginAt, u.MustChangePassword,
+                u.LockoutEnabled, u.LockoutEnd, u.AccessFailedCount
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (userRow is null)
             return AuthResult.Failure("Invalid credentials.");
 
-        if (!await _userManager.CheckPasswordAsync(user, request.Password))
+        // Step 3: Re-hydrate minimal ApplicationUser for password verification
+        var user = new ApplicationUser
+        {
+            Id = userRow.Id, UserName = userRow.UserName, Email = userRow.Email,
+            EmailConfirmed = userRow.EmailConfirmed, PasswordHash = userRow.PasswordHash,
+            TenantId = userRow.TenantId, SecurityStamp = userRow.SecurityStamp,
+            ConcurrencyStamp = userRow.ConcurrencyStamp, FirstName = userRow.FirstName,
+            LastName = userRow.LastName, LastLoginAt = userRow.LastLoginAt,
+            MustChangePassword = userRow.MustChangePassword,
+            LockoutEnabled = userRow.LockoutEnabled, LockoutEnd = userRow.LockoutEnd,
+            AccessFailedCount = userRow.AccessFailedCount
+        };
+
+        // Step 4: Verify password directly (no extra DB round-trip)
+        var pwResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, request.Password);
+        if (pwResult == PasswordVerificationResult.Failed)
             return AuthResult.Failure("Invalid credentials.");
 
-        user.LastLoginAt = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
+        // Step 5: Update LastLoginAt synchronously (safe - same DbContext scope)
+        await _db.Users
+            .Where(u => u.Id == user.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastLoginAt, DateTime.UtcNow), ct);
 
         var roles = await _userManager.GetRolesAsync(user);
         await _auditService.LogAsync(user.Id, user.Email!, "LOGIN", $"{user.Email} logged in", ct: ct);
@@ -199,6 +233,13 @@ public class IdentityService : IIdentityService
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         if (!result.Succeeded)
             return AuthResult.Failure(result.Errors.Select(e => e.Description).ToArray());
+
+        // Clear the forced-change flag now that the user has chosen their own password
+        if (user.MustChangePassword)
+        {
+            user.MustChangePassword = false;
+            await _userManager.UpdateAsync(user);
+        }
 
         await _auditService.LogAsync(user.Id, user.Email!, "CHANGE_PASSWORD", $"{user.Email} changed their password", ct: ct);
         return AuthResult.Success(BuildResponse(user, await _userManager.GetRolesAsync(user)));
@@ -271,8 +312,17 @@ public class IdentityService : IIdentityService
     {
         var roleList = roles.ToList();
         var fullName = $"{user.FirstName} {user.LastName}".Trim();
+        var linkedStudentIds = roleList.Contains(Roles.Parent)
+            ? _db.ParentStudents
+                .AsNoTracking()
+                .IgnoreQueryFilters()
+                .Where(ps => ps.Parent != null && ps.Parent.UserId == user.Id && ps.TenantId == user.TenantId)
+                .Select(ps => ps.StudentId)
+                .ToList()
+            : new List<Guid>();
+
         var (token, expires) = _tokenGenerator.GenerateToken(
-            user.Id, user.UserName!, user.TenantId, roleList, fullName);
+            user.Id, user.UserName!, user.TenantId, roleList, fullName, linkedStudentIds);
 
         return new AuthResponse
         {
@@ -282,7 +332,9 @@ public class IdentityService : IIdentityService
             Email = user.Email!,
             FullName = fullName,
             TenantId = user.TenantId,
-            Roles = roleList
+            Roles = roleList,
+            LinkedStudentIds = linkedStudentIds,
+            MustChangePassword = user.MustChangePassword
         };
     }
 }

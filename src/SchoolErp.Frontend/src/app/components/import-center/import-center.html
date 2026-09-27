@@ -1,7 +1,7 @@
 <div class="import-center-layout">
   <nav class="sidebar">
     <div class="sidebar-header">
-      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <button class="back-btn" (click)="goBack()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <h2>Import Center</h2>
     </div>
 
@@ -19,7 +19,7 @@
 
     <div class="sidebar-footer">
       <button class="sidebar-btn" (click)="downloadTemplate()" *ngIf="selectedEntity">
-        <span>📥</span>
+        <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span></span>
         Download Template
       </button>
     </div>
@@ -40,7 +40,7 @@
     <div class="content-body" *ngIf="selectedEntity">
       <div class="import-section" *ngIf="!showPreview">
         <div class="upload-card">
-          <div class="upload-icon">📁</div>
+          <div class="upload-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">folder</span></div>
           <h3>Select File to Import</h3>
           <p class="upload-description">
             Supported formats: CSV, Excel (.xlsx, .xls)<br>
@@ -140,7 +140,7 @@
     </div>
 
     <div class="empty-state" *ngIf="!selectedEntity">
-      <div class="empty-icon">📊</div>
+      <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></div>
       <h3>Select an Entity to Import</h3>
       <p>Choose from the list to begin importing data.</p>
     </div>

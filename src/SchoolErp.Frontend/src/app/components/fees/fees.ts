@@ -56,6 +56,45 @@ export class FeesComponent implements OnInit {
   selectedPaymentMode: string = 'ALL';
   selectedInvoiceStatus: string = 'ALL';
 
+  // Pagination
+  invoicePageSize = 15;
+  invoicePage = 1;
+  get totalInvoicePages(): number { return Math.ceil(this.filteredInvoices.length / this.invoicePageSize) || 1; }
+  get pagedInvoices(): FeeInvoiceDto[] {
+    const s = (this.invoicePage - 1) * this.invoicePageSize;
+    return this.filteredInvoices.slice(s, s + this.invoicePageSize);
+  }
+  get invoicePageNumbers(): number[] {
+    const total = this.totalInvoicePages; const cur = this.invoicePage; const pages: number[] = [];
+    if (total <= 7) { for (let i = 1; i <= total; i++) pages.push(i); }
+    else {
+      pages.push(1); if (cur > 3) pages.push(-1);
+      for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+      if (cur < total - 2) pages.push(-1); pages.push(total);
+    }
+    return pages;
+  }
+  goToInvoicePage(p: number): void { this.invoicePage = p; }
+
+  paymentPageSize = 15;
+  paymentPage = 1;
+  get totalPaymentPages(): number { return Math.ceil(this.filteredPayments.length / this.paymentPageSize) || 1; }
+  get pagedPayments(): PaymentTransactionDto[] {
+    const s = (this.paymentPage - 1) * this.paymentPageSize;
+    return this.filteredPayments.slice(s, s + this.paymentPageSize);
+  }
+  get paymentPageNumbers(): number[] {
+    const total = this.totalPaymentPages; const cur = this.paymentPage; const pages: number[] = [];
+    if (total <= 7) { for (let i = 1; i <= total; i++) pages.push(i); }
+    else {
+      pages.push(1); if (cur > 3) pages.push(-1);
+      for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+      if (cur < total - 2) pages.push(-1); pages.push(total);
+    }
+    return pages;
+  }
+  goToPaymentPage(p: number): void { this.paymentPage = p; }
+
   // Modal Controls
   showRecordPaymentModal: boolean = false;
   showCreateInvoiceModal: boolean = false;
@@ -104,7 +143,7 @@ export class FeesComponent implements OnInit {
     {
       id: 'mpesa',
       name: 'Mobile Money (M-Pesa / Airtel Money)',
-      icon: '📱',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">smartphone</span>',
       description: 'Instant mobile payment via M-Pesa Paybill, Till Number or STK Push.',
       enabled: true,
       mode: PaymentMode.MobileMoney,
@@ -117,7 +156,7 @@ export class FeesComponent implements OnInit {
     {
       id: 'bank',
       name: 'Bank Transfer & Direct Deposit',
-      icon: '🏦',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">account_balance</span>',
       description: 'Direct wire transfer or cash deposit into school bank accounts.',
       enabled: true,
       mode: PaymentMode.BankTransfer,
@@ -130,7 +169,7 @@ export class FeesComponent implements OnInit {
     {
       id: 'cash',
       name: 'Cash Payment Desk',
-      icon: '💵',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">attach_money</span>',
       description: 'Physical cash payments handled at school finance counters.',
       enabled: true,
       mode: PaymentMode.Cash,
@@ -142,7 +181,7 @@ export class FeesComponent implements OnInit {
     {
       id: 'cheque',
       name: 'Bank Cheque',
-      icon: '📝',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">note</span>',
       description: 'Physical banker cheques with clearing period verification.',
       enabled: true,
       mode: PaymentMode.Cheque,
@@ -154,7 +193,7 @@ export class FeesComponent implements OnInit {
     {
       id: 'stripe',
       name: 'Credit / Debit Card (Stripe / Visa / MasterCard)',
-      icon: '💳',
+      icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">credit_card</span>',
       description: 'Online card payment gateway integration via Stripe API.',
       enabled: true,
       mode: PaymentMode.Card,
@@ -508,22 +547,22 @@ export class FeesComponent implements OnInit {
 
   getPaymentModeIcon(mode: number | PaymentMode): string {
     switch (mode) {
-      case PaymentMode.Cash: return '💵';
-      case PaymentMode.BankTransfer: return '🏦';
-      case PaymentMode.MobileMoney: return '📱';
-      case PaymentMode.Cheque: return '📝';
-      case PaymentMode.Card: return '💳';
-      default: return '💰';
+      case PaymentMode.Cash: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">attach_money</span>';
+      case PaymentMode.BankTransfer: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">account_balance</span>';
+      case PaymentMode.MobileMoney: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">smartphone</span>';
+      case PaymentMode.Cheque: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">note</span>';
+      case PaymentMode.Card: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">credit_card</span>';
+      default: return '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span>';
     }
   }
 
   getInvoiceStatusBadge(status: FeeInvoiceStatus): string {
     switch (status) {
-      case FeeInvoiceStatus.Paid: return 'status-paid';
-      case FeeInvoiceStatus.PartiallyPaid: return 'status-partial';
-      case FeeInvoiceStatus.Overdue: return 'status-overdue';
-      case FeeInvoiceStatus.Cancelled: return 'status-cancelled';
-      default: return 'status-pending';
+      case FeeInvoiceStatus.Paid:           return 'badge badge-paid';
+      case FeeInvoiceStatus.PartiallyPaid:  return 'badge badge-partial';
+      case FeeInvoiceStatus.Overdue:        return 'badge badge-overdue';
+      case FeeInvoiceStatus.Cancelled:      return 'badge badge-neutral';
+      default:                              return 'badge badge-pending';
     }
   }
 

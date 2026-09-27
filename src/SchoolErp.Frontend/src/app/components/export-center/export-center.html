@@ -1,7 +1,7 @@
 <div class="export-center-layout">
   <nav class="sidebar">
     <div class="sidebar-header">
-      <button class="back-btn" (click)="goBack()">← Dashboard</button>
+      <button class="back-btn" (click)="goBack()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <h2>Export Center</h2>
     </div>
 
@@ -102,7 +102,7 @@
     </div>
 
     <div class="empty-state" *ngIf="!selectedEntity">
-      <div class="empty-icon">📤</div>
+      <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">publish</span></div>
       <h3>Select an Entity to Export</h3>
       <p>Choose from the list to begin exporting data.</p>
     </div>

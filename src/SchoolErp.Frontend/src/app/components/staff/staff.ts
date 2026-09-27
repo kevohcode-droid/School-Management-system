@@ -20,6 +20,7 @@ export class StaffComponent implements OnInit {
   successMessage: string = '';
   submittedStaff?: Partial<CreateStaffRequest>;
   showAddModal: boolean = false;
+  temporaryCredentials: { email: string; password: string } | null = null;
 
   designations: string[] = [
     'Teacher',
@@ -64,7 +65,9 @@ export class StaffComponent implements OnInit {
     department: '',
     dateOfJoining: new Date().toISOString().split('T')[0],
     employmentStatus: 'Full-time',
-    qualifications: ''
+    qualifications: '',
+    createLoginAccount: false,
+    accountRole: 'Staff'
   };
 
   constructor(
@@ -104,7 +107,9 @@ export class StaffComponent implements OnInit {
       department: '',
       dateOfJoining: new Date().toISOString().split('T')[0],
       employmentStatus: 'Full-time',
-      qualifications: ''
+      qualifications: '',
+      createLoginAccount: false,
+      accountRole: 'Staff'
     };
     this.errorMessage = '';
     this.successMessage = '';
@@ -126,7 +131,8 @@ export class StaffComponent implements OnInit {
       (this.newStaff.lastName?.trim() ?? '') !== '' &&
       (this.newStaff.phone?.trim() ?? '') !== '' &&
       (this.newStaff.designation?.trim() ?? '') !== '' &&
-      (this.newStaff.department?.trim() ?? '') !== ''
+      (this.newStaff.department?.trim() ?? '') !== '' &&
+      (!this.newStaff.createLoginAccount || !!this.newStaff.email?.trim())
     );
 
     if (!hasRequiredFields) {
@@ -137,8 +143,11 @@ export class StaffComponent implements OnInit {
     this.errorMessage = '';
 
     this.staffService.createStaff(this.newStaff).subscribe({
-      next: (created) => {
-        this.staffList.unshift(created);
+      next: (result) => {
+        this.staffList.unshift(result.staff);
+        this.temporaryCredentials = result.temporaryPassword && result.loginEmail
+          ? { email: result.loginEmail, password: result.temporaryPassword }
+          : null;
         this.successMessage = `${this.newStaff.firstName} ${this.newStaff.lastName} has been onboarded successfully.`;
         this.closeAddModal();
         this.isLoading = false;

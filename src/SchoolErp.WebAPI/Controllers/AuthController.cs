@@ -14,13 +14,15 @@ public class AuthController : ControllerBase
     private readonly IApplicationDbContext _db;
     private readonly SchoolErp.Infrastructure.Persistence.ApplicationDbContext _appDb;
     private readonly SchoolErp.Application.Common.Interfaces.IJwtTokenGenerator _jwtGenerator;
+    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(IIdentityService identityService, IApplicationDbContext db, SchoolErp.Infrastructure.Persistence.ApplicationDbContext appDb, SchoolErp.Application.Common.Interfaces.IJwtTokenGenerator jwtGenerator)
+    public AuthController(IIdentityService identityService, IApplicationDbContext db, SchoolErp.Infrastructure.Persistence.ApplicationDbContext appDb, SchoolErp.Application.Common.Interfaces.IJwtTokenGenerator jwtGenerator, IWebHostEnvironment environment)
     {
         _identityService = identityService;
         _db = db;
         _appDb = appDb;
         _jwtGenerator = jwtGenerator;
+        _environment = environment;
     }
 
     [HttpPost("register")]
@@ -84,6 +86,16 @@ public class AuthController : ControllerBase
                 .FirstOrDefaultAsync(t => t.Id == tenantId, ct)
             : null;
 
+        var linkedStudentIds = currentUser.Roles.Contains(SchoolErp.Domain.Common.Roles.Parent) &&
+                               !string.IsNullOrWhiteSpace(currentUser.UserId) &&
+                               currentUser.TenantId is { } parentTenantId
+            ? await _db.ParentStudents
+                .AsNoTracking()
+                .Where(ps => ps.TenantId == parentTenantId && ps.Parent != null && ps.Parent.UserId == currentUser.UserId)
+                .Select(ps => ps.StudentId)
+                .ToListAsync(ct)
+            : new List<Guid>();
+
         return Ok(new
         {
             currentUser.UserId,
@@ -92,7 +104,8 @@ public class AuthController : ControllerBase
             currentUser.TenantId,
             TenantName = tenant?.Name,
             TenantCode = tenant?.Code,
-            currentUser.Roles
+            currentUser.Roles,
+            LinkedStudentIds = linkedStudentIds
         });
     }
 
@@ -107,23 +120,33 @@ public class AuthController : ControllerBase
         return result.Succeeded ? Ok(result.Response) : BadRequest(new { errors = result.Errors });
     }
 
-    // Dev-only: issue a token for the seeded demo admin. Not for production use.
+    // Dev-only: issue a token for the seeded administrator. Not for production use.
     [HttpPost("dev-token")]
     [AllowAnonymous]
     public async Task<IActionResult> DevToken(CancellationToken ct)
     {
-        var demoEmail = "kevohkevi110@gmail.com";
-        var user = await _appDb.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == demoEmail, ct);
+        if (!_environment.IsDevelopment())
+            return NotFound();
+
+        var seedAdminEmail = "kevohkevi110@gmail.com";
+        var user = await _appDb.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == seedAdminEmail, ct);
         if (user is null)
-            return NotFound(new { message = "Demo admin not found" });
+            return NotFound(new { message = "Seeded administrator not found" });
 
         var roleIds = await _appDb.Set<Microsoft.AspNetCore.Identity.IdentityUserRole<string>>()
             .Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(ct);
 
         var roles = await _appDb.Roles.Where(r => roleIds.Contains(r.Id)).Select(r => r.Name).ToListAsync(ct);
+        var nonNullRoles = roles.Where(r => r != null).Select(r => r!).ToList();
         var fullName = $"{user.FirstName} {user.LastName}".Trim();
-        var (token, expires) = _jwtGenerator.GenerateToken(user.Id, user.UserName ?? user.Email!, user.TenantId, roles, fullName);
+        var linkedStudentIds = await _appDb.ParentStudents
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(ps => ps.Parent != null && ps.Parent.UserId == user.Id && ps.TenantId == user.TenantId)
+            .Select(ps => ps.StudentId)
+            .ToListAsync(ct);
+        var (token, expires) = _jwtGenerator.GenerateToken(user.Id, user.UserName ?? user.Email!, user.TenantId, nonNullRoles, fullName, linkedStudentIds);
 
-        return Ok(new { AccessToken = token, ExpiresAtUtc = expires, UserId = user.Id, Email = user.Email, FullName = fullName, TenantId = user.TenantId, Roles = roles });
+        return Ok(new { AccessToken = token, ExpiresAtUtc = expires, UserId = user.Id, Email = user.Email, FullName = fullName, TenantId = user.TenantId, Roles = nonNullRoles, LinkedStudentIds = linkedStudentIds });
     }
 }

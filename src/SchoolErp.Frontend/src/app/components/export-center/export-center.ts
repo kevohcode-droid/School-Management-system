@@ -28,14 +28,14 @@ export class ExportCenterComponent implements OnInit {
   isExporting = false;
 
   exportableEntities: ExportableEntity[] = [
-    { name: 'Students', icon: '👨‍🎓', description: 'Export student records with enrollment details' },
-    { name: 'Staff', icon: '👩‍🏫', description: 'Export staff and teacher records' },
-    { name: 'Classes', icon: '📚', description: 'Export class sections and schedules' },
-    { name: 'Subjects', icon: '📖', description: 'Export subject catalog' },
-    { name: 'Fees', icon: '💰', description: 'Export fee invoices and transactions' },
-    { name: 'Attendance', icon: '📋', description: 'Export attendance records' },
-    { name: 'Payments', icon: '💳', description: 'Export payment transactions' },
-    { name: 'Audit Logs', icon: '📜', description: 'Export system audit logs' }
+    { name: 'Students', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">man</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>', description: 'Export student records with enrollment details' },
+    { name: 'Staff', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">woman</span>‍<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>', description: 'Export staff and teacher records' },
+    { name: 'Classes', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">book</span>', description: 'Export class sections and schedules' },
+    { name: 'Subjects', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">menu_book</span>', description: 'Export subject catalog' },
+    { name: 'Fees', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">payments</span>', description: 'Export fee invoices and transactions' },
+    { name: 'Attendance', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span>', description: 'Export attendance records' },
+    { name: 'Payments', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">credit_card</span>', description: 'Export payment transactions' },
+    { name: 'Audit Logs', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">receipt_long</span>', description: 'Export system audit logs' }
   ];
 
   constructor(

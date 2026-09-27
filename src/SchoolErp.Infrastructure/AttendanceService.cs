@@ -21,17 +21,24 @@ public class AttendanceService : IAttendanceService
     {
         var tenantId = _currentUser.TenantId ?? Guid.Empty;
         
-        // Check if attendance already exists for this class/date to prevent duplicates
         var existingRecords = await _context.AttendanceRecords
             .Where(a => a.TenantId == tenantId && a.ClassId == dto.ClassId && a.Date == dto.Date)
-            .Select(a => a.StudentId)
             .ToListAsync();
+        var existingByStudent = existingRecords
+            .GroupBy(record => record.StudentId)
+            .ToDictionary(group => group.Key, group => group.First());
 
         var newRecords = new List<AttendanceRecord>();
 
         foreach (var record in dto.Records)
         {
-            if (existingRecords.Contains(record.StudentId)) continue; // Skip if already marked
+            if (existingByStudent.TryGetValue(record.StudentId, out var existing))
+            {
+                existing.Status = record.Status;
+                existing.Remarks = record.Remarks;
+                existing.MarkedByUserId = userId;
+                continue;
+            }
 
             newRecords.Add(new AttendanceRecord
             {
@@ -49,8 +56,9 @@ public class AttendanceService : IAttendanceService
         if (newRecords.Any())
         {
             _context.AttendanceRecords.AddRange(newRecords);
-            await _context.SaveChangesAsync();
         }
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<List<AttendanceSummaryDto>> GetDailyAttendanceAsync(Guid classId, DateTime date)

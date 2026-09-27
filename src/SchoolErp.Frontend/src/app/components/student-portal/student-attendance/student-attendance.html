@@ -1,0 +1,135 @@
+<div class="attendance-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2 class="page-title">Attendance Record</h2>
+    <p class="page-subtitle">Track your daily attendance history</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-error">
+    <span class="alert-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">warning</span>️</span>
+    {{ error }}
+  </div>
+
+  <!-- Summary Cards -->
+  <div *ngIf="summary" class="summary-cards">
+    <div class="stat-card stat-card--present">
+      <div class="stat-card__icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span></div>
+      <div class="stat-card__body">
+        <span class="stat-card__value">{{ summary.present }}</span>
+        <span class="stat-card__label">Present</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--absent">
+      <div class="stat-card__icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">cancel</span></div>
+      <div class="stat-card__body">
+        <span class="stat-card__value">{{ summary.absent }}</span>
+        <span class="stat-card__label">Absent</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--late">
+      <div class="stat-card__icon">⏰</div>
+      <div class="stat-card__body">
+        <span class="stat-card__value">{{ summary.late }}</span>
+        <span class="stat-card__label">Late</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--percentage">
+      <div class="stat-card__icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></div>
+      <div class="stat-card__body">
+        <span class="stat-card__value">{{ summary.percentage | number:'1.1-1' }}%</span>
+        <span class="stat-card__label">Attendance Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <div class="filter-group">
+      <label class="filter-label" for="yearInput">Year</label>
+      <input
+        id="yearInput"
+        type="number"
+        class="filter-input"
+        [(ngModel)]="selectedYear"
+        (change)="onFilterChange()"
+        min="2000"
+        [max]="selectedYear + 5"
+        placeholder="Year"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="monthSelect">Month</label>
+      <select
+        id="monthSelect"
+        class="filter-select"
+        [(ngModel)]="selectedMonth"
+        (change)="onFilterChange()"
+      >
+        <option *ngFor="let month of monthOptions" [value]="month.value">
+          {{ month.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group filter-group--action">
+      <button class="btn-refresh" (click)="loadAttendance()" [disabled]="isLoading">
+        <span *ngIf="isLoading">Loading…</span>
+        <span *ngIf="!isLoading"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">sync</span> Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading attendance data…</p>
+  </div>
+
+  <!-- Attendance Table -->
+  <div *ngIf="!isLoading && records.length > 0" class="table-wrapper">
+    <table class="attendance-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Day</th>
+          <th>Status</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of records" class="table-row">
+          <td class="cell-date">{{ record.date | date:'mediumDate' }}</td>
+          <td class="cell-day">{{ getDayOfWeek(record.date) }}</td>
+          <td class="cell-status">
+            <span class="badge" [ngClass]="getStatusBadgeClass(record.status)">
+              {{ record.status }}
+            </span>
+          </td>
+          <td class="cell-remarks">
+            <span *ngIf="record.remarks; else noRemarks">{{ record.remarks }}</span>
+            <ng-template #noRemarks>
+              <span class="no-remarks">—</span>
+            </ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && records.length === 0 && attendanceData !== null" class="empty-state">
+    <div class="empty-state__icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">calendar_month</span></div>
+    <h3 class="empty-state__title">No Attendance Records</h3>
+    <p class="empty-state__message">
+      No attendance records found for
+      <strong>{{ monthOptions[selectedMonth - 1]?.label }} {{ selectedYear }}</strong>.
+    </p>
+  </div>
+
+</div>

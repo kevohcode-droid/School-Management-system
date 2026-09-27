@@ -31,9 +31,32 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    [Authorize(Roles = $"{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Teacher}")]
     public async Task<IActionResult> BulkMark([FromBody] BulkMarkAttendanceDto dto, CancellationToken ct)
     {
+        var tenantId = _currentUser.TenantId ?? Guid.Empty;
+        if (tenantId == Guid.Empty)
+            return Unauthorized(new { message = "Tenant information is required." });
+
+        if (dto.Records is null || dto.Records.Count == 0)
+            return BadRequest(new { message = "At least one attendance record is required." });
+
+        var classExists = await _db.Sections
+            .AsNoTracking()
+            .AnyAsync(s => s.Id == dto.ClassId && s.TenantId == tenantId, ct);
+        if (!classExists)
+            return NotFound(new { message = "Class not found." });
+
+        var studentIds = dto.Records.Select(r => r.StudentId).ToList();
+        if (studentIds.Any(id => id == Guid.Empty) || studentIds.Distinct().Count() != studentIds.Count)
+            return BadRequest(new { message = "Each attendance record must contain a unique student ID." });
+
+        var validStudentCount = await _db.Students
+            .AsNoTracking()
+            .CountAsync(s => s.TenantId == tenantId && s.SectionId == dto.ClassId && studentIds.Contains(s.Id), ct);
+        if (validStudentCount != studentIds.Count)
+            return BadRequest(new { message = "All students must belong to the selected class." });
+
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         await _attendanceService.BulkMarkAttendanceAsync(dto, userId);
         return Ok(new { message = "Attendance marked successfully" });

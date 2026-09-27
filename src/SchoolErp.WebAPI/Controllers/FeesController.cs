@@ -8,7 +8,7 @@ namespace SchoolErp.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
 public class FeesController : ControllerBase
 {
     private readonly IFeeService _feeService;
@@ -34,7 +34,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("invoices")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> CreateInvoice([FromBody] CreateInvoiceRequest request, CancellationToken ct)
     {
         var result = await _feeService.CreateInvoiceAsync(request, ct);
@@ -59,7 +59,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("templates")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> CreateFeeTemplate([FromBody] CreateFeeTemplateRequest request, CancellationToken ct)
     {
         var result = await _feeService.CreateFeeTemplateAsync(request, ct);
@@ -67,7 +67,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("templates/{id:guid}/generate-invoices")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> GenerateInvoicesFromTemplate(Guid id, [FromQuery] string academicYear, [FromQuery] string term, CancellationToken ct)
     {
         var result = await _feeService.GenerateInvoicesFromTemplateAsync(id, academicYear, term, ct);
@@ -83,7 +83,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("payments")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request, CancellationToken ct)
     {
         var result = await _feeService.CreatePaymentAsync(request, ct);
@@ -99,7 +99,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("categories")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> CreateFeeCategory([FromBody] CreateFeeCategoryRequest request, CancellationToken ct)
     {
         var result = await _feeService.CreateFeeCategoryAsync(request, ct);
@@ -115,7 +115,7 @@ public class FeesController : ControllerBase
     }
 
     [HttpPost("discounts")]
-    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Accountant}")]
     public async Task<IActionResult> CreateDiscount([FromBody] CreateDiscountRequest request, CancellationToken ct)
     {
         var result = await _feeService.CreateDiscountAsync(request, ct);

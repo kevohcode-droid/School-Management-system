@@ -1,0 +1,229 @@
+<!-- ============================================================
+     Student Performance Page
+     ============================================================ -->
+<div class="performance-page">
+
+  <!-- ── Page Header ────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1 class="page-title">Academic Performance</h1>
+      <p class="page-subtitle">View your marks, grades, and trends by term</p>
+    </div>
+  </div>
+
+  <!-- ── Loading State ─────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-state" aria-live="polite">
+    <div class="spinner" aria-label="Loading performance data…"></div>
+    <p class="loading-text">Loading your performance data…</p>
+  </div>
+
+  <!-- ── Error State ───────────────────────────────────── -->
+  <div *ngIf="!isLoading && error" class="error-state" role="alert">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+         stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadPerformance()">Retry</button>
+  </div>
+
+  <!-- ── Main Content ──────────────────────────────────── -->
+  <ng-container *ngIf="!isLoading && !error && performanceData">
+
+    <!-- Term Selector -->
+    <div class="term-selector-bar" *ngIf="performanceData.grouped.length > 0">
+      <label for="termSelect" class="term-selector-bar__label">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true" class="term-selector-bar__icon">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Select Term
+      </label>
+      <select
+        id="termSelect"
+        class="form-select"
+        [(ngModel)]="selectedTerm"
+        aria-label="Select academic term">
+        <option *ngFor="let group of performanceData.grouped" [value]="group.term">
+          {{ group.term }}
+        </option>
+      </select>
+    </div>
+
+    <!-- ── Term Report ────────────────────────────────── -->
+    <ng-container *ngIf="currentTermReport; else noTermData">
+
+      <!-- Summary Row -->
+      <div class="summary-row">
+        <!-- Term Average Badge -->
+        <div class="summary-card">
+          <span class="summary-card__label">Term Average</span>
+          <span class="badge summary-card__badge"
+                [ngClass]="getGrade(currentTermReport.average).badgeClass">
+            {{ currentTermReport.average | number:'1.1-1' }}%
+            &nbsp;({{ getGrade(currentTermReport.average).letter }})
+          </span>
+        </div>
+
+        <!-- Total Score -->
+        <div class="summary-card">
+          <span class="summary-card__label">Total Score</span>
+          <span class="summary-card__value">
+            {{ currentTermReport.totalMarks }}
+            <span class="summary-card__max">/ {{ currentTermReport.totalMax }}</span>
+          </span>
+        </div>
+
+        <!-- Subject Count -->
+        <div class="summary-card">
+          <span class="summary-card__label">Subjects</span>
+          <span class="summary-card__value">{{ currentTermReport.marks.length }}</span>
+        </div>
+      </div>
+
+      <!-- Marks Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">{{ currentTermReport.term }} — Marks Breakdown</h2>
+          <span class="badge badge-neutral">{{ currentTermReport.marks.length }} subjects</span>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-wrapper">
+            <table class="data-table table-to-cards"
+                   aria-label="Marks for {{ currentTermReport.term }}">
+              <thead>
+                <tr>
+                  <th scope="col">Subject</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Max</th>
+                  <th scope="col">Percentage</th>
+                  <th scope="col">Grade</th>
+                  <th scope="col">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let mark of currentTermReport.marks">
+                  <td data-label="Subject">
+                    <span class="subject-name">{{ mark.subject }}</span>
+                  </td>
+                  <td data-label="Score">
+                    <strong>{{ mark.scoreObtained }}</strong>
+                  </td>
+                  <td data-label="Max">{{ mark.maxScore }}</td>
+                  <td data-label="Percentage">
+                    <div class="percentage-cell">
+                      <div class="percentage-bar-track" aria-hidden="true">
+                        <div class="percentage-bar-fill"
+                             [style.width.%]="mark.percentage"
+                             [ngClass]="{
+                               'fill--success': mark.percentage >= 80,
+                               'fill--primary': mark.percentage >= 65 && mark.percentage < 80,
+                               'fill--warning': mark.percentage >= 50 && mark.percentage < 65,
+                               'fill--neutral': mark.percentage >= 35 && mark.percentage < 50,
+                               'fill--danger':  mark.percentage < 35
+                             }">
+                        </div>
+                      </div>
+                      <span class="percentage-value">{{ mark.percentage | number:'1.1-1' }}%</span>
+                    </div>
+                  </td>
+                  <td data-label="Grade">
+                    <span class="badge" [ngClass]="getGrade(mark.percentage).badgeClass">
+                      {{ getGrade(mark.percentage).letter }}
+                    </span>
+                  </td>
+                  <td data-label="Date">
+                    <span class="date-cell">{{ mark.dateRecorded | date:'mediumDate' }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ── No Term Data ─────────────────────────────────── -->
+    <ng-template #noTermData>
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+             stroke-linejoin="round" class="empty-state__icon" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <p class="empty-state__title">No marks recorded</p>
+        <p class="empty-state__sub">
+          No performance data is available for the selected term yet.
+        </p>
+      </div>
+    </ng-template>
+
+    <!-- ── Historical Trends ─────────────────────────────── -->
+    <div class="card trends-card" *ngIf="performanceData.grouped.length > 0">
+      <div class="card-header">
+        <h2 class="card-title">Historical Trends</h2>
+        <span class="badge badge-neutral">{{ performanceData.grouped.length }} terms</span>
+      </div>
+      <div class="card-body">
+        <p class="trends-hint">Click a term card to view its detailed results.</p>
+        <div class="trends-grid">
+          <button
+            *ngFor="let group of performanceData.grouped"
+            class="term-card"
+            [ngClass]="[
+              getTermAccentClass(group.average),
+              group.term === selectedTerm ? 'term-card--active' : ''
+            ]"
+            (click)="selectTerm(group.term)"
+            [attr.aria-pressed]="group.term === selectedTerm"
+            [attr.aria-label]="'View ' + group.term + ' results'">
+
+            <span class="term-card__name">{{ group.term }}</span>
+            <span class="term-card__subjects">{{ group.marks.length }} subject(s)</span>
+
+            <div class="term-card__avg">
+              <span class="badge" [ngClass]="getGrade(group.average).badgeClass">
+                Avg {{ group.average | number:'1.1-1' }}%
+                &nbsp;({{ getGrade(group.average).letter }})
+              </span>
+            </div>
+
+            <div class="term-card__score">
+              {{ group.totalMarks }} / {{ group.totalMax }} pts
+            </div>
+
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ── Empty State — No data at all ─────────────────────── -->
+  <ng-container *ngIf="!isLoading && !error && performanceData && performanceData.grouped.length === 0">
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+           stroke-linejoin="round" class="empty-state__icon" aria-hidden="true">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <p class="empty-state__title">No performance records found</p>
+      <p class="empty-state__sub">
+        Your marks will appear here once your teacher records them in the system.
+      </p>
+    </div>
+  </ng-container>
+
+</div>

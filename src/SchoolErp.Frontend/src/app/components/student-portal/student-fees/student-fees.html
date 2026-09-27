@@ -1,0 +1,159 @@
+<div class="statement-page" [class.receipt-print-mode]="receiptToPrint">
+  <article class="receipt-sheet" *ngIf="receiptToPrint as receipt; else statementContent">
+    <p class="document-kicker">Student payment receipt</p>
+    <h1>Payment Receipt</h1>
+    <p class="document-school">School Management System</p>
+    <dl class="receipt-details">
+      <div><dt>Receipt / reference</dt><dd>{{ receipt.payment.transactionReference || receipt.invoice.invoiceNumber }}</dd></div>
+      <div><dt>Invoice</dt><dd>{{ receipt.invoice.invoiceNumber }}</dd></div>
+      <div><dt>Payment date</dt><dd>{{ receipt.payment.paymentDate | date:'mediumDate' }}</dd></div>
+      <div><dt>Payment method</dt><dd>{{ receipt.payment.mode }}</dd></div>
+      <div><dt>Status</dt><dd>{{ getPaymentStatusLabel(receipt.payment.status) }}</dd></div>
+      <div><dt>Amount received</dt><dd>{{ formatCurrency(receipt.payment.amount) }}</dd></div>
+    </dl>
+    <p class="receipt-note">This receipt reflects the payment record currently available in the student portal.</p>
+  </article>
+
+  <ng-template #statementContent>
+    <header class="statement-header">
+      <div class="heading-group">
+        <p class="eyebrow">Student account</p>
+        <div class="title-line">
+          <h1>Financial Statements</h1>
+          <span class="read-only-badge" aria-label="Read-only view">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            Read-Only View
+          </span>
+        </div>
+        <p class="subtitle">A clear record of billed fees, payments received, and your current balance.</p>
+      </div>
+      <div class="header-actions">
+        <label class="term-picker" *ngIf="termOptions.length > 1">
+          <span>Statement period</span>
+          <select [value]="selectedTermKey" (change)="selectedTermKey = $any($event.target).value">
+            <option *ngFor="let term of termOptions" [value]="term.key">{{ term.label }}</option>
+          </select>
+        </label>
+        <button class="action-button action-button--quiet" type="button" (click)="downloadStatementPdf()" [disabled]="!feesData?.invoices?.length">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg>
+          Download PDF
+        </button>
+        <button class="action-button action-button--primary" type="button" (click)="printStatement()" [disabled]="!feesData?.invoices?.length">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Print Statement
+        </button>
+      </div>
+    </header>
+
+    <div class="loading-state" *ngIf="loading" role="status">
+      <span class="spinner"></span>
+      <p>Loading your financial statement…</p>
+    </div>
+
+    <section class="error-panel" *ngIf="!loading && error" role="alert">
+      <span class="error-mark">!</span>
+      <div><h2>Statement unavailable</h2><p>{{ error }}</p></div>
+      <button type="button" class="action-button action-button--quiet" (click)="loadFees()">Try again</button>
+    </section>
+
+    <main class="statement-content" *ngIf="!loading && !error && feesData">
+      <section class="summary-grid" aria-label="Statement summary">
+        <article class="summary-card summary-card--billed">
+          <span class="summary-label">Total Billed</span>
+          <strong class="summary-value">{{ formatCurrency(totalBilled) }}</strong>
+          <span class="summary-footnote">{{ selectedTermLabel }}</span>
+        </article>
+        <article class="summary-card summary-card--paid">
+          <span class="summary-label">Total Paid</span>
+          <strong class="summary-value">{{ formatCurrency(totalPaid) }}</strong>
+          <span class="summary-footnote">Payments recorded for this period</span>
+        </article>
+        <article class="summary-card" [class.summary-card--balance-due]="outstandingBalance > 0" [class.summary-card--settled]="outstandingBalance <= 0">
+          <span class="summary-label">Outstanding Balance</span>
+          <strong class="summary-value">{{ formatCurrency(outstandingBalance) }}</strong>
+          <span class="summary-footnote">{{ outstandingBalance > 0 ? 'Payment is still due' : 'Your account is settled' }}</span>
+        </article>
+        <article class="summary-card summary-card--due">
+          <span class="summary-label">Payment Due Date</span>
+          <strong class="summary-value summary-value--date">{{ nextDueDate ? (nextDueDate | date:'mediumDate') : 'No upcoming due date' }}</strong>
+          <span class="summary-footnote">{{ nextDueDate ? 'Earliest unpaid invoice' : 'No unpaid invoices with a future due date' }}</span>
+        </article>
+      </section>
+
+      <section class="instructions-section" aria-labelledby="instructions-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">Payment information</p><h2 id="instructions-heading">Payment Instructions</h2></div>
+          <span class="setup-notice">Confirm details with the school finance office</span>
+        </div>
+        <div class="instructions-grid">
+          <article class="payment-channel payment-channel--mpesa">
+            <div class="channel-mark" aria-hidden="true">M</div>
+            <div class="channel-copy">
+              <h3>M-Pesa Paybill</h3>
+              <dl><div><dt>Paybill number</dt><dd>522522 <span class="sample-tag">Sample</span></dd></div>
+                <div><dt>Account reference</dt><dd>Student admission number <span class="sample-tag">Format</span></dd></div></dl>
+              <p>Use your admission number as the account reference. Verify the Paybill with the school before sending funds.</p>
+            </div>
+          </article>
+          <article class="payment-channel payment-channel--bank">
+            <div class="channel-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m3 9 9-6 9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 21h18M2 18h20"/></svg>
+            </div>
+            <div class="channel-copy">
+              <h3>Bank Transfer</h3>
+              <dl><div><dt>Account name</dt><dd>School ERP Tuition <span class="sample-tag">Sample</span></dd></div>
+                <div><dt>Account number</dt><dd>011029384756 <span class="sample-tag">Sample</span></dd></div>
+                <div><dt>Bank / branch</dt><dd>Equity Bank · Confirm branch <span class="sample-tag">Sample</span></dd></div></dl>
+              <p>Enter the student admission number and invoice number in the transfer narration.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="table-section" aria-labelledby="fees-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">Charges</p><h2 id="fees-heading">Itemized Billed Fees</h2></div>
+          <span class="row-count">{{ billedItems.length }} line items</span>
+        </div>
+        <div class="table-scroll">
+          <table class="statement-table">
+            <thead><tr><th scope="col">Description</th><th scope="col">Category</th><th scope="col" class="numeric">Amount</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let item of billedItems"><td>{{ item.description }}</td><td><span class="category-label">{{ item.category }}</span></td><td class="numeric amount">{{ formatCurrency(item.amount) }}</td></tr>
+              <tr *ngIf="billedItems.length === 0"><td colspan="3" class="empty-row">No fee line items are available for this period.</td></tr>
+            </tbody>
+            <tfoot><tr><th colspan="2" scope="row">Total Billed</th><td class="numeric">{{ formatCurrency(totalBilled) }}</td></tr></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-section history-section" aria-labelledby="payments-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">Receipts</p><h2 id="payments-heading">Payment History</h2></div>
+          <span class="row-count">{{ paymentHistory.length }} transactions</span>
+        </div>
+        <div class="table-scroll">
+          <table class="statement-table payment-table">
+            <thead><tr><th scope="col">Date</th><th scope="col">Receipt / Ref No.</th><th scope="col">Payment Method</th><th scope="col" class="numeric">Amount Paid</th><th scope="col">Status</th><th scope="col" class="action-column">Action</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let row of paymentHistory">
+                <td>{{ row.payment.paymentDate | date:'mediumDate' }}</td>
+                <td class="reference-cell">{{ row.payment.transactionReference || row.invoice.invoiceNumber }}</td>
+                <td>{{ row.payment.mode }}</td>
+                <td class="numeric amount amount--paid">{{ formatCurrency(row.payment.amount) }}</td>
+                <td><span [ngClass]="getPaymentStatusClass(row.payment.status)"><span class="status-dot"></span>{{ getPaymentStatusLabel(row.payment.status) }}</span></td>
+                <td class="action-column"><button class="receipt-button" type="button" (click)="downloadReceipt(row)" [attr.aria-label]="'Download receipt ' + (row.payment.transactionReference || row.invoice.invoiceNumber)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg><span>Receipt PDF</span>
+                </button></td>
+              </tr>
+              <tr *ngIf="paymentHistory.length === 0"><td colspan="6" class="empty-row">No payments have been recorded for this period.</td></tr>
+            </tbody>
+            <tfoot *ngIf="paymentHistory.length"><tr><th colspan="3" scope="row">Total Payments Received</th><td class="numeric">{{ formatCurrency(totalPaid) }}</td><td colspan="2"></td></tr></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <footer class="statement-footnote"><span class="footnote-mark">i</span><p>This is a read-only statement. For payment confirmation, billing questions, or official payment instructions, contact your school finance office.</p></footer>
+    </main>
+  </ng-template>
+</div>

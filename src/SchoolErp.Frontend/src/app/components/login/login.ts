@@ -30,10 +30,8 @@ export class LoginComponent implements OnInit {
   isLoadingPublicData = true;
 
   roleOptions = [
-    { key: 'Admin', label: 'Admin', icon: '🛡️' },
-    { key: 'Teacher', label: 'Teacher', icon: '👩‍🏫' },
-    { key: 'Student', label: 'Student', icon: '🎓' },
-    { key: 'Parent', label: 'Parent', icon: '👥' }
+    { key: 'Student', label: 'Student', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>' },
+    { key: 'Parent', label: 'Parent', icon: '<span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">group</span>' }
   ];
   selectedRole = 'Student';
 
@@ -56,8 +54,8 @@ export class LoginComponent implements OnInit {
   private initForms(): void {
     this.loginForm = this.fb.group({
       tenantCode: ['100', [Validators.required, Validators.minLength(2)]],
-      email: ['kevohkevi110@gmail.com', [Validators.required, Validators.email]],
-      password: ['Kevoh2060,!', [Validators.required, Validators.minLength(6)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
 
@@ -69,7 +67,7 @@ export class LoginComponent implements OnInit {
       confirmPassword: ['', [Validators.required]],
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
-      role: ['Teacher', [Validators.required]]
+      role: ['Student', [Validators.required]]
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -100,9 +98,9 @@ export class LoginComponent implements OnInit {
     this.isRegisterMode = !this.isRegisterMode;
     this.errorMessage = '';
     if (this.isRegisterMode) {
-      this.registerForm.reset({ role: 'Teacher' });
+      this.registerForm.reset({ role: 'Student' });
     } else {
-      this.loginForm.reset({ rememberMe: false });
+      this.loginForm.reset({ tenantCode: '100', email: '', password: '', rememberMe: false });
     }
   }
 
@@ -116,6 +114,25 @@ export class LoginComponent implements OnInit {
 
   selectLoginRole(role: string): void {
     this.selectedRole = role;
+    this.errorMessage = '';
+  }
+
+  getSelectedRoleDescription(): string {
+    const descriptions: Record<string, string> = {
+      Admin: 'Manage school operations, users, academics and finances.',
+      Teacher: 'Manage teaching, attendance and student academic progress.',
+      Accountant: 'Manage school fees, payments, invoices, receipts and financial reports.',
+      Staff: 'Access assigned administrative and school operational functions.',
+      Student: 'View your personal academic information and school activities.',
+      Parent: "View your child's academic, attendance and financial information."
+    };
+    return descriptions[this.selectedRole] || '';
+  }
+
+  private selectedRoleMatches(roles: string[]): boolean {
+    return this.selectedRole === 'Admin'
+      ? roles.includes('Admin') || roles.includes('SuperAdmin')
+      : roles.includes(this.selectedRole);
   }
 
   private getFormattedDate(): string {
@@ -165,19 +182,32 @@ export class LoginComponent implements OnInit {
       password: this.loginForm.value.password
     };
 
-    console.log('Login attempt:', loginRequest);
-
     this.authService.login(loginRequest).subscribe({
       next: (response: AuthResponse) => {
-        console.log('Login successful:', response);
+        if (!this.selectedRoleMatches(response.roles || [])) {
+          this.authService.logout();
+          this.errorMessage = `This account does not have ${this.selectedRole} access. Select the role assigned to your account.`;
+          this.isLoading = false;
+          return;
+        }
+
         this.authService.saveToken(response.accessToken);
         this.authService.saveCurrentUser({
           userId: response.userId,
           userName: response.email,
           fullName: response.fullName,
           tenantId: response.tenantId,
-          roles: response.roles
+          roles: response.roles,
+          linkedStudentIds: response.linkedStudentIds || []
         });
+
+        if (response.mustChangePassword) {
+          localStorage.setItem('mustChangePassword', 'true');
+          this.isLoading = false;
+          this.router.navigate(['/change-password']);
+          return;
+        }
+        localStorage.removeItem('mustChangePassword');
         
         if (this.loginForm.value.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
@@ -185,18 +215,16 @@ export class LoginComponent implements OnInit {
           localStorage.removeItem('rememberMe');
         }
         
-        console.log('Fetching current user...');
         this.authService.getCurrentUser().subscribe({
           next: (user: CurrentUser) => {
-            console.log('Current user fetched:', user);
             this.authService.saveCurrentUser(user);
             this.isLoading = false;
-            this.router.navigate(['/dashboard']);
+            this.router.navigate([user.roles?.includes('Student') ? '/student' : '/dashboard']);
           },
           error: (err: any) => {
             console.error('Error fetching current user:', err);
             this.isLoading = false;
-            this.router.navigate(['/dashboard']);
+            this.router.navigate([response.roles?.includes('Student') ? '/student' : '/dashboard']);
           }
         });
       },
@@ -229,24 +257,20 @@ export class LoginComponent implements OnInit {
       role: this.registerForm.value.role
     };
 
-    console.log('Registration attempt:', registerRequest);
-
     this.authService.register(registerRequest).subscribe({
       next: (response: AuthResponse) => {
-        console.log('Registration successful:', response);
         this.authService.saveToken(response.accessToken);
         this.authService.saveCurrentUser({
           userId: response.userId,
           userName: response.email,
           fullName: response.fullName,
           tenantId: response.tenantId,
-          roles: response.roles
+          roles: response.roles,
+          linkedStudentIds: response.linkedStudentIds || []
         });
         
-        console.log('Fetching current user after registration...');
         this.authService.getCurrentUser().subscribe({
           next: (user: CurrentUser) => {
-            console.log('Current user fetched:', user);
             this.authService.saveCurrentUser(user);
             this.isLoading = false;
             this.router.navigate(['/dashboard']);

@@ -1,0 +1,601 @@
+<div class="performance-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="back-btn" title="Back to Dashboard">
+        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard
+      </button>
+      <div>
+        <h1>Academic Performance</h1>
+        <p class="page-subtitle">Record exam marks, track student progress, and analyze academic history</p>
+      </div>
+    </div>
+    <div class="header-badge">
+      <span class="badge-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></span>
+      <span class="badge-text">ACADEMICS</span>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tab-navigation">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'enter'"
+      (click)="setTab('enter')"
+    >
+      <span class="tab-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">note</span></span>
+      Upload / Enter Marks
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'history'"
+      (click)="setTab('history')"
+    >
+      <span class="tab-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">trending_up</span></span>
+      Performance History
+    </button>
+  </div>
+
+  <!-- Notification Banners -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <span class="alert-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span></span>
+    <span class="alert-text">{{ successMessage }}</span>
+    <button class="close-btn" (click)="successMessage = ''">×</button>
+  </div>
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    <span class="alert-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">warning</span>️</span>
+    <span class="alert-text">{{ errorMessage }}</span>
+    <button class="close-btn" (click)="errorMessage = ''">×</button>
+  </div>
+
+  <!-- TAB 1: ENTER / UPLOAD MARKS -->
+  <div class="tab-content" *ngIf="activeTab === 'enter'">
+    <!-- Criteria Selection Panel -->
+    <div class="filter-panel card">
+      <div class="panel-header">
+        <h3>1. Select Assessment Criteria</h3>
+        <p class="panel-subtitle">Choose the class, subject, and term to enter or update student marks</p>
+      </div>
+
+      <div class="filter-grid">
+        <!-- Class Selector -->
+        <div class="form-group">
+          <label for="classSelect">Class / Stream <span class="required">*</span></label>
+          <select
+            id="classSelect"
+            class="form-control"
+            [(ngModel)]="selectedClassId"
+            (change)="onClassOrCriteriaChange()"
+          >
+            <option value="" disabled>-- Select Class --</option>
+            <option *ngFor="let cls of classes" [value]="cls.id">
+              {{ cls.name }} {{ cls.gradeLevel ? '(' + cls.gradeLevel + ')' : '' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Subject Selector -->
+        <div class="form-group">
+          <label for="subjectSelect">Subject <span class="required">*</span></label>
+          <select
+            id="subjectSelect"
+            class="form-control"
+            [(ngModel)]="selectedSubject"
+            (change)="onClassOrCriteriaChange()"
+          >
+            <option *ngFor="let subj of subjectOptions" [value]="subj">
+              {{ subj }}
+            </option>
+          </select>
+          <input
+            *ngIf="selectedSubject === 'Other (Specify)'"
+            type="text"
+            class="form-control custom-input"
+            placeholder="Type Subject Name..."
+            [(ngModel)]="customSubject"
+            (blur)="onClassOrCriteriaChange()"
+          />
+        </div>
+
+        <!-- Exam Term Selector -->
+        <div class="form-group">
+          <label for="termSelect">Exam Term <span class="required">*</span></label>
+          <select
+            id="termSelect"
+            class="form-control"
+            [(ngModel)]="selectedTerm"
+            (change)="onClassOrCriteriaChange()"
+          >
+            <option *ngFor="let term of termOptions" [value]="term">
+              {{ term }}
+            </option>
+          </select>
+          <input
+            *ngIf="selectedTerm === 'Other (Specify)'"
+            type="text"
+            class="form-control custom-input"
+            placeholder="e.g., Midterm 1 - 2026..."
+            [(ngModel)]="customTerm"
+            (blur)="onClassOrCriteriaChange()"
+          />
+        </div>
+
+        <!-- Maximum Score -->
+        <div class="form-group">
+          <label for="maxScore">Maximum Score</label>
+          <input
+            id="maxScore"
+            type="number"
+            min="1"
+            max="1000"
+            class="form-control"
+            [(ngModel)]="maxScore"
+            (change)="onMaxScoreChange()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Marks Entry Grid Card -->
+    <div class="grid-panel card" *ngIf="selectedClassId">
+      <div class="grid-header">
+        <div class="grid-title-area">
+          <h3>2. Student Marks Entry</h3>
+          <span class="criteria-badge">
+            {{ effectiveSubject }} • {{ effectiveTerm }} • Max: {{ maxScore }}
+          </span>
+        </div>
+
+        <!-- Stats Chips -->
+        <div class="stats-row">
+          <div class="stat-chip">
+            <span class="stat-label">Students</span>
+            <span class="stat-val">{{ studentRows.length }}</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-label">Entered</span>
+            <span class="stat-val">{{ enteredCount }}/{{ studentRows.length }}</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-label">Class Avg</span>
+            <span class="stat-val accent">{{ classAverage }}%</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-label">Highest</span>
+            <span class="stat-val success">{{ highestScore }}/{{ maxScore }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions and Search -->
+      <div class="action-toolbar">
+        <div class="search-box">
+          <span class="search-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
+          <input
+            type="text"
+            placeholder="Search student by name or admission number..."
+            [(ngModel)]="searchFilter"
+            class="search-input"
+          />
+        </div>
+        <div class="quick-actions">
+          <label class="btn-subtle import-button">
+            Import CSV
+            <input type="file" accept=".csv,text/csv" (change)="importCsv($event)" />
+          </label>
+          <button class="btn-subtle" type="button" (click)="exportCsv()">Export Excel CSV</button>
+          <button class="btn-subtle" (click)="quickFill(0)">Set All 0</button>
+          <button class="btn-subtle" (click)="clearAll()">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoadingStudents">
+        <div class="spinner"></div>
+        <p>Loading students and previous marks...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoadingStudents && studentRows.length === 0">
+        <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">group</span></div>
+        <h4>No Students Found</h4>
+        <p>There are no students enrolled in this class yet.</p>
+      </div>
+
+      <!-- Students Table -->
+      <div class="table-responsive" *ngIf="!isLoadingStudents && studentRows.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">#</th>
+              <th style="width: 160px;">Admission No</th>
+              <th>Student Name</th>
+              <th style="width: 170px;">Score Obtained</th>
+              <th style="width: 100px;">Max Score</th>
+              <th style="width: 110px;">Percentage</th>
+              <th style="width: 90px;">Grade</th>
+              <th>Remarks</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let row of filteredStudentRows; let i = index"
+              [class.row-modified]="row.isModified"
+            >
+              <td class="col-center">{{ i + 1 }}</td>
+              <td class="col-adm font-mono">{{ row.admissionNumber }}</td>
+              <td class="col-name font-semibold">{{ row.studentName }}</td>
+              <td>
+                <div class="input-score-wrapper">
+                  <input
+                    type="number"
+                    min="0"
+                    [max]="maxScore"
+                    step="0.5"
+                    placeholder="—"
+                    [(ngModel)]="row.scoreObtained"
+                    (input)="onScoreInput(row)"
+                    [attr.aria-invalid]="!!row.validationError"
+                    class="score-input"
+                  />
+                  <span class="score-denom">/ {{ maxScore }}</span>
+                </div>
+              </td>
+              <td class="col-center text-muted">{{ maxScore }}</td>
+              <td class="col-center font-semibold">
+                <span *ngIf="row.scoreObtained !== null">{{ row.percentage }}%</span>
+                <span *ngIf="row.scoreObtained === null" class="text-muted">—</span>
+              </td>
+              <td class="col-center">
+                <span
+                  class="badge-grade"
+                  [ngClass]="'badge-' + row.statusBadge"
+                >
+                  {{ row.gradeBadge }}
+                </span>
+              </td>
+              <td>{{ row.remarks || '—' }}</td>
+              <td>
+                <span class="mark-status" [class.status-entered]="row.scoreObtained !== null">
+                  {{ row.scoreObtained !== null ? (row.reviewStatus || 'Submitted') : 'Pending' }}
+                </span>
+                <span class="field-error" *ngIf="row.validationError">{{ row.validationError }}</span>
+              </td>
+              <td>
+                <button type="button" class="mark-save-button" [disabled]="!row.isModified || isSavingStudentId === row.studentId" (click)="saveStudentMark(row)">
+                  {{ isSavingStudentId === row.studentId ? 'Saving...' : 'Save' }}
+                </button>
+                <div class="review-actions" *ngIf="canReviewMarks && row.markId">
+                  <input *ngIf="row.reviewStatus !== 'Finalized'" type="text" class="review-comment-input" [(ngModel)]="row.reviewComment" placeholder="Review comment" aria-label="Review comment" />
+                  <button type="button" class="mark-edit-button" *ngIf="row.reviewStatus === 'Submitted' || row.reviewStatus === 'Rejected'" (click)="reviewStudentMark(row, 'Under Review')">Review</button>
+                  <button type="button" class="mark-save-button" *ngIf="row.reviewStatus === 'Submitted' || row.reviewStatus === 'Under Review' || row.reviewStatus === 'Rejected'" (click)="reviewStudentMark(row, 'Approved')">Approve</button>
+                  <button type="button" class="mark-cancel-button" *ngIf="row.reviewStatus === 'Submitted' || row.reviewStatus === 'Under Review'" (click)="reviewStudentMark(row, 'Rejected')">Reject</button>
+                  <button type="button" class="mark-save-button" *ngIf="row.reviewStatus === 'Approved'" (click)="reviewStudentMark(row, 'Finalized')">Finalize</button>
+                  <button type="button" class="mark-edit-button" *ngIf="row.reviewStatus === 'Finalized'" (click)="reopenStudentMark(row)">Reopen</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submission Footer -->
+      <div class="grid-footer" *ngIf="!isLoadingStudents && studentRows.length > 0">
+        <div class="footer-meta">
+          <span>Ready to submit <strong>{{ enteredCount }}</strong> recorded mark(s)</span>
+          <span class="unsaved-indicator" *ngIf="unsavedCount">{{ unsavedCount }} unsaved change(s)</span>
+        </div>
+        <div class="footer-actions">
+          <button
+            class="submit-btn"
+            [disabled]="isSaving || enteredCount === 0"
+            (click)="submitMarks()"
+          >
+            <span *ngIf="!isSaving"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">save</span> Submit Marks</span>
+            <span *ngIf="isSaving">⏳ Saving Marks...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <section class="analytics-section" *ngIf="selectedClassId">
+      <div class="analytics-heading">
+        <div>
+          <h3>Performance Analytics</h3>
+          <p>Based on recorded marks for this class</p>
+        </div>
+      </div>
+      <div class="analytics-kpis">
+        <article class="analytics-kpi"><span>Total Students</span><strong>{{ studentRows.length }}</strong></article>
+        <article class="analytics-kpi"><span>Class Average</span><strong>{{ analyticsClassAverage }}%</strong></article>
+        <article class="analytics-kpi"><span>Highest Average</span><strong>{{ highestStudentAverage | number:'1.0-1' }}%</strong></article>
+        <article class="analytics-kpi"><span>Lowest Average</span><strong>{{ lowestStudentAverage | number:'1.0-1' }}%</strong></article>
+        <article class="analytics-kpi"><span>Pass Rate</span><strong>{{ analyticsPassRate }}%</strong></article>
+        <article class="analytics-kpi"><span>Needs Attention</span><strong>{{ academicAlerts.length }}</strong></article>
+      </div>
+      <div class="analytics-layout">
+        <article class="analytics-panel">
+          <h4>Class Average by Term</h4>
+          <div class="chart-row" *ngFor="let item of termAverages">
+            <span>{{ item.label }}</span><div class="chart-track"><i [style.width.%]="item.value"></i></div><b>{{ item.value }}%</b>
+          </div>
+          <p class="chart-empty" *ngIf="!termAverages.length">No performance history found.</p>
+        </article>
+        <article class="analytics-panel">
+          <h4>Subject Performance</h4>
+          <div class="chart-row" *ngFor="let item of subjectAverages">
+            <span>{{ item.label }}</span><div class="chart-track"><i [style.width.%]="item.value"></i></div><b>{{ item.value }}%</b>
+          </div>
+          <p class="chart-empty" *ngIf="!subjectAverages.length">No performance history found.</p>
+        </article>
+        <article class="analytics-panel">
+          <h4>Grade Distribution</h4>
+          <div class="grade-distribution">
+            <div *ngFor="let item of gradeDistribution"><b>{{ item.label }}</b><span>{{ item.value }}</span></div>
+          </div>
+          <p class="chart-empty" *ngIf="!analyticsMarks.length">No performance history found.</p>
+        </article>
+        <article class="analytics-panel academic-alerts">
+          <h4>Academic Alerts <span>{{ academicAlerts.length }}</span></h4>
+          <button type="button" class="alert-link" *ngFor="let alert of academicAlerts" (click)="openStudentHistory(alert.studentId)">
+            {{ alert.message }} <span>View history</span>
+          </button>
+          <p class="chart-empty" *ngIf="!academicAlerts.length">No academic alerts.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB 2: PERFORMANCE HISTORY -->
+  <div class="tab-content" *ngIf="activeTab === 'history'">
+    <!-- Student Selector Panel -->
+    <div class="filter-panel card">
+      <div class="panel-header">
+        <h3>Select Student</h3>
+        <p class="panel-subtitle">View comprehensive performance records across terms and subjects</p>
+      </div>
+
+      <div class="history-selector-grid">
+        <!-- Optional Class Filter -->
+        <div class="form-group">
+          <label for="histClassFilter">Filter by Class (Optional)</label>
+          <select
+            id="histClassFilter"
+            class="form-control"
+            [(ngModel)]="historyClassFilter"
+          >
+            <option value="">-- All Classes --</option>
+            <option *ngFor="let cls of classes" [value]="cls.id">
+              {{ cls.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Student Dropdown -->
+        <div class="form-group student-picker-group">
+          <label for="historyStudentSearch">Find Student</label>
+          <input id="historyStudentSearch" class="form-control" [(ngModel)]="historyStudentSearch" placeholder="Name or admission number" />
+        </div>
+
+        <div class="form-group student-picker-group">
+          <label for="studentPicker">Choose Student <span class="required">*</span></label>
+          <select
+            id="studentPicker"
+            class="form-control"
+            [(ngModel)]="selectedStudentId"
+            (change)="onStudentSelected()"
+          >
+            <option value="" disabled>-- Select a student --</option>
+            <option *ngFor="let s of filteredStudentsForHistory" [value]="s.id">
+              {{ s.admissionNumber ? '[' + s.admissionNumber + '] ' : '' }}{{ s.firstName }} {{ s.lastName }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Performance Report Card -->
+    <div class="history-results card" *ngIf="selectedStudentId">
+      <!-- Student Banner -->
+      <div class="student-profile-header">
+        <div class="student-avatar">
+          <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span>
+        </div>
+        <div class="student-info">
+          <h2>{{ selectedStudent?.firstName }} {{ selectedStudent?.lastName }}</h2>
+          <p class="student-meta">
+            Admission #: <strong>{{ selectedStudent?.admissionNumber || '—' }}</strong> •
+            Class: <strong>{{ selectedStudent?.sectionName || 'Not Assigned' }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">assignment</span></span>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ historyTotalExams }}</span>
+            <span class="kpi-label">Assessments Taken</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">bar_chart</span></span>
+          <div class="kpi-data">
+            <span class="kpi-value accent">{{ historyAveragePercentage }}%</span>
+            <span class="kpi-label">Overall Average</span>
+          </div>
+        </div>
+        <div class="kpi-card"><div class="kpi-data"><span class="kpi-value">{{ historyOverallGrade }}</span><span class="kpi-label">Overall Grade</span></div></div>
+
+        <div class="kpi-card">
+          <span class="kpi-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">emoji_events</span></span>
+          <div class="kpi-data">
+            <span class="kpi-value success" *ngIf="historyHighestScore">
+              {{ historyHighestScore.score }}%
+            </span>
+            <span class="kpi-value text-muted" *ngIf="!historyHighestScore">—</span>
+            <span class="kpi-label">
+              {{ historyHighestScore ? historyHighestScore.subject : 'Highest Score' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">ads_click</span></span>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ historyPassRate }}%</span>
+            <span class="kpi-label">Pass Rate (&ge;50%)</span>
+          </div>
+        </div>
+        <div class="kpi-card"><div class="kpi-data"><span class="kpi-value">{{ historySubjectCount }}</span><span class="kpi-label">Subjects</span></div></div>
+        <div class="kpi-card"><div class="kpi-data"><span class="kpi-value">{{ bestHistorySubject }}</span><span class="kpi-label">Best Subject</span></div></div>
+        <div class="kpi-card"><div class="kpi-data"><span class="kpi-value">{{ weakestHistorySubject }}</span><span class="kpi-label">Weakest Subject</span></div></div>
+      </div>
+
+      <section class="student-timeline" *ngIf="historyTimeline.length">
+        <h4>Student Performance Over Time</h4>
+        <div class="timeline-bars">
+          <div class="timeline-item" *ngFor="let point of historyTimeline">
+            <div class="timeline-track"><i [style.height.%]="point.value"></i></div>
+            <strong>{{ point.value }}%</strong>
+            <span>{{ point.subject }}</span>
+            <small>{{ point.label }}</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- Historical Marks Table -->
+      <div class="history-table-section">
+        <div class="table-toolbar">
+          <h4>Examination Records ({{ studentMarksHistory.length }})</h4>
+          <div class="history-filters">
+            <select class="form-control" aria-label="Filter by subject" [(ngModel)]="historySubjectFilter"><option value="">All subjects</option><option *ngFor="let subject of historySubjectOptions" [value]="subject">{{ subject }}</option></select>
+            <select class="form-control" aria-label="Filter by academic year" [(ngModel)]="historyYearFilter"><option value="">All years</option><option *ngFor="let year of historyYears" [value]="year">{{ year }}</option></select>
+            <select class="form-control" aria-label="Filter by term" [(ngModel)]="historyTermFilter"><option value="">All terms</option><option *ngFor="let term of historyTermOptions" [value]="term">{{ term }}</option></select>
+            <button type="button" class="btn-subtle" (click)="exportStudentHistory()">Export Excel CSV</button>
+            <button type="button" class="btn-subtle" (click)="printStudentHistory()">Generate PDF</button>
+            <button type="button" class="btn-subtle" (click)="printStudentHistory()">Print Report</button>
+          </div>
+          <div class="search-box">
+            <span class="search-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
+            <input
+              type="text"
+              placeholder="Filter by subject or term..."
+              [(ngModel)]="historySearchQuery"
+              class="search-input"
+            />
+          </div>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoadingHistory">
+          <div class="spinner"></div>
+          <p>Fetching performance records...</p>
+        </div>
+
+        <div class="alert alert-danger" *ngIf="historyErrorMessage">{{ historyErrorMessage }}</div>
+
+        <div class="empty-state" *ngIf="!isLoadingHistory && filteredHistoryMarks.length === 0">
+          <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">note</span></div>
+          <h4>No Performance Records Found</h4>
+          <p>This student does not have any recorded examination marks yet.</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoadingHistory && filteredHistoryMarks.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Academic Year</th>
+                <th>Term</th>
+                <th>Subject</th>
+                <th style="width: 130px;" class="col-center">Score</th>
+                <th style="width: 120px;" class="col-center">Max Score</th>
+                <th style="width: 130px;" class="col-center">Percentage</th>
+                <th style="width: 100px;" class="col-center">Grade</th>
+                <th style="width: 160px;">Date Recorded</th>
+                <th>Status / Review</th>
+                <th *ngIf="canEditMarks">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let mark of filteredHistoryMarks">
+                <td>{{ getAcademicYear(mark) }}</td>
+                <td><span class="term-tag">{{ mark.examTerm }}</span></td>
+                <td class="col-name font-semibold">{{ mark.subject }}</td>
+                <td class="col-center font-bold">
+                  <input
+                    *ngIf="editingMarkId === mark.id"
+                    type="number"
+                    class="mark-edit-input"
+                    min="0"
+                    [max]="mark.maxScore"
+                    step="0.5"
+                    [(ngModel)]="editingScore"
+                    [attr.aria-label]="'Score for ' + mark.studentName + ', ' + mark.subject + ' ' + mark.examTerm"
+                  />
+                  <span *ngIf="editingMarkId !== mark.id">{{ mark.scoreObtained }}</span>
+                </td>
+                <td class="col-center text-muted">{{ mark.maxScore }}</td>
+                <td class="col-center font-bold">
+                  {{ mark.percentage }}%
+                </td>
+                <td class="col-center">
+                  <span
+                    class="badge-grade"
+                    [ngClass]="getGradeBadgeClass(mark.percentage)"
+                  >
+                    {{ getGradeBadgeText(mark.percentage) }}
+                  </span>
+                </td>
+                <td class="text-muted">
+                  {{ mark.dateRecorded | date: 'mediumDate' }}
+                </td>
+                <td>
+                  <span class="mark-status" [class.status-entered]="mark.reviewStatus === 'Approved' || mark.reviewStatus === 'Finalized'">{{ mark.reviewStatus }}</span>
+                  <small class="review-comment" *ngIf="mark.reviewComment">{{ mark.reviewComment }}</small>
+                </td>
+                <td *ngIf="canEditMarks">
+                  <div class="mark-edit-actions" *ngIf="editingMarkId === mark.id; else editMarkAction">
+                    <button
+                      type="button"
+                      class="mark-save-button"
+                      [disabled]="isSavingMarkId === mark.id"
+                      (click)="saveMark(mark)"
+                    >{{ isSavingMarkId === mark.id ? 'Saving...' : 'Save' }}</button>
+                    <button
+                      type="button"
+                      class="mark-cancel-button"
+                      [disabled]="isSavingMarkId === mark.id"
+                      (click)="cancelMarkEdit()"
+                    >Cancel</button>
+                  </div>
+                  <ng-template #editMarkAction>
+                    <button type="button" class="mark-edit-button" *ngIf="mark.reviewStatus !== 'Finalized'" (click)="editMark(mark)">Edit</button>
+                  </ng-template>
+                  <div class="review-actions" *ngIf="canReviewMarks && editingMarkId !== mark.id">
+                    <input *ngIf="mark.reviewStatus !== 'Finalized'" type="text" class="review-comment-input" [(ngModel)]="reviewComment" placeholder="Review comment" aria-label="Review comment" />
+                    <button type="button" class="mark-edit-button" *ngIf="mark.reviewStatus === 'Submitted' || mark.reviewStatus === 'Rejected'" [disabled]="isSavingMarkId === mark.id" (click)="reviewMark(mark, 'Under Review')">Review</button>
+                    <button type="button" class="mark-save-button" *ngIf="mark.reviewStatus === 'Submitted' || mark.reviewStatus === 'Under Review' || mark.reviewStatus === 'Rejected'" [disabled]="isSavingMarkId === mark.id" (click)="reviewMark(mark, 'Approved')">Approve</button>
+                    <button type="button" class="mark-cancel-button" *ngIf="mark.reviewStatus === 'Submitted' || mark.reviewStatus === 'Under Review'" [disabled]="isSavingMarkId === mark.id" (click)="reviewMark(mark, 'Rejected')">Reject</button>
+                    <button type="button" class="mark-save-button" *ngIf="mark.reviewStatus === 'Approved'" [disabled]="isSavingMarkId === mark.id" (click)="reviewMark(mark, 'Finalized')">Finalize</button>
+                    <button type="button" class="mark-edit-button" *ngIf="mark.reviewStatus === 'Finalized'" [disabled]="isSavingMarkId === mark.id" (click)="reopenMark(mark)">Reopen</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty Prompt When No Student Selected -->
+    <div class="prompt-box card" *ngIf="!selectedStudentId">
+      <div class="prompt-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></div>
+      <h3>Select a Student to View Performance History</h3>
+      <p>Choose a student from the dropdown above to inspect their historical grades, GPA averages, and assessment timelines.</p>
+    </div>
+  </div>
+</div>

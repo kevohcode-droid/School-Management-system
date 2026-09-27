@@ -22,6 +22,8 @@ public class Student : AuditableEntity, ITenantEntity
     public Section? Section { get; set; }
 
     public ICollection<Grade> Grades { get; set; } = new List<Grade>();
+    public ICollection<StudentMark> StudentMarks { get; set; } = new List<StudentMark>();
+    public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     public ICollection<FeeInvoice> FeeInvoices { get; set; } = new List<FeeInvoice>();
     public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
 

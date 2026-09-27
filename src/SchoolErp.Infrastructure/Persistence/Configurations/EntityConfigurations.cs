@@ -33,6 +33,47 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
     }
 }
 
+public class ParentConfiguration : IEntityTypeConfiguration<Parent>
+{
+    public void Configure(EntityTypeBuilder<Parent> b)
+    {
+        b.Property(p => p.UserId).HasMaxLength(450);
+        b.Property(p => p.FirstName).HasMaxLength(100).IsRequired();
+        b.Property(p => p.LastName).HasMaxLength(100).IsRequired();
+        b.Property(p => p.Email).HasMaxLength(256);
+        b.Property(p => p.Phone).HasMaxLength(50);
+        b.Property(p => p.Address).HasMaxLength(300);
+        b.Property(p => p.Occupation).HasMaxLength(100);
+
+        b.HasIndex(p => new { p.TenantId, p.UserId }).IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
+    }
+}
+
+public class ParentStudentConfiguration : IEntityTypeConfiguration<ParentStudent>
+{
+    public void Configure(EntityTypeBuilder<ParentStudent> b)
+    {
+        b.Property(ps => ps.RelationshipType)
+            .HasConversion<string>()
+            .HasMaxLength(30)
+            .IsRequired();
+
+        b.HasIndex(ps => new { ps.TenantId, ps.ParentId, ps.StudentId }).IsUnique();
+        b.HasIndex(ps => new { ps.TenantId, ps.StudentId });
+
+        b.HasOne(ps => ps.Parent)
+            .WithMany(p => p.ParentStudents)
+            .HasForeignKey(ps => ps.ParentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(ps => ps.Student)
+            .WithMany(s => s.ParentStudents)
+            .HasForeignKey(ps => ps.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class SectionConfiguration : IEntityTypeConfiguration<Section>
 {
     public void Configure(EntityTypeBuilder<Section> b)
@@ -76,6 +117,28 @@ public class GradeConfiguration : IEntityTypeConfiguration<Grade>
             .WithMany(c => c.Grades)
             .HasForeignKey(g => g.CourseId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class StudentMarkConfiguration : IEntityTypeConfiguration<StudentMark>
+{
+    public void Configure(EntityTypeBuilder<StudentMark> b)
+    {
+        b.Property(m => m.Subject).HasMaxLength(150).IsRequired();
+        b.Property(m => m.ExamTerm).HasMaxLength(100).IsRequired();
+        b.Property(m => m.ScoreObtained).HasPrecision(6, 2);
+        b.Property(m => m.MaxScore).HasPrecision(6, 2);
+        b.Property(m => m.ReviewStatus).HasMaxLength(30).IsRequired();
+        b.Property(m => m.ReviewComment).HasMaxLength(1000);
+        b.Property(m => m.ReviewedBy).HasMaxLength(450);
+        b.Ignore(m => m.Percentage);
+
+        b.HasIndex(m => new { m.TenantId, m.StudentId, m.Subject, m.ExamTerm });
+
+        b.HasOne(m => m.Student)
+            .WithMany(s => s.StudentMarks)
+            .HasForeignKey(m => m.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 
@@ -202,5 +265,28 @@ public class AttendanceRecordConfiguration : IEntityTypeConfiguration<Attendance
             .WithMany(s => s.AttendanceRecords)
             .HasForeignKey(a => a.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class StaffMemberConfiguration : IEntityTypeConfiguration<StaffMember>
+{
+    public void Configure(EntityTypeBuilder<StaffMember> b)
+    {
+        b.Property(s => s.UserId).HasMaxLength(450);
+        b.Property(s => s.EmployeeId).HasMaxLength(100).IsRequired();
+        b.Property(s => s.FirstName).HasMaxLength(100).IsRequired();
+        b.Property(s => s.LastName).HasMaxLength(100).IsRequired();
+        b.Property(s => s.Email).HasMaxLength(256);
+        b.Property(s => s.Phone).HasMaxLength(50);
+        b.Property(s => s.NationalId).HasMaxLength(50);
+        b.Property(s => s.Designation).HasMaxLength(150).IsRequired();
+        b.Property(s => s.Department).HasMaxLength(150).IsRequired();
+        b.Property(s => s.EmploymentStatus).HasMaxLength(100).IsRequired();
+        b.Property(s => s.Qualifications).HasMaxLength(500);
+        b.Property(s => s.DateOfJoining).HasMaxLength(50);
+
+        b.HasIndex(s => new { s.TenantId, s.EmployeeId }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.UserId }).IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
     }
 }

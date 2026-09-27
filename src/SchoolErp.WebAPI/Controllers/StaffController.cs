@@ -31,7 +31,7 @@ public class StaffController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateStaffRequest request, CancellationToken ct)
     {
         var result = await _staffService.CreateAsync(request, ct);
-        return CreatedAtAction(nameof(GetAll), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetAll), new { id = result.Staff.Id }, result);
     }
 
     [HttpPut("{id:guid}")]

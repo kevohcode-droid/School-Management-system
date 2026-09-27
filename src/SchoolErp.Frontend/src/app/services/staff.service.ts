@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
-import { Staff, CreateStaffRequest } from '../models/staff';
+import { Staff, CreateStaffRequest, CreateStaffResponse } from '../models/staff';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,8 @@ export class StaffService {
     return this.apiService.get<Staff[]>('/staff');
   }
 
-  createStaff(request: CreateStaffRequest): Observable<Staff> {
-    return this.apiService.post<Staff>('/staff', request);
+  createStaff(request: CreateStaffRequest): Observable<CreateStaffResponse> {
+    return this.apiService.post<CreateStaffResponse>('/staff', request);
   }
 
   updateStaff(id: string, request: CreateStaffRequest): Observable<Staff> {

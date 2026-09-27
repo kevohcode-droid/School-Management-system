@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using SchoolErp.Domain.Enums;
+using SchoolErp.Domain.Entities;
 
 namespace SchoolErp.Application.Students.Dtos;
 
@@ -17,6 +18,23 @@ public record StudentDto
     public DateTime EnrollmentDate { get; init; }
     public Guid? SectionId { get; init; }
     public string? SectionName { get; init; }
+    public string? UserId { get; init; }
+    public Guid TenantId { get; init; }
+    public DateTime CreatedAtUtc { get; init; }
+    public string? CreatedBy { get; init; }
+    public DateTime? UpdatedAtUtc { get; init; }
+    public string? UpdatedBy { get; init; }
+    public Section? Section { get; init; }
+}
+
+/// <summary>Returned when an admin creates a student — includes the one-time temporary password.</summary>
+public record CreateStudentResponse
+{
+    public StudentDto Student { get; init; } = null!;
+    /// <summary>Temporary password shown once to the admin. Null if account already existed.</summary>
+    public string? TemporaryPassword { get; init; }
+    /// <summary>Login username for the student account.</summary>
+    public string? Username { get; init; }
 }
 
 public record UpdateStudentRequest

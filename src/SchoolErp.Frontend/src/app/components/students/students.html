@@ -1,155 +1,256 @@
-<div class="students-container">
-  <header class="students-header">
-    <div class="header-left">
-      <button (click)="goBack()" class="back-btn">← Dashboard</button>
-      <div>
-        <h1>Students Directory</h1>
-      </div>
+<main class="app-content" id="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Students Directory</h1>
+      <p class="page-subtitle">{{ filteredStudents.length }} of {{ students.length }} students</p>
     </div>
-    <div class="header-actions">
-      <button (click)="studentService.downloadTemplate()" class="template-btn">Template</button>
-      <button (click)="studentService.exportStudents()" class="export-btn">Export Excel</button>
-      <button (click)="importStudents()" class="import-btn">Import Excel</button>
-      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="openAddModal()" class="add-btn">
-        + Register Student
+    <div class="page-actions">
+      <button (click)="studentService.downloadTemplate()" class="btn btn-secondary btn-sm">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        Template
+      </button>
+      <button (click)="studentService.exportStudents()" class="btn btn-secondary btn-sm">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4zm7 5a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L12 12.586V9z" clip-rule="evenodd"/></svg>
+        Export
+      </button>
+      <button *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" (click)="importStudents()" class="btn btn-secondary btn-sm">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+        Import
+      </button>
+      <button
+        *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])"
+        (click)="openAddModal()"
+        class="btn btn-primary btn-sm"
+        aria-label="Register a new student"
+      >
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+        Register Student
       </button>
     </div>
-  </header>
+  </div>
 
-  <main class="students-content">
-    <div class="search-and-filter-card">
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        (input)="filterStudents()"
-        placeholder="Search by name, email, or admission number..."
-        class="search-input"
+  <!-- Error -->
+  <div role="alert" class="alert alert-danger" *ngIf="errorMessage" aria-live="polite">
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Search & Filter card -->
+  <div class="card" style="margin-bottom: var(--space-4);">
+    <div class="card-body" style="padding: var(--space-4);">
+      <div class="students-toolbar">
+        <div class="search-field">
+          <label for="student-search" class="sr-only">Search students</label>
+          <svg class="search-field-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+          <input
+            id="student-search"
+            type="search"
+            class="form-input search-field-input"
+            placeholder="Search by name, admission no., or email…"
+            [(ngModel)]="searchQuery"
+            (input)="filterStudents()"
+            autocomplete="off"
+            aria-label="Search students"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading && students.length === 0" role="status" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <span>Loading student directory…</span>
+  </div>
+
+  <!-- Table card -->
+  <div class="card" *ngIf="!isLoading || students.length > 0">
+    <div class="table-wrapper">
+      <table
+        class="data-table table-to-cards"
+        aria-label="Students directory"
+        role="table"
       >
-    </div>
+        <caption class="sr-only">List of registered students with admission number, name, email, gender, date of birth, and section.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Admission No.</th>
+            <th scope="col">Full Name</th>
+            <th scope="col" class="hide-mobile">Email</th>
+            <th scope="col" class="hide-mobile">Gender</th>
+            <th scope="col" class="hide-mobile">Date of Birth</th>
+            <th scope="col">Section</th>
+            <th scope="col" *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of pagedStudents" [attr.data-label]="student.firstName + ' ' + student.lastName">
+            <td data-label="Admission No.">
+              <code class="admission-code">{{ student.admissionNumber }}</code>
+            </td>
+            <td data-label="Full Name">
+              <span class="student-name">{{ student.firstName }} {{ student.lastName }}</span>
+            </td>
+            <td data-label="Email" class="hide-mobile">{{ student.email || '—' }}</td>
+            <td data-label="Gender" class="hide-mobile">
+              <span class="badge badge-gender" [ngClass]="getGenderLabel(student.gender).toLowerCase()">
+                {{ getGenderLabel(student.gender) }}
+              </span>
+            </td>
+            <td data-label="Date of Birth" class="hide-mobile">
+              {{ student.dateOfBirth ? (student.dateOfBirth | date:'mediumDate') : '—' }}
+            </td>
+            <td data-label="Section">
+              <span class="badge badge-neutral">{{ student.sectionName || 'N/A' }}</span>
+            </td>
+            <td data-label="Actions" *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" style="text-align:right;">
+              <div class="row-actions">
+                <button
+                  (click)="openEditModal(student)"
+                  class="btn btn-ghost btn-icon btn-sm"
+                  [attr.aria-label]="'Edit ' + student.firstName + ' ' + student.lastName"
+                  title="Edit"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                </button>
+                <button
+                  (click)="openDeleteModal(student)"
+                  class="btn btn-ghost btn-icon btn-sm danger-btn"
+                  [attr.aria-label]="'Delete ' + student.firstName + ' ' + student.lastName"
+                  title="Delete"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div class="error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
-
-    <div class="loading" *ngIf="isLoading && students.length === 0">
-      <div class="spinner"></div>
-      <span>Loading student directory...</span>
-    </div>
-
-    <div class="table-card" *ngIf="!isLoading || students.length > 0">
-      <div class="students-table-container">
-        <table class="students-table">
-          <thead>
-            <tr>
-              <th>Admission No.</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Gender</th>
-              <th>Date of Birth</th>
-              <th>Section</th>
-              <th *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let student of filteredStudents">
-              <td class="font-mono">{{ student.admissionNumber }}</td>
-              <td class="font-semibold">{{ student.firstName }} {{ student.lastName }}</td>
-              <td>{{ student.email || '—' }}</td>
-              <td>
-                <span class="badge badge-gender" [class]="getGenderLabel(student.gender).toLowerCase()">
-                  {{ getGenderLabel(student.gender) }}
-                </span>
-              </td>
-              <td>{{ student.dateOfBirth ? (student.dateOfBirth | date:'mediumDate') : '—' }}</td>
-              <td>
-                <span class="badge-section">{{ student.sectionName || 'N/A' }}</span>
-              </td>
-              <td *ngIf="authService.hasAnyRole(['SuperAdmin', 'Admin'])" class="actions-cell">
-                <button (click)="openEditModal(student)" class="btn-icon btn-edit" title="Edit Student">✏️</button>
-                <button (click)="openDeleteModal(student)" class="btn-icon btn-delete" title="Delete Student">🗑️</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="no-data" *ngIf="filteredStudents.length === 0">
-          No students found matching your query.
-        </div>
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="filteredStudents.length === 0 && !isLoading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+        </svg>
+        <h3>No students found</h3>
+        <p>Try adjusting your search or register a new student.</p>
       </div>
     </div>
-  </main>
-</div>
 
-<!-- ADD STUDENT MODAL -->
-<div class="modal-overlay" *ngIf="showAddModal">
-  <div class="modal-content modal-large">
+    <!-- Pagination -->
+    <div class="card-footer" *ngIf="totalPages > 1">
+      <div class="pagination-wrap">
+        <span class="pagination-info">
+          Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > filteredStudents.length ? filteredStudents.length : currentPage * pageSize }} of {{ filteredStudents.length }} students
+        </span>
+        <nav class="pagination" aria-label="Students pagination">
+          <button
+            class="pagination-btn"
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+            aria-label="Previous page"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          </button>
+          <ng-container *ngFor="let p of pageNumbers">
+            <span *ngIf="p === -1" class="pagination-ellipsis" aria-hidden="true">…</span>
+            <button
+              *ngIf="p !== -1"
+              class="pagination-btn"
+              [class.active]="p === currentPage"
+              (click)="goToPage(p)"
+              [attr.aria-label]="'Page ' + p"
+              [attr.aria-current]="p === currentPage ? 'page' : null"
+            >{{ p }}</button>
+          </ng-container>
+          <button
+            class="pagination-btn"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            aria-label="Next page"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── ADD STUDENT MODAL ─────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  *ngIf="showAddModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="add-modal-title"
+  (click)="$event.target === $event.currentTarget && closeAddModal()"
+>
+  <div class="modal-content modal-content-large">
     <div class="modal-header">
-      <div class="modal-title-block">
-        <h2>Register New Student</h2>
-        <p class="modal-subtitle">Fill in the student's academic, personal, and guardian information.</p>
-      </div>
-      <button (click)="closeAddModal()" class="close-modal-btn">&times;</button>
+      <h2 class="modal-title" id="add-modal-title">Register New Student</h2>
+      <button class="btn btn-ghost btn-icon" (click)="closeAddModal()" aria-label="Close dialog">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
     </div>
-    <form (ngSubmit)="submitAddStudent()">
-      <!-- SECTION 1: Academic & Enrollment -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <span class="section-icon">🎓</span>
-          <h3>Academic & Enrollment Details</h3>
-        </div>
-        <div class="modal-grid">
+    <form (ngSubmit)="submitAddStudent()" class="modal-body">
+      <!-- Academic & Enrollment -->
+      <fieldset class="form-section">
+        <legend class="form-section-legend">Academic &amp; Enrollment</legend>
+        <div class="form-grid">
           <div class="form-group">
-            <label for="add-admission">Admission / Reg Number <span class="required">*</span></label>
-            <input type="text" id="add-admission" [(ngModel)]="newStudent.admissionNumber" name="admissionNumber" required placeholder="ADM-1001">
+            <label class="form-label" for="add-admission">Admission No. <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="add-admission" [(ngModel)]="newStudent.admissionNumber" name="admissionNumber" required placeholder="ADM-1001" aria-required="true">
           </div>
           <div class="form-group">
-            <label for="add-admission-date">Admission Date</label>
-            <input type="date" id="add-admission-date" [(ngModel)]="newStudent.admissionDate" name="admissionDate">
+            <label class="form-label" for="add-admission-date">Admission Date</label>
+            <input class="form-input" type="date" id="add-admission-date" [(ngModel)]="newStudent.admissionDate" name="admissionDate">
           </div>
           <div class="form-group">
-            <label for="add-section">Stream / Section</label>
-            <select id="add-section" [(ngModel)]="newStudent.sectionId" name="sectionId">
+            <label class="form-label" for="add-section">Section</label>
+            <select class="form-select" id="add-section" [(ngModel)]="newStudent.sectionId" name="sectionId">
               <option [value]="null">— Select Section —</option>
               <option *ngFor="let s of sections" [value]="s">{{ s }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="add-academic-year">Academic Year / Term</label>
-            <select id="add-academic-year" [(ngModel)]="newStudent.academicYear" name="academicYear">
+            <label class="form-label" for="add-academic-year">Academic Year</label>
+            <select class="form-select" id="add-academic-year" [(ngModel)]="newStudent.academicYear" name="academicYear">
               <option *ngFor="let year of academicYears" [value]="year">{{ year }}</option>
             </select>
           </div>
         </div>
-      </div>
+      </fieldset>
 
-      <!-- SECTION 2: Personal Information -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <span class="section-icon">👤</span>
-          <h3>Personal Information</h3>
-        </div>
-        <div class="modal-grid modal-grid-3">
+      <!-- Personal Information -->
+      <fieldset class="form-section">
+        <legend class="form-section-legend">Personal Information</legend>
+        <div class="form-grid form-grid-3">
           <div class="form-group">
-            <label for="add-first">First Name <span class="required">*</span></label>
-            <input type="text" id="add-first" [(ngModel)]="newStudent.firstName" name="firstName" required placeholder="Alice">
+            <label class="form-label" for="add-first">First Name <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="add-first" [(ngModel)]="newStudent.firstName" name="firstName" required placeholder="Alice" aria-required="true">
           </div>
           <div class="form-group">
-            <label for="add-middle">Middle Name</label>
-            <input type="text" id="add-middle" [(ngModel)]="newStudent.middleName" name="middleName" placeholder="Grace">
+            <label class="form-label" for="add-middle">Middle Name</label>
+            <input class="form-input" type="text" id="add-middle" [(ngModel)]="newStudent.middleName" name="middleName" placeholder="Grace">
           </div>
           <div class="form-group">
-            <label for="add-last">Last Name <span class="required">*</span></label>
-            <input type="text" id="add-last" [(ngModel)]="newStudent.lastName" name="lastName" required placeholder="Johnson">
+            <label class="form-label" for="add-last">Last Name <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="add-last" [(ngModel)]="newStudent.lastName" name="lastName" required placeholder="Johnson" aria-required="true">
           </div>
         </div>
-        <div class="modal-grid">
+        <div class="form-grid">
           <div class="form-group">
-            <label for="add-dob">Date of Birth</label>
-            <input type="date" id="add-dob" [(ngModel)]="newStudent.dateOfBirth" name="dateOfBirth">
+            <label class="form-label" for="add-dob">Date of Birth</label>
+            <input class="form-input" type="date" id="add-dob" [(ngModel)]="newStudent.dateOfBirth" name="dateOfBirth">
           </div>
           <div class="form-group">
-            <label for="add-gender">Gender</label>
-            <select id="add-gender" [(ngModel)]="newStudent.gender" name="gender">
+            <label class="form-label" for="add-gender">Gender</label>
+            <select class="form-select" id="add-gender" [(ngModel)]="newStudent.gender" name="gender">
               <option [value]="0">Unspecified</option>
               <option [value]="1">Male</option>
               <option [value]="2">Female</option>
@@ -157,98 +258,96 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="add-nationality">Nationality / County of Origin</label>
-            <select id="add-nationality" [(ngModel)]="newStudent.nationality" name="nationality">
-              <option value="">— Select Nationality —</option>
+            <label class="form-label" for="add-nationality">Nationality</label>
+            <select class="form-select" id="add-nationality" [(ngModel)]="newStudent.nationality" name="nationality">
+              <option value="">— Select —</option>
               <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="add-email">Email Address</label>
-            <input type="email" id="add-email" [(ngModel)]="newStudent.email" name="email" placeholder="alice@school.edu">
+            <label class="form-label" for="add-email">Email Address</label>
+            <input class="form-input" type="email" id="add-email" [(ngModel)]="newStudent.email" name="email" placeholder="alice@school.edu">
           </div>
         </div>
-      </div>
+      </fieldset>
 
-      <!-- SECTION 3: Guardian / Parent Details -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <span class="section-icon">👨‍👩‍👧</span>
-          <h3>Parent / Guardian Details</h3>
-        </div>
-        <div class="modal-grid">
+      <!-- Guardian Details -->
+      <fieldset class="form-section">
+        <legend class="form-section-legend">Parent / Guardian</legend>
+        <div class="form-grid">
           <div class="form-group">
-            <label for="add-guardian-name">Guardian Full Name</label>
-            <input type="text" id="add-guardian-name" [(ngModel)]="newStudent.guardianName" name="guardianName" placeholder="John Doe">
+            <label class="form-label" for="add-guardian-name">Guardian Full Name</label>
+            <input class="form-input" type="text" id="add-guardian-name" [(ngModel)]="newStudent.guardianName" name="guardianName" placeholder="John Doe">
           </div>
           <div class="form-group">
-            <label for="add-guardian-rel">Relationship to Student</label>
-            <select id="add-guardian-rel" [(ngModel)]="newStudent.guardianRelationship" name="guardianRelationship">
-              <option value="">— Select Relationship —</option>
+            <label class="form-label" for="add-guardian-rel">Relationship</label>
+            <select class="form-select" id="add-guardian-rel" [(ngModel)]="newStudent.guardianRelationship" name="guardianRelationship">
+              <option value="">— Select —</option>
               <option *ngFor="let r of guardianRelationships" [value]="r">{{ r }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="add-guardian-phone">Primary Phone Number <span class="required">*</span></label>
-            <input type="tel" id="add-guardian-phone" [(ngModel)]="newStudent.guardianPhone" name="guardianPhone" placeholder="+254 700 000 000">
+            <label class="form-label" for="add-guardian-phone">Phone <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="tel" id="add-guardian-phone" [(ngModel)]="newStudent.guardianPhone" name="guardianPhone" placeholder="+254 700 000 000">
           </div>
           <div class="form-group">
-            <label for="add-guardian-email">Guardian Email Address</label>
-            <input type="email" id="add-guardian-email" [(ngModel)]="newStudent.guardianEmail" name="guardianEmail" placeholder="parent@example.com">
+            <label class="form-label" for="add-guardian-email">Guardian Email</label>
+            <input class="form-input" type="email" id="add-guardian-email" [(ngModel)]="newStudent.guardianEmail" name="guardianEmail" placeholder="parent@example.com">
           </div>
         </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" (click)="closeAddModal()" class="btn-secondary">Cancel</button>
-        <button type="submit" class="btn-primary" [disabled]="isLoading">
-          <span *ngIf="isLoading">Registering…</span>
-          <span *ngIf="!isLoading">Register Student</span>
-        </button>
-      </div>
+      </fieldset>
     </form>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)="submitAddStudent()" [disabled]="isLoading">
+        <span class="spinner spinner-sm" *ngIf="isLoading" aria-hidden="true"></span>
+        {{ isLoading ? 'Registering…' : 'Register Student' }}
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- EDIT STUDENT MODAL -->
-<div class="modal-overlay" *ngIf="showEditModal">
-  <div class="modal-content modal-large">
+<!-- ── EDIT STUDENT MODAL ────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  *ngIf="showEditModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="edit-modal-title"
+  (click)="$event.target === $event.currentTarget && closeEditModal()"
+>
+  <div class="modal-content modal-content-large">
     <div class="modal-header">
-      <div class="modal-title-block">
-        <h2>Modify Student Profile</h2>
-        <p class="modal-subtitle">Update the student's details below.</p>
-      </div>
-      <button (click)="closeEditModal()" class="close-modal-btn">&times;</button>
+      <h2 class="modal-title" id="edit-modal-title">Edit Student</h2>
+      <button class="btn btn-ghost btn-icon" (click)="closeEditModal()" aria-label="Close dialog">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
     </div>
-    <form (ngSubmit)="submitEditStudent()">
-      <!-- Personal -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <span class="section-icon">👤</span>
-          <h3>Personal Information</h3>
-        </div>
-        <div class="modal-grid modal-grid-3">
+    <form (ngSubmit)="submitEditStudent()" class="modal-body">
+      <fieldset class="form-section">
+        <legend class="form-section-legend">Personal Information</legend>
+        <div class="form-grid form-grid-3">
           <div class="form-group">
-            <label for="edit-first">First Name <span class="required">*</span></label>
-            <input type="text" id="edit-first" [(ngModel)]="editStudent.firstName" name="firstName" required>
+            <label class="form-label" for="edit-first">First Name <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="edit-first" [(ngModel)]="editStudent.firstName" name="firstName" required>
           </div>
           <div class="form-group">
-            <label for="edit-middle">Middle Name</label>
-            <input type="text" id="edit-middle" [(ngModel)]="editStudent.middleName" name="middleName">
+            <label class="form-label" for="edit-middle">Middle Name</label>
+            <input class="form-input" type="text" id="edit-middle" [(ngModel)]="editStudent.middleName" name="middleName">
           </div>
           <div class="form-group">
-            <label for="edit-last">Last Name <span class="required">*</span></label>
-            <input type="text" id="edit-last" [(ngModel)]="editStudent.lastName" name="lastName" required>
+            <label class="form-label" for="edit-last">Last Name <span class="required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="edit-last" [(ngModel)]="editStudent.lastName" name="lastName" required>
           </div>
         </div>
-        <div class="modal-grid">
+        <div class="form-grid">
           <div class="form-group">
-            <label for="edit-email">Email Address</label>
-            <input type="email" id="edit-email" [(ngModel)]="editStudent.email" name="email">
+            <label class="form-label" for="edit-email">Email</label>
+            <input class="form-input" type="email" id="edit-email" [(ngModel)]="editStudent.email" name="email">
           </div>
           <div class="form-group">
-            <label for="edit-gender">Gender</label>
-            <select id="edit-gender" [(ngModel)]="editStudent.gender" name="gender">
+            <label class="form-label" for="edit-gender">Gender</label>
+            <select class="form-select" id="edit-gender" [(ngModel)]="editStudent.gender" name="gender">
               <option [value]="0">Unspecified</option>
               <option [value]="1">Male</option>
               <option [value]="2">Female</option>
@@ -256,73 +355,82 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="edit-dob">Date of Birth</label>
-            <input type="date" id="edit-dob" [(ngModel)]="editStudent.dateOfBirth" name="dateOfBirth">
+            <label class="form-label" for="edit-dob">Date of Birth</label>
+            <input class="form-input" type="date" id="edit-dob" [(ngModel)]="editStudent.dateOfBirth" name="dateOfBirth">
           </div>
           <div class="form-group">
-            <label for="edit-nationality">Nationality</label>
-            <select id="edit-nationality" [(ngModel)]="editStudent.nationality" name="nationality">
-              <option value="">— Select Nationality —</option>
+            <label class="form-label" for="edit-nationality">Nationality</label>
+            <select class="form-select" id="edit-nationality" [(ngModel)]="editStudent.nationality" name="nationality">
+              <option value="">— Select —</option>
               <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <!-- Guardian -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <span class="section-icon">👨‍👩‍👧</span>
-          <h3>Parent / Guardian Details</h3>
-        </div>
-        <div class="modal-grid">
+      </fieldset>
+      <fieldset class="form-section">
+        <legend class="form-section-legend">Parent / Guardian</legend>
+        <div class="form-grid">
           <div class="form-group">
-            <label for="edit-guardian-name">Guardian Full Name</label>
-            <input type="text" id="edit-guardian-name" [(ngModel)]="editStudent.guardianName" name="guardianName">
+            <label class="form-label" for="edit-guardian-name">Guardian Name</label>
+            <input class="form-input" type="text" id="edit-guardian-name" [(ngModel)]="editStudent.guardianName" name="guardianName">
           </div>
           <div class="form-group">
-            <label for="edit-guardian-rel">Relationship to Student</label>
-            <select id="edit-guardian-rel" [(ngModel)]="editStudent.guardianRelationship" name="guardianRelationship">
-              <option value="">— Select Relationship —</option>
+            <label class="form-label" for="edit-guardian-rel">Relationship</label>
+            <select class="form-select" id="edit-guardian-rel" [(ngModel)]="editStudent.guardianRelationship" name="guardianRelationship">
+              <option value="">— Select —</option>
               <option *ngFor="let r of guardianRelationships" [value]="r">{{ r }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="edit-guardian-phone">Primary Phone Number</label>
-            <input type="tel" id="edit-guardian-phone" [(ngModel)]="editStudent.guardianPhone" name="guardianPhone">
+            <label class="form-label" for="edit-guardian-phone">Phone</label>
+            <input class="form-input" type="tel" id="edit-guardian-phone" [(ngModel)]="editStudent.guardianPhone" name="guardianPhone">
           </div>
           <div class="form-group">
-            <label for="edit-guardian-email">Guardian Email</label>
-            <input type="email" id="edit-guardian-email" [(ngModel)]="editStudent.guardianEmail" name="guardianEmail">
+            <label class="form-label" for="edit-guardian-email">Guardian Email</label>
+            <input class="form-input" type="email" id="edit-guardian-email" [(ngModel)]="editStudent.guardianEmail" name="guardianEmail">
           </div>
         </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" (click)="closeEditModal()" class="btn-secondary">Cancel</button>
-        <button type="submit" class="btn-primary" [disabled]="isLoading">
-          <span *ngIf="isLoading">Saving…</span>
-          <span *ngIf="!isLoading">Save Changes</span>
-        </button>
-      </div>
+      </fieldset>
     </form>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)="submitEditStudent()" [disabled]="isLoading">
+        <span class="spinner spinner-sm" *ngIf="isLoading" aria-hidden="true"></span>
+        {{ isLoading ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- DELETE CONFIRMATION MODAL -->
-<div class="modal-overlay" *ngIf="showDeleteModal">
-  <div class="modal-content" style="max-width: 450px;">
+<!-- ── DELETE CONFIRMATION MODAL ────────────────────────── -->
+<div
+  class="modal-overlay"
+  *ngIf="showDeleteModal"
+  role="alertdialog"
+  aria-modal="true"
+  aria-labelledby="delete-modal-title"
+  aria-describedby="delete-modal-desc"
+>
+  <div class="modal-content" style="max-width:440px;">
     <div class="modal-header">
-      <h2 style="color: var(--danger)">Confirm Student Deletion</h2>
-      <button (click)="closeDeleteModal()" class="close-modal-btn">&times;</button>
+      <h2 class="modal-title" id="delete-modal-title" style="color:var(--danger);">Delete Student</h2>
+      <button class="btn btn-ghost btn-icon" (click)="closeDeleteModal()" aria-label="Cancel deletion">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
     </div>
-    <div class="modal-body" style="padding: 1rem 0;">
-      <p>Are you sure you want to remove <strong>{{ studentToDelete?.firstName }} {{ studentToDelete?.lastName }}</strong> from the database?</p>
-      <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">This action is permanent and cannot be undone.</p>
+    <div class="modal-body">
+      <p id="delete-modal-desc">
+        Are you sure you want to permanently delete
+        <strong>{{ studentToDelete?.firstName }} {{ studentToDelete?.lastName }}</strong>?
+        This action cannot be undone.
+      </p>
     </div>
     <div class="modal-footer">
-      <button type="button" (click)="closeDeleteModal()" class="btn-secondary">Cancel</button>
-      <button type="button" (click)="confirmDeleteStudent()" class="btn-danger" [disabled]="isLoading">Delete Records</button>
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="confirmDeleteStudent()" [disabled]="isLoading">
+        <span class="spinner spinner-sm" *ngIf="isLoading" aria-hidden="true"></span>
+        {{ isLoading ? 'Deleting…' : 'Yes, Delete' }}
+      </button>
     </div>
   </div>
 </div>

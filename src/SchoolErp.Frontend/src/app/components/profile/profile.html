@@ -2,21 +2,21 @@
   <nav class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
-        <span class="brand-icon">🏫</span>
+        <span class="brand-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></span>
         <span class="brand-text">School ERP</span>
       </div>
     </div>
 
     <div class="sidebar-section">
       <button class="sidebar-btn" (click)="goBack()">
-        <span class="sidebar-icon">←</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span></span>
         Back to Dashboard
       </button>
     </div>
 
     <div class="sidebar-footer">
       <button class="sidebar-btn" (click)="logout()">
-        <span class="sidebar-icon">🚪</span>
+        <span class="sidebar-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">logout</span></span>
         Logout
       </button>
     </div>
@@ -35,7 +35,7 @@
           <h2 class="profile-name">{{ profile.fullName || profile.email }}</h2>
           <span class="profile-role-badge">{{ profile.role }}</span>
           <button class="edit-photo-btn" (click)="openEditProfile()">
-            <span>✏️</span> Edit Profile
+            <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">edit</span>️</span> Edit Profile
           </button>
         </div>
 
@@ -88,7 +88,7 @@
 
         <div class="profile-actions">
           <button class="action-btn primary" (click)="changePassword()">
-            <span>🔐</span> Change Password
+            <span><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">lock</span></span> Change Password
           </button>
         </div>
       </div>
@@ -136,7 +136,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3>Edit Profile</h3>
-        <button class="modal-close" (click)="closeEditProfile()">✕</button>
+        <button class="modal-close" (click)="closeEditProfile()"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">close</span></button>
       </div>
       <div class="modal-body">
         <div class="form-group">

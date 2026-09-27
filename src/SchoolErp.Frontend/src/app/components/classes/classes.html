@@ -1,7 +1,7 @@
 <div class="page-container">
   <header class="page-header">
     <div class="header-left">
-      <button (click)="goBack()" class="back-btn">← Dashboard</button>
+      <button (click)="goBack()" class="back-btn"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Dashboard</button>
       <div>
         <h1>Classes &amp; Subjects</h1>
         <p class="page-subtitle">Set up academic structure, classes, and subject assignments</p>
@@ -19,12 +19,12 @@
 
   <main class="page-content">
     <div class="success-message" *ngIf="successMessage">
-      ✅ {{ successMessage }}
+      <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">check_circle</span> {{ successMessage }}
     </div>
 
     <!-- Empty state -->
     <div class="empty-state" *ngIf="classes.length === 0 && !isLoading">
-      <div class="empty-icon">📚</div>
+      <div class="empty-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">book</span></div>
       <h3>No Classes Configured Yet</h3>
       <p>Define your school's academic structure by creating the first class.</p>
     </div>
@@ -36,7 +36,7 @@
           <div class="class-code-badge">{{ cls.code || cls.name.substring(0,4).toUpperCase() }}</div>
           <div class="class-card-meta">
             <h4>{{ cls.name }}</h4>
-            <span *ngIf="cls.room" class="room-tag">📍 {{ cls.room }}</span>
+            <span *ngIf="cls.room" class="room-tag"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">location_on</span> {{ cls.room }}</span>
           </div>
         </div>
         <div class="class-details">
@@ -76,7 +76,7 @@
       <!-- Class Details -->
       <div class="form-section">
         <div class="form-section-header">
-          <span class="section-icon">🏫</span>
+          <span class="section-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">school</span></span>
           <h3>Class Details</h3>
         </div>
         <div class="modal-grid">
@@ -112,7 +112,7 @@
       <!-- Subject Selection -->
       <div class="form-section">
         <div class="form-section-header">
-          <span class="section-icon">📖</span>
+          <span class="section-icon"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">menu_book</span></span>
           <h3>Associated Subjects</h3>
         </div>
         <p class="section-hint">Click to select subjects taught in this class (multi-select).</p>

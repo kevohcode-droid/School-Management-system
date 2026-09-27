@@ -20,6 +20,33 @@ export class StudentsComponent implements OnInit {
   errorMessage: string = '';
   searchQuery: string = '';
 
+  // Pagination
+  pageSize = 15;
+  currentPage = 1;
+  get totalPages(): number { return Math.ceil(this.filteredStudents.length / this.pageSize) || 1; }
+  get pagedStudents(): Student[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredStudents.slice(start, start + this.pageSize);
+  }
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPages;
+    const cur = this.currentPage;
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (cur > 3) pages.push(-1); // ellipsis
+      for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+      if (cur < total - 2) pages.push(-1);
+      pages.push(total);
+    }
+    return pages;
+  }
+  goToPage(p: number): void { this.currentPage = p; }
+  prevPage(): void { if (this.currentPage > 1) this.currentPage--; }
+  nextPage(): void { if (this.currentPage < this.totalPages) this.currentPage++; }
+
   // Modals state
   showAddModal: boolean = false;
   showEditModal: boolean = false;
@@ -123,6 +150,7 @@ export class StudentsComponent implements OnInit {
         (s.email && s.email.toLowerCase().includes(query))
       );
     }
+    this.currentPage = 1; // reset to first page on filter
   }
 
   openAddModal(): void {

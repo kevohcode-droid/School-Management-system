@@ -5,7 +5,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center space-x-4">
           <button (click)="goBack()" class="text-gray-600 hover:text-gray-900">
-            ← Back to Dashboard
+            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">arrow_back</span> Back to Dashboard
           </button>
           <h1 class="text-xl font-semibold text-gray-900">Analytics</h1>
         </div>
@@ -14,7 +14,7 @@
           <div class="relative">
             <input type="text" placeholder="Search analytics..." 
                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"/>
-            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <span class="absolute left-3 top-2.5 text-gray-400"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">search</span></span>
           </div>
           
           <button class="relative p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
@@ -102,8 +102,8 @@
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Student Enrollment Trend</h3>
           <div class="flex space-x-2">
-            <button (click)="exportToExcel('Enrollment')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
-            <button (click)="exportToPDF('Enrollment')" class="text-xs text-gray-600 hover:text-gray-900">📄 PDF</button>
+            <button (click)="exportToExcel('Enrollment')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
+            <button (click)="exportToPDF('Enrollment')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">description</span> PDF</button>
           </div>
         </div>
         <div class="h-48">
@@ -120,7 +120,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Gender Distribution</h3>
-          <button (click)="exportToExcel('Gender')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
+          <button (click)="exportToExcel('Gender')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
         </div>
         <div class="flex items-center justify-center h-48">
           <div class="relative w-32 h-32 rounded-full flex items-center justify-center overflow-hidden">
@@ -151,8 +151,8 @@
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Monthly Revenue</h3>
           <div class="flex space-x-2">
-            <button (click)="exportToExcel('Revenue')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
-            <button (click)="exportToPDF('Revenue')" class="text-xs text-gray-600 hover:text-gray-900">📄 PDF</button>
+            <button (click)="exportToExcel('Revenue')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
+            <button (click)="exportToPDF('Revenue')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">description</span> PDF</button>
           </div>
         </div>
         <div class="h-48">
@@ -171,7 +171,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Attendance Trend</h3>
-          <button (click)="exportToExcel('Attendance')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
+          <button (click)="exportToExcel('Attendance')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
         </div>
         <div class="h-48">
           <div class="relative h-full">
@@ -189,7 +189,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Students Per Class</h3>
-          <button (click)="exportToExcel('Students')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
+          <button (click)="exportToExcel('Students')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
         </div>
         <div class="h-48">
           <div class="flex items-end space-x-2 h-full">
@@ -205,7 +205,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900">Fee Collection Trend</h3>
-          <button (click)="exportToExcel('Fees')" class="text-xs text-gray-600 hover:text-gray-900">📥 Excel</button>
+          <button (click)="exportToExcel('Fees')" class="text-xs text-gray-600 hover:text-gray-900"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: inherit;">inbox</span> Excel</button>
         </div>
         <div class="h-48">
           <div class="relative h-full">

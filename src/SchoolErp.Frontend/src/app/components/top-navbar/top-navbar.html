@@ -1,0 +1,156 @@
+<header class="topnav" role="banner">
+
+  <!-- Left: Hamburger (mobile) + Breadcrumbs -->
+  <div class="topnav-left">
+    <!-- Mobile hamburger -->
+    <button
+      class="hamburger"
+      (click)="menuToggle.emit()"
+      aria-label="Toggle navigation menu"
+      aria-expanded="false"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol class="breadcrumb-list">
+        @for (crumb of breadcrumbs; track crumb.label; let last = $last; let first = $first) {
+          <li class="breadcrumb-item" [class.active]="last">
+            @if (!last && crumb.route) {
+              <a [routerLink]="crumb.route" class="breadcrumb-link">
+                @if (first) {
+                  <!-- Home icon -->
+                  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="breadcrumb-home-icon">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                  </svg>
+                  <span class="sr-only">{{ crumb.label }}</span>
+                } @else {
+                  {{ crumb.label }}
+                }
+              </a>
+            } @else {
+              <span [attr.aria-current]="last ? 'page' : null">
+                @if (first && breadcrumbs.length === 1) {
+                  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="breadcrumb-home-icon">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                  </svg>
+                }
+                {{ first && breadcrumbs.length === 1 ? '' : crumb.label }}
+              </span>
+            }
+            @if (!last) {
+              <svg class="breadcrumb-sep" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            }
+          </li>
+        }
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Right: Search + Profile -->
+  <div class="topnav-right">
+
+    <!-- Search bar -->
+    <div class="search-wrap" role="search">
+      <label for="global-search" class="sr-only">Search</label>
+      <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+      </svg>
+      <input
+        #searchInput
+        id="global-search"
+        type="search"
+        class="search-input"
+        placeholder="Search…"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch($event)"
+        autocomplete="off"
+        aria-label="Global search"
+      />
+      <kbd class="search-kbd" aria-hidden="true">/</kbd>
+    </div>
+
+    <!-- Notifications bell -->
+    <button class="icon-btn" aria-label="Notifications" (click)="navigateTo('/notifications')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+    </button>
+
+    <!-- Profile menu -->
+    <div class="profile-menu-wrap">
+      <button
+        class="profile-btn"
+        (click)="toggleProfile()"
+        [attr.aria-expanded]="profileOpen()"
+        aria-haspopup="true"
+        aria-controls="profile-dropdown"
+        aria-label="Open profile menu"
+      >
+        <span class="avatar" aria-hidden="true">{{ userInitials }}</span>
+        <span class="profile-info hide-mobile">
+          <span class="profile-name">{{ currentUser?.fullName || currentUser?.email || 'User' }}</span>
+          <span class="profile-role badge badge-primary">{{ userRole }}</span>
+        </span>
+        <svg class="profile-chevron hide-mobile" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+          [class.rotated]="profileOpen()">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <!-- Dropdown -->
+      <div
+        id="profile-dropdown"
+        class="profile-dropdown"
+        [class.open]="profileOpen()"
+        role="menu"
+        aria-label="Profile actions"
+      >
+        <!-- User info header -->
+        <div class="dropdown-header">
+          <span class="avatar avatar-lg" aria-hidden="true">{{ userInitials }}</span>
+          <div>
+            <p class="dropdown-name">{{ currentUser?.fullName || 'User' }}</p>
+            <p class="dropdown-email">{{ currentUser?.email }}</p>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <button class="dropdown-item" role="menuitem" (click)="navigateTo('/profile')">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+          </svg>
+          My Profile
+        </button>
+        <button class="dropdown-item" role="menuitem" (click)="navigateTo('/preferences')">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+          </svg>
+          Preferences
+        </button>
+        <button class="dropdown-item" role="menuitem" (click)="navigateTo('/change-password')">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+          Change Password
+        </button>
+
+        <div class="dropdown-divider"></div>
+
+        <button class="dropdown-item danger" role="menuitem" (click)="logout()">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
+          </svg>
+          Log out
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
