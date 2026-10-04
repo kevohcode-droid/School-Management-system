@@ -1,0 +1,44 @@
+# =========================================================
+# GitHub Linguist configuration for School ERP
+# =========================================================
+
+# ---------------------------------------------------------
+# Ignore generated .NET build files from language statistics
+# ---------------------------------------------------------
+**/bin/ linguist-generated
+**/obj/ linguist-generated
+
+# ---------------------------------------------------------
+# Ignore Angular dependencies and generated build files
+# ---------------------------------------------------------
+**/node_modules/ linguist-vendored
+**/dist/ linguist-generated
+
+# ---------------------------------------------------------
+# Ignore published/deployment output
+# ---------------------------------------------------------
+/publish/ linguist-generated
+/IIS/ linguist-generated
+
+# ---------------------------------------------------------
+# Make sure actual source code is detected
+# ---------------------------------------------------------
+*.cs linguist-detectable
+*.ts linguist-detectable
+*.html linguist-detectable
+*.css linguist-detectable
+*.scss linguist-detectable
+
+# ---------------------------------------------------------
+# Configuration files
+# ---------------------------------------------------------
+*.json linguist-detectable
+*.yml linguist-detectable
+*.yaml linguist-detectable
+*.xml linguist-detectable
+
+# ---------------------------------------------------------
+# Docker
+# ---------------------------------------------------------
+Dockerfile linguist-detectable
+docker-compose.yml linguist-detectable
